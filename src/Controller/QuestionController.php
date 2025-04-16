@@ -30,7 +30,7 @@ class QuestionController extends AbstractController
         ];
         $question_text = 'I\'ve been turned into a cat, any thoughts on how to turn back? While I\'m **adorable**, I don\'t really care for cat food.';
 
-        $parsedQuestionText = $markdownHelper->parse($question_text);
+        $parsedQuestionText = $markdownHelper->parse($question_text, $markdownParser, $cache);
         //dd($slug, $this);
         //dump($slug, $this);
         dump($cache);
