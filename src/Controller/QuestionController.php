@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-
+use App\Service\MarkdownHelper;
 class QuestionController extends AbstractController
 {
     /**
@@ -22,7 +22,7 @@ class QuestionController extends AbstractController
     /**
      * @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show($slug, MarkdownParserInterface $markdownParser, CacheInterface $cache){
+    public function show($slug, MarkdownParserInterface $markdownParser, CacheInterface $cache, MarkdownHelper $markdownHelper){
         $answers = [
             'Make sure your cat is cutting `purrfectlyyyy` still',
             'Honestly, I like furry shoes better than MY Cat',
@@ -30,9 +30,7 @@ class QuestionController extends AbstractController
         ];
         $question_text = 'I\'ve been turned into a cat, any thoughts on how to turn back? While I\'m **adorable**, I don\'t really care for cat food.';
 
-        $parsedQuestionText = $cache->get('markdown_'.md5($question_text), function () use($question_text, $markdownParser) {
-            return $markdownParser->transformMarkdown($question_text);
-        });
+        $parsedQuestionText = $markdownHelper->parse($question_text);
         //dd($slug, $this);
         //dump($slug, $this);
         dump($cache);
