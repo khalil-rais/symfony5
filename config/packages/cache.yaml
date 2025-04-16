@@ -1,5 +1,5 @@
 parameters:
-    cache_adapter: cache.adapter.acpu
+    cache_adapter: cache.adapter.apcu
 framework:
     cache:
         # Unique name of your app: used to compute stable namespaces for cache keys.
