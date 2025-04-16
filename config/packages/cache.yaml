@@ -1,3 +1,5 @@
+parameters:
+    cache_adapter: cache.adapter.acpu
 framework:
     cache:
         # Unique name of your app: used to compute stable namespaces for cache keys.
