@@ -7,9 +7,15 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class MarkdownHelper
 {
-    public function parse(string $question_text, MarkdownParserInterface $markdownParser, CacheInterface $cache): string{
-        return $cache->get('markdown_'.md5($question_text), function () use($question_text, $markdownParser) {
-            return $markdownParser->transformMarkdown($question_text);
+    private $markdownParser;
+    private $cache;
+    public function __construct(MarkdownParserInterface $markdownParser, CacheInterface $cache){
+        $this->markdownParser = $markdownParser;
+        $this->cache = $cache;
+    }
+    public function parse(string $question_text): string{
+        return $this->cache->get('markdown_'.md5($question_text), function () use($question_text) {
+            return $this->markdownParser->transformMarkdown($question_text);
         });
     }
 }
