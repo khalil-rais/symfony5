@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Sentry\State\HubInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +29,8 @@ class QuestionController extends AbstractController
     /**
      * @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show($slug, MarkdownHelper $markdownHelper, bool $isDebug){
+    public function show($slug, MarkdownHelper $markdownHelper, bool $isDebug, HubInterface $sentryHub){
+        dump($sentryHub->getClient());
         if ($this->isDebug){
             $this->logger->info("We are in debug mode");
         }
