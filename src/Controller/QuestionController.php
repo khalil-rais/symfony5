@@ -6,9 +6,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Psr\Log\LoggerInterface;
 use App\Service\MarkdownHelper;
 class QuestionController extends AbstractController
 {
+    private $logger;
+    private $isDebug;
+
+    public function __construct(LoggerInterface $logger, bool $isDebug)
+    {
+        $this->logger = $logger;
+        $this->isDebug = $isDebug;
+    }
     /**
      * @Route("/", name="app_homepage")
      */
@@ -20,7 +29,9 @@ class QuestionController extends AbstractController
      * @Route("/questions/{slug}", name="app_question_show")
      */
     public function show($slug, MarkdownHelper $markdownHelper, bool $isDebug){
-        dump($isDebug);
+        if ($this->isDebug){
+            $this->logger->info("We are in debug mode");
+        }
         $answers = [
             'Make sure your cat is cutting `purrfectlyyyy` still',
             'Honestly, I like furry shoes better than MY Cat',
