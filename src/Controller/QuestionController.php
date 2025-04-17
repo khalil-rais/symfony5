@@ -19,8 +19,8 @@ class QuestionController extends AbstractController
     /**
      * @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show($slug, MarkdownHelper $markdownHelper){
-        dump($this->getParameter('cache_adapter'));
+    public function show($slug, MarkdownHelper $markdownHelper, bool $isDebug){
+        dump($isDebug);
         $answers = [
             'Make sure your cat is cutting `purrfectlyyyy` still',
             'Honestly, I like furry shoes better than MY Cat',
