@@ -13,6 +13,6 @@ class AppFixtures extends Fixture
     {
         // $product = new Product();
         // $manager->persist($product);
-        QuestionFactory::new()->create();
+        QuestionFactory::new()->createMany(20);
     }
 }
