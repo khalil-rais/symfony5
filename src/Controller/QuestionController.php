@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
 use Sentry\State\HubInterface;
@@ -57,9 +58,8 @@ EOF
     /**
      * @Route("/", name="app_homepage")
      */
-    public function homepage(EntityManagerInterface $entityManager)
+    public function homepage(QuestionRepository $repository)
     {
-        $repository = $entityManager->getRepository(Question::class);
         $questions = $repository->findAllAskedOrderedByNewest();
 
         return $this->render('question/homepage.html.twig', [
