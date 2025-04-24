@@ -20,11 +20,13 @@
                                             (unpublished)
                                         {% endif %}
                                     </small>
-                                    <div class="js-vote-arrows vote-arrows vote-arrows-alt flex-fill pt-2" style="min-width: 90px;">
-                                        <button class="js-vote-up btn btn-link" name="direction" value="up"><i class="far fa-arrow-alt-circle-up"></i></button>
-                                        <button class="js-vote-down btn btn-link" name="direction" value="down"><i class="far fa-arrow-alt-circle-down"></i></button>
-                                        <span>{{ question.votesString }}</span>
-                                    </div>
+                                    <form action="{{ path('app_question_vote', {slug: question.slug}) }}" method="POST">
+                                        <div class="js-vote-arrows vote-arrows vote-arrows-alt flex-fill pt-2" style="min-width: 90px;">
+                                            <button class="js-vote-up btn btn-link" name="direction" value="up"><i class="far fa-arrow-alt-circle-up"></i></button>
+                                            <button class="js-vote-down btn btn-link" name="direction" value="down"><i class="far fa-arrow-alt-circle-down"></i></button>
+                                            <span>{{ question.votesString }}</span>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                             <div class="col">

@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Sentry\State\HubInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Entity\Question;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
@@ -90,5 +91,17 @@ EOF
             'question' => $question,
             'answers' => $answers,
         ]);
+    }
+
+    /**
+     * @Route("/questions/{slug}/vote", name="app_question_vote", methods="POST")
+     */
+    public function questionVote(Question $question, Request $request){
+        $direction = $request->request->get('direction');
+        if($direction === 'up'){
+            $question->setVotes($question->getVotes() + 1);
+        } elseif ($direction === 'down'){
+            $question->setVotes($question->getVotes() - 1);
+        }
     }
 }
