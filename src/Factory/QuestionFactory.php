@@ -50,11 +50,23 @@ final class QuestionFactory extends PersistentProxyObjectFactory
      */
     protected function defaults(): array|callable
     {
+
         return [
-            'name' => self::faker()->text(255),
-            'question' => self::faker()->text(),
-            'slug' => self::faker()->text(100),
-            'votes' => self::faker()->randomNumber(),
+            'name' => 'Missing Dress',
+            'slug' => 'missing-dress-' . rand(0, 1000),
+            'question' => <<<EOF
+Hi! So... I'm having a *weird* day. Yesterday, I cast a spell 
+to make my dishes wash themselves. But while I was casting it, 
+I slipped a little and I think `I also hit my dress with the spell`.
+
+When I woke up this morning, I caught a quick glimpse of my dresses 
+opening the front door and walking out! I've been out all afternoon 
+(with no dresses mind you) searching for them.
+
+Does anyone have a spell to call your dresses back?
+EOF,
+            'votes' => rand(-20, 50),
+            'askedAt' => rand(1, 10) > 2 ? new \DateTimeImmutable(sprintf('-%d days', rand(1, 100))) : null,
         ];
     }
 
