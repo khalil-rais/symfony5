@@ -4,6 +4,7 @@ namespace App\Factory;
 
 use App\Entity\Question;
 use App\Repository\QuestionRepository;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 use Zenstruck\Foundry\Persistence\Proxy;
 use Zenstruck\Foundry\Persistence\ProxyRepositoryDecorator;
@@ -53,7 +54,6 @@ final class QuestionFactory extends PersistentProxyObjectFactory
 
         return [
             'name' => self::faker()->realText(50),
-            'slug' => self::faker()->slug(),
             'question' => self::faker()->paragraphs(
                 self::faker()->numberBetween(1, 4),
                 true
@@ -69,7 +69,12 @@ final class QuestionFactory extends PersistentProxyObjectFactory
     protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(Question $question): void {})
+            ->afterInstantiate(function(Question $question): void {
+                if(!$question->getSlug()){
+                    $slugger = new AsciiSlugger();
+                    $question->setSlug($slugger->slug($question->getName()));
+                }
+            })
         ;
     }
 }
