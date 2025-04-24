@@ -71,8 +71,11 @@ EOF
         }
 
         $repository = $entityManager->getRepository(Question::class);
-        $questions = $repository->findOneBy(['slug' => $slug]);
-        dd($questions);
+        /** @var Question|null $questions */
+        $question = $repository->findOneBy(['slug' => $slug]);
+        if (!$question) {
+            throw $this->createNotFoundException(sprintf('Question with id %s not found.', $slug));
+        }
 
         $answers = [
             'Make sure your cat is cutting `purrfectlyyyy` still',
