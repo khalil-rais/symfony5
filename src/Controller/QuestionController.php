@@ -103,5 +103,6 @@ EOF
         } elseif ($direction === 'down'){
             $question->setVotes($question->getVotes() - 1);
         }
+        dd($question);
     }
 }
