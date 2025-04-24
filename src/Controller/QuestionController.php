@@ -33,7 +33,7 @@ class QuestionController extends AbstractController
         ->setQuestion(<<<EOF
 Hi! So... I'm having a *weird* day. Yesterday, I cast a spell 
 to make my dishes wash themselves. But while I was casting it, 
-I slipped a little and I think 'I also hit my dress with the spell'.
+I slipped a little and I think `I also hit my dress with the spell`.
 
 When I woke up this morning, I caught a quick glimpse of my dresses 
 opening the front door and walking out! I've been out all afternoon 
@@ -82,16 +82,10 @@ EOF
             'Honestly, I like furry shoes better than MY Cat',
             'Maybe... try saying the spell backwards?',
         ];
-        $question_text = 'I\'ve been turned into a cat, any thoughts on how to turn back? While I\'m **adorable**, I don\'t really care for cat food.';
 
-        $parsedQuestionText = $markdownHelper->parse($question_text);
-        //dd($slug, $this);
-        //dump($slug, $this);
-        //dump($cache);
 
         return $this->render('question/show.html.twig', [
-            'question' => ucwords(str_replace('-',' ',$slug)),
-            'questionText' => $parsedQuestionText,
+            'question' => $question,
             'answers' => $answers,
         ]);
     }
