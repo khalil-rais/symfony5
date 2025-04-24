@@ -52,7 +52,7 @@ final class QuestionFactory extends PersistentProxyObjectFactory
     {
 
         return [
-            'name' => self::faker()->realText(),
+            'name' => self::faker()->realText(50),
             'slug' => self::faker()->slug(),
             'question' => self::faker()->paragraphs(
                 self::faker()->numberBetween(1, 4),
