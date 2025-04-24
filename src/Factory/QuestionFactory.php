@@ -30,6 +30,11 @@ use Zenstruck\Foundry\Persistence\ProxyRepositoryDecorator;
  */
 final class QuestionFactory extends PersistentProxyObjectFactory
 {
+    public function unpublished():self
+    {
+        return $this->addState(['askedAt' => null]);
+    }
+
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
      *
@@ -58,7 +63,7 @@ final class QuestionFactory extends PersistentProxyObjectFactory
                 self::faker()->numberBetween(1, 4),
                 true
             ),
-            'askedAt' => self::faker()->boolean(70) ? \DateTimeImmutable::createFromMutable(self::faker()->dateTimeBetween('-100 days', '-1 minute')) : null,
+            'askedAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTimeBetween('-100 days', '-1 minute')),
             'votes' => rand(-20, 50),
         ];
     }
