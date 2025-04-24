@@ -60,7 +60,7 @@ EOF
     public function homepage(EntityManagerInterface $entityManager)
     {
         $repository = $entityManager->getRepository(Question::class);
-        $questions = $repository->findBy([], ['askedAt' => 'DESC']);
+        $questions = $repository->findAllAskedOrderedByNewest();
 
         return $this->render('question/homepage.html.twig', [
             'questions' => $questions,
