@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Answer;
 use App\Entity\Question;
+use App\Factory\AnswerFactory;
 use App\Factory\QuestionFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -20,18 +21,10 @@ class AppFixtures extends Fixture
             ->unpublished()
             ->createMany(5);
 
-        $answer = new Answer();
-        $answer->setContent('This question is the best! I whsih I knew the answer');
-        $answer->setUsername ('weaverryan') ;
-
-        $question = new Question();
-        $question->setName('How to up-disappear you wallet.');
-        $question->setQuestion('... I should not have done this...');
-
-        $answer->setQuestion($question);
-
-        $manager->persist($answer);
-        $manager->persist($question);
+        AnswerFactory::createMany(100,
+        [
+            'question' => QuestionFactory::random(),
+        ]);
 
         $manager->flush();
 

@@ -52,11 +52,9 @@ final class AnswerFactory extends PersistentProxyObjectFactory
     {
         return [
             'content' => self::faker()->text(),
-            'createdAt' => self::faker()->dateTime(),
-            'question' => QuestionFactory::new(),
-            'updatedAt' => self::faker()->dateTime(),
-            'username' => self::faker()->text(255),
-            'votes' => self::faker()->randomNumber(),
+            'createdAt' => self::faker()->dateTimeBetween('-1 year'),
+            'username' => self::faker()->userName(),
+            'votes' => self::faker()->numberBetween(-20, 50),
         ];
     }
 
