@@ -49,14 +49,16 @@ class QuestionController extends AbstractController
     /**
      * @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show(Question $question, AnswerRepository $answerRepository){
+    public function show(Question $question){
 
         if ($this->isDebug){
             $this->logger->info("We are in debug mode");
         }
 
-        $answers = $answerRepository->findBy(['question' => $question]);
-        dd($answers);
+        $answers = $question->getAnswers();
+        foreach ($answers as $answer){
+            dump($answer);
+        }
 
         $answers = [
             'Make sure your cat is cutting `purrfectlyyyy` still',
