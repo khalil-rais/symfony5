@@ -56,20 +56,10 @@ class QuestionController extends AbstractController
         }
 
         $answers = $question->getAnswers();
-        foreach ($answers as $answer){
-            dump($answer);
-        }
-
-        $answers = [
-            'Make sure your cat is cutting `purrfectlyyyy` still',
-            'Honestly, I like furry shoes better than MY Cat',
-            'Maybe... try saying the spell backwards?',
-        ];
 
 
         return $this->render('question/show.html.twig', [
-            'question' => $question,
-            'answers' => $answers,
+            'question' => $question
         ]);
     }
 
