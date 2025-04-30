@@ -55,7 +55,7 @@ final class AnswerFactory extends PersistentProxyObjectFactory
             'createdAt' => self::faker()->dateTimeBetween('-1 year'),
             'username' => self::faker()->userName(),
             'votes' => self::faker()->numberBetween(-20, 50),
-            'question' => QuestionFactory::new()->unpublished()->create(),
+            'question' => QuestionFactory::new()->unpublished(),
         ];
     }
 
