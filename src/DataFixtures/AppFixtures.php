@@ -32,7 +32,7 @@ class AppFixtures extends Fixture
         $answer1->setContent ('answer 1');
         $answer1->setUsername ( 'weaverryan') ;
         $answer2 = new Answer ();
-        $answer2->setContent ('answer 1');
+        $answer2->setContent ('answer 2');
         $answer2->setUsername ('weaverryan' );
         $question->addAnswer($answer1);
         $question->addAnswer($answer2);
