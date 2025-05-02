@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\QuestionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -141,9 +142,10 @@ class Question
 
     public function getApprovedAnswers(): Collection
     {
-        return $this->answers->filter(function (Answer $answer) {
-            return $answer->isApproved();
-        });
+        $criteria = Criteria::create()
+            ->andWhere(Criteria::expr()->eq('status', Answer::STATUS_APPROVED));
+
+        return $this->answers->matching($criteria);
     }
 
     public function addAnswer(Answer $answer): static
