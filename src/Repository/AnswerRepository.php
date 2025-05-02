@@ -29,4 +29,16 @@ class AnswerRepository extends ServiceEntityRepository
             )
             );
     }
+
+    /**
+     * @return Answer []
+     */
+    public function findAllApproved (int $max = 10): array{
+
+        return $this->createQueryBuilder('answer')
+            ->addCriteria(self::createApprovedCriteria())
+            ->setMaxResults($max)
+            ->getQuery()
+            ->getResult();
+    }
 }
