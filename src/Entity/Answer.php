@@ -10,6 +10,10 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 #[ORM\Entity(repositoryClass: AnswerRepository::class)]
 class Answer
 {
+    public const STATUS_NEEDS_APPROVAL = 'needs_approval';
+    public const STATUS_SPAM = 'spam';
+    public const STATUS_APPROVED = 'approved';
+
     use TimestampableEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -30,7 +34,7 @@ class Answer
     private ?Question $question = null;
 
     #[ORM\Column(length: 15)]
-    private ?string $status = null;
+    private ?string $status = self::STATUS_NEEDS_APPROVAL;
 
     public function getId(): ?int
     {
@@ -92,6 +96,10 @@ class Answer
 
     public function setStatus(string $status): static
     {
+        if(!in_array($status, [self::STATUS_NEEDS_APPROVAL, self::STATUS_SPAM])){
+            throw new \InvalidArgumentException(sprintf('Invalid status: "%s"', $status));
+        }
+
         $this->status = $status;
 
         return $this;

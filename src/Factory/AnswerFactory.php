@@ -56,6 +56,7 @@ final class AnswerFactory extends PersistentProxyObjectFactory
             'username' => self::faker()->userName(),
             'votes' => self::faker()->numberBetween(-20, 50),
             'question' => QuestionFactory::new()->unpublished(),
+            'status' => Answer::STATUS_APPROVED,
         ];
     }
 
