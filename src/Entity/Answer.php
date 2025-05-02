@@ -96,7 +96,7 @@ class Answer
 
     public function setStatus(string $status): static
     {
-        if(!in_array($status, [self::STATUS_NEEDS_APPROVAL, self::STATUS_SPAM])){
+        if(!in_array($status, [self::STATUS_NEEDS_APPROVAL, self::STATUS_SPAM, self::STATUS_APPROVED])){
             throw new \InvalidArgumentException(sprintf('Invalid status: "%s"', $status));
         }
 
