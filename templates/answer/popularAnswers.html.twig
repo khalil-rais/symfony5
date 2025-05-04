@@ -7,5 +7,12 @@
         <div class="row">
             <h1>Most Popular Answers</h1>
         </div>
+        <div class="row">
+            <ul class="list-unstyled">
+                {% for answer in answers %}
+                    <li>{{ answer.votes }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 {% endblock %}
