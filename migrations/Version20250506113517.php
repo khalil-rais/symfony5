@@ -27,7 +27,7 @@ final class Version20250506113517 extends AbstractMigration
             ALTER TABLE question_tag DROP FOREIGN KEY FK_339D56FBBAD26311
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE question_tag ADD id INT AUTO_INCREMENT NOT NULL, ADD tagged_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', DROP PRIMARY KEY, ADD PRIMARY KEY (id)
+            ALTER TABLE question_tag ADD id INT AUTO_INCREMENT NOT NULL, ADD tagged_at DATETIME DEFAULT NOW() COMMENT '(DC2Type:datetime_immutable)', DROP PRIMARY KEY, ADD PRIMARY KEY (id)
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE question_tag ADD CONSTRAINT FK_339D56FB1E27F6BF FOREIGN KEY (question_id) REFERENCES question (id)
