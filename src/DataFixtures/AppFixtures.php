@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Answer;
 use App\Entity\Question;
+use App\Entity\Tag;
 use App\Factory\AnswerFactory;
 use App\Factory\QuestionFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -32,6 +33,21 @@ class AppFixtures extends Fixture
                 'question' => $questions[array_rand($questions)],
             ];
         })->needsApproval()->many(20)->create();
+
+        $question = QuestionFactory::createOne();
+
+        $tag1 = new Tag();
+        $tag1->setName('dinosaurs');
+        $tag2 = new Tag();
+        $tag2->setName('monster trucks');
+
+        $question->addTag($tag1);
+        $question->addTag($tag2);
+
+        $manager->persist($tag1);
+        $manager->persist($tag2);
+
+
 
         $manager->flush () ;
 
