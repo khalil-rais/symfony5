@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1446ac6024433071e2d79a0fd718969f",
+    "content-hash": "5e5a8e5d822b22a7210e90c60774beff",
     "packages": [
         {
             "name": "babdev/pagerfanta-bundle",
@@ -2299,6 +2299,50 @@
                 "source": "https://github.com/Pagerfanta/doctrine-orm-adapter/tree/v4.7.1"
             },
             "time": "2024-11-30T19:18:10+00:00"
+        },
+        {
+            "name": "pagerfanta/twig",
+            "version": "v4.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Pagerfanta/twig.git",
+                "reference": "f3eb17928c61fe6f72abc822825e1006afae6257"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Pagerfanta/twig/zipball/f3eb17928c61fe6f72abc822825e1006afae6257",
+                "reference": "f3eb17928c61fe6f72abc822825e1006afae6257",
+                "shasum": ""
+            },
+            "require": {
+                "pagerfanta/core": "^3.7 || ^4.0",
+                "php": "^8.1",
+                "twig/twig": "^2.13 || ^3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Pagerfanta\\Twig\\": "./"
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Twig integration for Pagerfanta",
+            "keywords": [
+                "pagerfanta"
+            ],
+            "support": {
+                "source": "https://github.com/Pagerfanta/twig/tree/v4.7.1"
+            },
+            "time": "2024-12-13T15:11:13+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
