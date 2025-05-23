@@ -8,11 +8,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SecurityController extends AbstractController
 {
-    #[Route('/security', name: 'app_security')]
-    public function index(): Response
+    #[Route('/login', name: 'app_login')]
+    public function login(): Response
     {
-        return $this->render('security/index.html.twig', [
-            'controller_name' => 'SecurityController',
-        ]);
+        return $this->render('security/login.html.twig');
     }
 }
