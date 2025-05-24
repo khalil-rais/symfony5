@@ -13,12 +13,12 @@ class LoginFormAuthenticator extends AbstractAuthenticator
 {
     public function supports(Request $request): ?bool
     {
-        // TODO: Implement supports() method.
+        return $request->getPathInfo() === '/login' && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport
     {
-        // TODO: Implement authenticate() method.
+        dd('Authenticate');
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
