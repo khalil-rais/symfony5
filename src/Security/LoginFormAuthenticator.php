@@ -62,7 +62,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        dd('failure');
+        dd('failure', $exception);
     }
 
 //    public function start(Request $request, AuthenticationException $authException = null): Response
