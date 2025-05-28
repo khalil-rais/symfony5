@@ -59,7 +59,7 @@ final class UserFactory extends PersistentProxyObjectFactory
         return [
             'email' => self::faker()->email(),
             'firstName' => self::faker()->firstName(),
-            'password' => $this->passwordHasher->hashPassword(),
+            'plainPassword' => 'tada',
         ];
     }
 
@@ -69,7 +69,14 @@ final class UserFactory extends PersistentProxyObjectFactory
     protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(User $user): void {})
+            ->afterInstantiate(function(User $user): void {
+                if ($user->getPlainPassword()) {
+                    $user->setPassword(
+                        $this->passwordHasher->hashPassword(
+                        $user,
+                        $user->getPlainPassword()));
+                }
+            })
         ;
     }
 }
