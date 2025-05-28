@@ -43,19 +43,19 @@ class LoginFormAuthenticator extends AbstractAuthenticator
                 return $user;
             }),
             new CustomCredentials(function($credentials, User $user) {
-                dd ($credentials, $user);
+                return $credentials === 'tada';
             }, $password)
         ) ;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // TODO: Implement onAuthenticationSuccess() method.
+        dd('success');
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        // TODO: Implement onAuthenticationFailure() method.
+        dd('failure');
     }
 
 //    public function start(Request $request, AuthenticationException $authException = null): Response
