@@ -20,8 +20,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCre
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 
-class LoginFormAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     private UserRepository $userRepository;
     private RouterInterface $router;
@@ -30,10 +31,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     {
         $this->userRepository = $userRepository;
         $this->router = $router;
-    }
-    public function supports(Request $request): ?bool
-    {
-        return $request->getPathInfo() === '/login' && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport
@@ -70,19 +67,9 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         );
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    protected function getLoginUrl(Request $request): string
     {
-        $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
-
-        return new RedirectResponse(
-            $this->router->generate('app_login')
-        );
+        return $this->router->generate('app_login');
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): Response
-    {
-        return new RedirectResponse(
-            $this->router->generate('app_login')
-        );
-    }
 }
