@@ -32,7 +32,9 @@ class QuestionController extends AbstractController
      */
     public function new(EntityManagerInterface $entityManager)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        if (!$this->isGranted ('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException( 'No access for you!');
+        }
 
         return new Response('Sounds like a GREAT feature for V2!');
     }
