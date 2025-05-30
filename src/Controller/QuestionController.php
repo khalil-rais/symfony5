@@ -32,6 +32,7 @@ class QuestionController extends AbstractController
      */
     public function new(EntityManagerInterface $entityManager)
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
 
         return new Response('Sounds like a GREAT feature for V2!');
     }
