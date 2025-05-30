@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 use App\Service\MarkdownHelper;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class QuestionController extends AbstractController
 {
     private $logger;
@@ -29,13 +30,10 @@ class QuestionController extends AbstractController
 
     /**
      * @Route("/questions/new")
+     * @IsGranted ("ROLE_ADMIN" )
      */
     public function new(EntityManagerInterface $entityManager)
     {
-        if (!$this->isGranted ('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException( 'No access for you!');
-        }
-
         return new Response('Sounds like a GREAT feature for V2!');
     }
 
