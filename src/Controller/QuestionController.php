@@ -31,7 +31,7 @@ class QuestionController extends AbstractController
     /**
      * @Route("/questions/new")
      */
-    #[IsGranted ("ROLE_ADMIN")]
+    #[IsGranted ("ROLE_USER")]
     public function new(EntityManagerInterface $entityManager)
     {
         return new Response('Sounds like a GREAT feature for V2!');
