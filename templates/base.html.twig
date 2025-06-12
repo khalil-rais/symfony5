@@ -37,6 +37,11 @@
                      alt="{{ app.user.displayName }}">
             </button>
             <div class="dropdown-menu" aria-labelledby="user-dropdown">
+                {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+                    <a class=
+                       "dropdown-item" href=
+                       "{{ path('app_homepage', {'_switch_user' : '_exit'}) }}">Exit Impersonation</a>
+                {% endif %}
                 <a class=
                    "dropdown-item" href=
                    "{{ path('app_logout') }}">Log Out</a>
