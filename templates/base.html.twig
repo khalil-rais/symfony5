@@ -28,7 +28,18 @@
         </ul>
     </div>
     {% if is_granted ('IS_AUTHENTICATED_REMEMBERED') %}
-        {{ app.user.firstName }}
+
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="user-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <img src="https://ui-avatars.com/api/?name={{ app.user.firstName | url_encode }}&size=32&background=random"
+                     alt="{{ app.user.firstName }}">
+            </button>
+            <div class="dropdown-menu" aria-labelledby="user-dropdown">
+                <a class=
+                   "dropdown-item" href=
+                   "{{ path('app_logout') }}">Log Out</a>
+            </div>
+        </div>
         <a class="nav-Link text-black-50" href="{{ path('app_logout') }}">Log Out</a>
     {% else %}
         <a class="nav-Link text-black-50" href="{{ path('app_login') }}">Log In</a>
