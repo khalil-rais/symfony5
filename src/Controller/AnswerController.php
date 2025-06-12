@@ -10,15 +10,20 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 
 class AnswerController extends AbstractController
 {
     /**
      * @Route("/answers/{id}/vote", methods="POST", name="answer_vote")
-     * @IsGranted("'IS_AUTHENTICATED_REMEMBERED" )
+     * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
      */
     public function answerVote(Answer $answer, LoggerInterface $logger, Request $request, EntityManagerInterface $entityManager)
     {
+        $logger->info('{user} is voting on answer {answer}', [
+            'user' => $this->getUser()->getUserIdentifier(),
+            'answer' => $answer->getId(),
+        ]);
         $data = json_decode($request->getContent(), true);
         $direction = $data['direction'] ?? 'up';
 
