@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-class AnswerController extends AbstractController
+class AnswerController extends BaseController
 {
     /**
      * @Route("/answers/{id}/vote", methods="POST", name="answer_vote")
@@ -21,7 +21,7 @@ class AnswerController extends AbstractController
     public function answerVote(Answer $answer, LoggerInterface $logger, Request $request, EntityManagerInterface $entityManager)
     {
         $logger->info('{user} is voting on answer {answer}', [
-            'user' => $this->getUser()->getUserIdentifier(),
+            'user' => $this->getUser()->getEmail(),
             'answer' => $answer->getId(),
         ]);
         $data = json_decode($request->getContent(), true);
