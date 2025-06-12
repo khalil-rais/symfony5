@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserController extends BaseController
 {
     /**
-     * @Route("/api/me")
+     * @Route("/api/me", name="app_user_apime")
      * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
      */
     public function apiMe()
