@@ -144,11 +144,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // https://ui-avatars.com/api/?name={{ app.user.firstName | url_encode }}&size=32&background=random
         return 'https://ui-avatars.com/api/?' . http_build_query([
-            'name' => $this->getFirstname() ?: $this->getEmail(),
+            'name' => $this->getDisplayName(),
             'size' => $size,
             'background' => 'random',
         ]);
 
+    }
+
+    public function getDisplayName(): string
+    {
+        return $this->getFirstname() ?: $this->getEmail();
     }
 
 
