@@ -41,7 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $questions;
 
     #[ORM\Column]
-    private ?bool $isVerified = null;
+    private ?bool $isVerified = false;
 
     public function __construct()
     {
