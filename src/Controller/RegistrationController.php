@@ -60,7 +60,7 @@ class RegistrationController extends AbstractController
     /**
      * @Route("/verify", name="app_verify_email")
      */
-    public function verifyUserEmail(Request $request, VerifyEmailHelperInterface $verifyEmailHelper, UserRepository $userRepository): Response
+    public function verifyUserEmail(Request $request, VerifyEmailHelperInterface $verifyEmailHelper, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
         $user = $userRepository->find($request->query->get ('id'));
         if (!$user) {
@@ -79,8 +79,11 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute( 'app_register');
         }
 
-        dd('ToDo verifyUserEmail');
+        $user->setIsVerified(true);
+        $entityManager->flush();
+        $this->addFlash( 'success', 'Account verified! You can now login.');
 
+        return $this->redirectToRoute('app_login');
     }
 
 }
