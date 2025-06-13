@@ -74,7 +74,9 @@ class QuestionController extends AbstractController
     /**
      * @Route("/questions/edit/{slug}", name="app_question_edit")
      */
-    public function edit(Question $question){
+    public function edit(Question $question)
+    {
+        $this->denyAccessUnlessGranted ('EDIT', $question);
 
         $this->denyAccessUnlessGranted ('IS_AUTHENTICATED_REMEMBERED');
 
