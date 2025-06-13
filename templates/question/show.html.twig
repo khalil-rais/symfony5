@@ -30,7 +30,12 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <h1 class="q-title-show">{{ question.name }}</h1>
+                                <div class="d-flex justify-content-between">
+                                    <h1 class="q-title-show">{{ question.name }}</h1>
+                                    <a href="{{ path('app_question_edit', {
+                                        slug: question.slug
+                                    }) }}" class="btn btn-secondary btm-sm mb-2">Edit</a>
+                                </div>
                                 <div class="q-display p-3">
                                     <i class="fa fa-quote-left mr-3"></i>
                                     <p class="d-inline">{{ question.question | parse_markdown }}</p>
