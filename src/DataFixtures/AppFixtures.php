@@ -17,11 +17,22 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        UserFactory::createOne([
+            'email' => 'abraca_admin@example.com',
+            'roles' => ['ROLE_ADMIN'],
+        ]);
+
+        UserFactory::createOne([
+            'email' => 'abraca_user@example.com',
+        ]);
+        UserFactory::createMany(10);
+
         TagFactory::createMany(100);
 
         $questions = QuestionFactory::new()->createMany(20, function() {
             return [
                 'questionTags' => QuestionTagFactory::new()->many(1,5),
+                'owner' => UserFactory::random(),
             ];
         });
 
@@ -40,16 +51,6 @@ class AppFixtures extends Fixture
                 'question' => $questions[array_rand($questions)],
             ];
         })->needsApproval()->many(20)->create();
-
-        UserFactory::createOne([
-            'email' => 'abraca_admin@example.com',
-            'roles' => ['ROLE_ADMIN'],
-        ]);
-
-        UserFactory::createOne([
-            'email' => 'abraca_user@example.com',
-        ]);
-        UserFactory::createMany(10);
 
         $manager->flush () ;
 
