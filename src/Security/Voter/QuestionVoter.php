@@ -6,13 +6,19 @@ use App\Entity\Question;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class QuestionVoter extends Voter
 {
     public const EDIT = 'POST_EDIT';
     public const VIEW = 'POST_VIEW';
+    private Security $security;
 
+    public function __construct (Security $security)
+    {
+        $this->security = $security;
+    }
     protected function supports(string $attribute, mixed $subject): bool
     {
         // replace with your own logic
@@ -32,6 +38,10 @@ class QuestionVoter extends Voter
 
         if (!$subject instanceof Question) {
             throw new \Exception ( 'Wrong type somehow passed');
+        }
+
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            return true;
         }
 
         // ... (check conditions and return true to grant permission) ...
