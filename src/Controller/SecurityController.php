@@ -39,7 +39,7 @@ class SecurityController extends BaseController
             $entityManager->flush();
         }
 
-        dd ($totpAuthenticator->getQRContent ($user));
+        return $this->render ('security/enable2fa.html.twig');
 
     }
 
@@ -48,9 +48,10 @@ class SecurityController extends BaseController
     public function authenticatorQrCode(TotpAuthenticatorInterface $totpAuthenticator)
     {
         $qrCodeContent = $totpAuthenticator->getQRContent($this->getUser());
-        $result = new Builder(
+        $builder = new Builder(
             data: $qrCodeContent,
-        )->build();
+        );
+        $result =$builder->build();
         return new Response($result->getString(), Response::HTTP_OK, ['Content-Type' => 'image/png']);
     }
 }
