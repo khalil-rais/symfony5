@@ -38,7 +38,7 @@ class SecurityController extends BaseController
             $entityManager->flush();
         }
 
-        dd($user);
+        dd ($totpAuthenticator->getQRContent ($user));
 
     }
 }
