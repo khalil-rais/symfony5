@@ -16,7 +16,7 @@ class CheckVerifiedUserSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            CheckPassportEvent::class => 'onCheckPassport',
+            CheckPassportEvent::class => ['onCheckPassport',-1]
         ];
     }
 
