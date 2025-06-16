@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250616101349 extends AbstractMigration
+final class Version20250616114714 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20250616101349 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE user ADD totpSecret VARCHAR(255) DEFAULT NULL
+            ALTER TABLE user ADD totp_secret VARCHAR(255) DEFAULT NULL
         SQL);
     }
 
@@ -29,7 +29,7 @@ final class Version20250616101349 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE user DROP totpSecret
+            ALTER TABLE user DROP totp_secret
         SQL);
     }
 }
