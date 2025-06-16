@@ -3,9 +3,10 @@
 namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -40,5 +41,16 @@ class SecurityController extends BaseController
 
         dd ($totpAuthenticator->getQRContent ($user));
 
+    }
+
+    #[Route('/authentication/2fa/qr-code', name: 'app_qr_code')]
+    #[IsGranted('ROLE_USER')]
+    public function authenticatorQrCode(TotpAuthenticatorInterface $totpAuthenticator)
+    {
+        $qrCodeContent = $totpAuthenticator->getQRContent($this->getUser());
+        $result = new Builder(
+            data: $qrCodeContent,
+        )->build();
+        return new Response($result->getString(), Response::HTTP_OK, ['Content-Type' => 'image/png']);
     }
 }
