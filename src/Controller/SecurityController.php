@@ -39,7 +39,9 @@ class SecurityController extends BaseController
             $entityManager->flush();
         }
 
-        return $this->render ('security/enable2fa.html.twig');
+        return $this->render('security/enable2fa.html.twig', [
+            'qrCodeUrl' => $this->generateUrl('app_qr_code')
+        ]);
 
     }
 
