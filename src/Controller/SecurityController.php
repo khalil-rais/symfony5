@@ -2,58 +2,86 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\Response;
+use App\Entity\User;
+use App\Form\Model\UserRegistrationFormModel;
+use App\Form\UserRegistrationFormType;
+use App\Security\LoginFormAuthenticator;
+use App\Service\Mailer;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class SecurityController extends BaseController
+class SecurityController extends AbstractController
 {
-    #[Route('/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    /**
+     * @Route("/login", name="app_login")
+     */
+    public function login(AuthenticationUtils $authenticationUtils)
     {
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
         return $this->render('security/login.html.twig', [
-            'error' => $authenticationUtils->getLastAuthenticationError(),
-            'last_username' => $authenticationUtils->getLastUsername (),
+            'last_username' => $lastUsername,
+            'error'         => $error,
         ]);
     }
 
-    #[Route('/logout', name: 'app_logout')]
+    /**
+     * @Route("/logout", name="app_logout")
+     */
     public function logout()
     {
-        throw new \Exception('logout() should never be reached!');
+        throw new \Exception('Will be intercepted before getting here');
     }
 
-    #[Route('/authentication/2fa/enable', name: 'app_2fa_enable')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function enable2fa(TotpAuthenticatorInterface $totpAuthenticator, EntityManagerInterface $entityManager)
+    /**
+     * @Route("/register", name="app_register")
+     */
+    public function register(Mailer $mailer, Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $formAuthenticator)
     {
-        $user = $this->getUser();
-        if (!$user->isTotpAuthenticationEnabled()){
-            $user->setTotpSecret($totpAuthenticator->generateSecret());
+        $form = $this->createForm(UserRegistrationFormType::class);
+        $form->handleRequest($request);
 
-            $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UserRegistrationFormModel $userModel */
+            $userModel = $form->getData();
+
+            $user = new User();
+            $user->setFirstName($userModel->firstName);
+            $user->setEmail($userModel->email);
+            $user->setPassword($passwordEncoder->encodePassword(
+                $user,
+                $userModel->plainPassword
+            ));
+            // be absolutely sure they agree
+            if (true === $userModel->agreeTerms) {
+                $user->agreeToTerms();
+            }
+            $user->setSubscribeToNewsletter($userModel->subscribeToNewsletter);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+
+            $mailer->sendWelcomeMessage($user);
+
+            return $guardHandler->authenticateUserAndHandleSuccess(
+                $user,
+                $request,
+                $formAuthenticator,
+                'main'
+            );
         }
 
-        return $this->render('security/enable2fa.html.twig', [
-            'qrCodeUrl' => $this->generateUrl('app_qr_code')
+        return $this->render('security/register.html.twig', [
+            'registrationForm' => $form->createView(),
         ]);
-
-    }
-
-    #[Route('/authentication/2fa/qr-code', name: 'app_qr_code')]
-    #[IsGranted('ROLE_USER')]
-    public function authenticatorQrCode(TotpAuthenticatorInterface $totpAuthenticator)
-    {
-        $qrCodeContent = $totpAuthenticator->getQRContent($this->getUser());
-        $builder = new Builder(
-            data: $qrCodeContent,
-        );
-        $result =$builder->build();
-        return new Response($result->getString(), Response::HTTP_OK, ['Content-Type' => 'image/png']);
     }
 }

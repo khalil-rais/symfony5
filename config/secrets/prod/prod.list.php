@@ -1,5 +1,5 @@
 <?php
 
-return [
-    'SENTRY_DSN' => null,
-];
+return array (
+  'MAILER_DSN' => NULL,
+);

@@ -2,55 +2,84 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
-use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
-use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @UniqueEntity(
+ *     fields={"email"},
+ *     message="I think you're already registered!"
+ * )
+ */
+class User implements UserInterface
 {
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $totpSecret;
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    #[Groups("user:read")]
-    private ?int $id = null;
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
+    private $id;
 
-    #[ORM\Column(length: 180, unique: true)]
-    #[Groups("user:read")]
-    private ?string $email = null;
+    /**
+     * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups("main")
+     * @Assert\NotBlank(message="Please enter an email")
+     * @Assert\Email()
+     */
+    private $email;
 
-    #[ORM\Column]
-    private array $roles = [];
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $roles = [];
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups("user:read")]
-    private ?string $firstname = null;
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("main")
+     */
+    private $firstName;
 
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $password;
 
-    private ?string $plainPassword;
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("main")
+     */
+    private $twitterUsername;
 
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Question::class)]
-    private Collection $questions;
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ApiToken", mappedBy="user", orphanRemoval=true)
+     */
+    private $apiTokens;
 
-    #[ORM\Column]
-    private ?bool $isVerified = false;
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Article", mappedBy="author", fetch="EXTRA_LAZY")
+     */
+    private $articles;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $agreedTermsAt;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $subscribeToNewsletter = false;
 
     public function __construct()
     {
-        $this->questions = new ArrayCollection();
+        $this->apiTokens = new ArrayCollection();
+        $this->articles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -63,7 +92,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(string $email): self
     {
         $this->email = $email;
 
@@ -74,14 +103,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      * A visual identifier that represents this user.
      *
      * @see UserInterface
-     */
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    /**
-     * @deprecated since Symfony 5.3, use getUserIdentifier instead
      */
     public function getUsername(): string
     {
@@ -100,7 +121,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): static
+    public function setRoles(array $roles): self
     {
         $this->roles = $roles;
 
@@ -108,149 +129,156 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     /**
-     *
-     * @see PasswordAuthenticatedUserInterface
+     * @see UserInterface
      */
-    public function getPassword(): ?string
+    public function getPassword()
     {
         return $this->password;
     }
 
     /**
-     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
-     *
      * @see UserInterface
      */
-    public function getSalt(): ?string
+    public function getSalt()
     {
-        return null;
+        // not needed when using bcrypt or argon
     }
 
     /**
      * @see UserInterface
      */
-    public function eraseCredentials(): void
+    public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        $this->plainPassword = null;
+        // $this->plainPassword = null;
     }
 
-    public function getFirstname(): ?string
+    public function getFirstName(): ?string
     {
-        return $this->firstname;
+        return $this->firstName;
     }
 
-    public function setFirstname(?string $firstname): static
+    public function setFirstName(string $firstName): self
     {
-        $this->firstname = $firstname;
+        $this->firstName = $firstName;
 
         return $this;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(string $password): self
     {
         $this->password = $password;
 
         return $this;
     }
 
-    public function getPlainPassword(): ?string
+    public function getTwitterUsername(): ?string
     {
-        return $this->plainPassword;
+        return $this->twitterUsername;
     }
 
-    public function setPlainPassword(?string $plainPassword): void
+    public function setTwitterUsername(?string $twitterUsername): self
     {
-        $this->plainPassword = $plainPassword;
+        $this->twitterUsername = $twitterUsername;
+
+        return $this;
     }
 
-    #[Groups("user:read")]
-    public function getAvatarUri(int $size = 32): string
+    public function getAvatarUrl(int $size = null): string
     {
-        // https://ui-avatars.com/api/?name={{ app.user.firstName | url_encode }}&size=32&background=random
-        return 'https://ui-avatars.com/api/?' . http_build_query([
-            'name' => $this->getDisplayName(),
-            'size' => $size,
-            'background' => 'random',
-        ]);
+        $url = 'https://robohash.org/'.$this->getEmail();
 
-    }
+        if ($size) {
+            $url .= sprintf('?size=%dx%d', $size, $size);
+        }
 
-    public function getDisplayName(): string
-    {
-        return $this->getFirstname() ?: $this->getEmail();
+        return $url;
     }
 
     /**
-     * @return Collection<int, Question>
+     * @return Collection|ApiToken[]
      */
-    public function getQuestions(): Collection
+    public function getApiTokens(): Collection
     {
-        return $this->questions;
+        return $this->apiTokens;
     }
 
-    public function addQuestion(Question $question): static
+    public function addApiToken(ApiToken $apiToken): self
     {
-        if (!$this->questions->contains($question)) {
-            $this->questions->add($question);
-            $question->setOwner($this);
+        if (!$this->apiTokens->contains($apiToken)) {
+            $this->apiTokens[] = $apiToken;
+            $apiToken->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeQuestion(Question $question): static
+    public function removeApiToken(ApiToken $apiToken): self
     {
-        if ($this->questions->removeElement($question)) {
+        if ($this->apiTokens->contains($apiToken)) {
+            $this->apiTokens->removeElement($apiToken);
             // set the owning side to null (unless already changed)
-            if ($question->getOwner() === $this) {
-                $question->setOwner(null);
+            if ($apiToken->getUser() === $this) {
+                $apiToken->setUser(null);
             }
         }
 
         return $this;
     }
 
-    public function isIsVerified(): ?bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setIsVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getIsVerified(): ?bool
-    {
-        return $this->isVerified;
-    }
-
-
-    public function isTotpAuthenticationEnabled(): bool
-    {
-        return $this->totpSecret ? true : false;
-    }
-
-    public function getTotpAuthenticationUsername(): string
-    {
-        return $this->getUserIdentifier();
-    }
-
-    public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
-    {
-        return new TotpConfiguration($this->totpSecret, TotpConfiguration::ALGORITHM_SHA1, 30, 6);
-    }
-
     /**
-     * @param mixed $totpSecret
+     * @return Collection|Article[]
      */
-    public function setTotpSecret(?string $totpSecret): self
+    public function getArticles(): Collection
     {
-        $this->totpSecret = $totpSecret;
+        return $this->articles;
+    }
+
+    public function addArticle(Article $article): self
+    {
+        if (!$this->articles->contains($article)) {
+            $this->articles[] = $article;
+            $article->setAuthor($this);
+        }
 
         return $this;
+    }
+
+    public function removeArticle(Article $article): self
+    {
+        if ($this->articles->contains($article)) {
+            $this->articles->removeElement($article);
+            // set the owning side to null (unless already changed)
+            if ($article->getAuthor() === $this) {
+                $article->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getFirstName();
+    }
+
+    public function getAgreedTermsAt(): ?\DateTimeInterface
+    {
+        return $this->agreedTermsAt;
+    }
+
+    public function agreeToTerms()
+    {
+        $this->agreedTermsAt = new \DateTime();
+    }
+
+    public function isSubscribeToNewsletter()
+    {
+        return $this->subscribeToNewsletter;
+    }
+
+    public function setSubscribeToNewsletter(bool $subscribeToNewsletter)
+    {
+        $this->subscribeToNewsletter = $subscribeToNewsletter;
     }
 }

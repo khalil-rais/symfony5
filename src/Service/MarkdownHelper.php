@@ -2,42 +2,48 @@
 
 namespace App\Service;
 
-use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
+use Michelf\MarkdownInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Contracts\Cache\CacheInterface;
 
 class MarkdownHelper
 {
-    private $markdownParser;
     private $cache;
-    private $isDebug;
+    private $markdown;
     private $logger;
-    private Security $security;
+    private $isDebug;
 
-    public function __construct(MarkdownParserInterface $markdownParser, CacheInterface $cache, bool $isDebug, LoggerInterface $markdownLogger, Security $security){
-        $this->markdownParser = $markdownParser;
+    private $security;
+
+    public function __construct(AdapterInterface $cache, MarkdownInterface $markdown, LoggerInterface $markdownLogger, bool $isDebug, Security $security)
+    {
         $this->cache = $cache;
-        $this->isDebug = $isDebug;
+        $this->markdown = $markdown;
         $this->logger = $markdownLogger;
+        $this->isDebug = $isDebug;
         $this->security = $security;
     }
-    public function parse(string $question_text): string{
-        if(stripos($question_text, 'cat') !== false){
-            $this->logger->info('Meow!');
-        }
 
-        if($this->security->getUser()){
-            $this->logger->info('Rendering markdown for {user}', [
-                'user' => $this->security->getUser()->getUserIdentifier(),
+    public function parse(string $source): string
+    {
+        if (stripos($source, 'bacon') !== false) {
+            $this->logger->info('They are talking about bacon again!', [
+                'user' => $this->security->getUser()
             ]);
         }
 
-        if($this->isDebug){
-            return $this->markdownParser->transformMarkdown($question_text);
+        // skip caching entirely in debug
+        if ($this->isDebug) {
+            return $this->markdown->transform($source);
         }
-        return $this->cache->get('markdown_'.md5($question_text), function () use($question_text) {
-            return $this->markdownParser->transformMarkdown($question_text);
-        });
+
+        $item = $this->cache->getItem('markdown_'.md5($source));
+        if (!$item->isHit()) {
+            $item->set($this->markdown->transform($source));
+            $this->cache->save($item);
+        }
+
+        return $item->get();
     }
 }
