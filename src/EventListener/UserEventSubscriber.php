@@ -14,8 +14,9 @@ class UserEventSubscriber implements EventSubscriberInterface
 
         $this->logger = $logger;
     }
-    public function onKernelRequest()
+    public function onKernelRequest(RequestEvent $event)
     {
+        dd($event);
         $this->logger->info('I\'m logging SUPER early on the request');
     }
 
