@@ -26,9 +26,11 @@ class ArticleController extends AbstractController
     /**
      * @Route("/", name="app_homepage")
      */
-    public function homepage(ArticleRepository $repository)
+    public function homepage(ArticleRepository $repository, LoggerInterface $logger)
     {
         $articles = $repository->findAllPublishedOrderedByNewest();
+
+        $logger->info('Inside the controller!');
 
         return $this->render('article/homepage.html.twig', [
             'articles' => $articles,
