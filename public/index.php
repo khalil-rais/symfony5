@@ -21,6 +21,15 @@ if ($trustedHosts = $_SERVER['TRUSTED_HOSTS'] ?? $_ENV['TRUSTED_HOSTS'] ?? false
 }
 
 $kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+
+$request1 = Request::create('/login');
+$request2 = Request::create('/register');
+$response1 = $kernel->handle($request1);
+$response2 = $kernel->handle($request2) ;
+dump ($response1);
+dump ($response2);
+die();
+
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();
