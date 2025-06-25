@@ -16,8 +16,9 @@ class UserEventSubscriber implements EventSubscriberInterface
     }
     public function onKernelRequest(RequestEvent $event)
     {
-        dd($event);
-        $this->logger->info('I\'m logging SUPER early on the request');
+        $request = $event->getRequest ();
+        $userAgent = $request->headers->get('User-Agent');
+        $this->logger->info(sprintf('The User-Agent is "%s"', $userAgent));
     }
 
     public static function getSubscribedEvents(){
