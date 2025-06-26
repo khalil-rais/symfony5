@@ -2,3 +2,4 @@ index:
     path: /playing/{id}
     defaults:
       _controller: App\Controller\DefaultController::index
+      id: 10
