@@ -17,9 +17,6 @@ class UserEventSubscriber implements EventSubscriberInterface
     }
     public function onKernelRequest(RequestEvent $event)
     {
-        $event->setResponse(new Response(
-            'Ah ah, ah: you didn\'t say the magic word'
-        ));
         $request = $event->getRequest ();
         $userAgent = $request->headers->get('User-Agent');
         $this->logger->info(sprintf('The User-Agent is "%s"', $userAgent));
