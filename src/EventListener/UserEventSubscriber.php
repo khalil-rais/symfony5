@@ -18,12 +18,9 @@ class UserEventSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $request = $event->getRequest ();
-        $request->attributes->set('_controller', function($slug = null) {
-            dd($slug);
-            return new Response('I just took over the controller!');
-        });
-
         $userAgent = $request->headers->get('User-Agent');
+        $isMac = stripos($userAgent,'Mac') !== false;
+        $request->attributes->set('isMac', $isMac);
         $this->logger->info(sprintf('The User-Agent is "%s"', $userAgent));
     }
 
