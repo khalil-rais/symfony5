@@ -40,10 +40,10 @@ class ArticleController extends AbstractController
     /**
      * @Route("/news/{slug}", name="article_show", defaults={"foo": "bar"})
      */
-    public function show($slug, SlackClient $slack, ArticleRepository $articleRepository, $isMac)
+    public function show( Article $article, SlackClient $slack, ArticleRepository $articleRepository, $isMac)
     {
         dump($isMac);
-        $article = $articleRepository->findOneBy(['slug' => $slug]);
+        //$article = $articleRepository->findOneBy(['slug' => $slug]);
 
         if (!$article) {
             throw $this->createNotFoundException('Article not found');
