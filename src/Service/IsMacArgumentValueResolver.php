@@ -16,6 +16,7 @@ class IsMacArgumentValueResolver implements ArgumentValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument)
     {
+        dump($request);
         if ($request->query->has('mac')) {
             if($request->query->get('mac')){
                 yield $request->query->getBoolean('mac');
