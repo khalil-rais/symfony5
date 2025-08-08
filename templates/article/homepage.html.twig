@@ -54,7 +54,9 @@
                     {% endif %}
                 </div>
 
-                {{ render(controller('App\\Controller\\PartialController::trendingQuotes')) }}
+                {{ render(controller('App\\Controller\\PartialController::trendingQuotes',{
+                    isMac: isMac
+                })) }}
 
             </div>
         </div>
