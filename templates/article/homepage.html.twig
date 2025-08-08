@@ -48,6 +48,10 @@
                     <img class="advertisement-img" src="{{ asset('build/images/space-ice.png') }}">
                     <p><span class="advertisement-text">New:</span> Space Ice Cream!</p>
                     <button class="btn btn-info">Buy Now!</button>
+                    {% if isMac %}
+                        <hr>
+                        <small>BTW, you're using a Mac!</small>
+                    {% endif %}
                 </div>
 
                 {{ render(controller('App\\Controller\\PartialController::trendingQuotes')) }}

@@ -26,7 +26,7 @@ class ArticleController extends AbstractController
     /**
      * @Route("/", name="app_homepage")
      */
-    public function homepage(ArticleRepository $repository, LoggerInterface $logger)
+    public function homepage(ArticleRepository $repository, LoggerInterface $logger, $isMac)
     {
         $articles = $repository->findAllPublishedOrderedByNewest();
 
@@ -34,6 +34,7 @@ class ArticleController extends AbstractController
 
         return $this->render('article/homepage.html.twig', [
             'articles' => $articles,
+            'isMac' => $isMac,
         ]);
     }
 
