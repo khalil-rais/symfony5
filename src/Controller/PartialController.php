@@ -6,13 +6,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PartialController extends AbstractController
 {
-    public function trendingQuotes()
+    public function trendingQuotes($isMac)
     {
         $quotes = $this->getTrendingQuotes();
 
         return $this->render('partial/trendingQuotes.html.twig', [
             'quotes' => $quotes,
-            //'quotes' => [],
+            'isMac' => $isMac,
         ]);
     }
 
