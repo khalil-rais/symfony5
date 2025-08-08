@@ -31,6 +31,7 @@ class ArticleController extends AbstractController
     public function homepage(ArticleRepository $repository, LoggerInterface $logger, $isMac, HttpKernelInterface $httpKernel)
     {
         // manual sub-request example
+        /*
         $request = new Request();
         $request->attributes->set('_controller','App\\Controller\\PartialController::trendingQuotes');
         $request->server->set('REMOTE_ADDR', '127.0.0.1');
@@ -40,7 +41,7 @@ class ArticleController extends AbstractController
             HttpKernelInterface::SUB_REQUEST
         );
         dump($response);
-        
+*/
         $articles = $repository->findAllPublishedOrderedByNewest();
 
         $logger->info('Inside the controller!');

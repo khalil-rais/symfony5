@@ -17,6 +17,10 @@ class UserEventSubscriber implements EventSubscriberInterface
     }
     public function onKernelRequest(RequestEvent $event)
     {
+        if (!$event->isMasterRequest()) {
+            return;
+        }
+
         $request = $event->getRequest ();
         $userAgent = $request->attributes->get('isMac');
         $this->logger->info(sprintf('The User-Agent is "%s"', $userAgent));
