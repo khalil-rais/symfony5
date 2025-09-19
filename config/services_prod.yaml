@@ -1,3 +1,0 @@
-parameters:
-    # uncomment to use the faster apcu in production
-    #cache_adapter: 'cache.adapter.apcu'

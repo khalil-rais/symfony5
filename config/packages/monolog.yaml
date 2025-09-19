@@ -1,2 +1,2 @@
 monolog:
-    channels: ['markdown']
+    channels: [messenger_audit]
