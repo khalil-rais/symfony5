@@ -33,5 +33,4 @@ services:
     # please note that last definitions always *replace* previous ones
 
     Intervention\Image\ImageManager:
-        arguments:
-            - { driver: 'gd' }
+        factory: ['Intervention\Image\ImageManager', 'gd']

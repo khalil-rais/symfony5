@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Image;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -38,16 +38,63 @@ class ImagePostController extends AbstractController
      */
     public function create(Request $request, ValidatorInterface $validator, PhotoFileManager $photoManager, EntityManagerInterface $entityManager, PhotoPonkaficator $ponkaficator, MessageBusInterface $messageBus)
     {
+        // Debug: Check all files received
+        $allFiles = $request->files->all();
+        
         /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('file');
 
-        $errors = $validator->validate($imageFile, [
-            new Image(),
-            new NotBlank()
-        ]);
+        if (!$imageFile) {
+            return $this->json([
+                'error' => 'No file uploaded', 
+                'debug_all_files' => array_keys($allFiles),
+                'debug_file_structure' => gettype($imageFile)
+            ], 400);
+        }
 
-        if (count($errors) > 0) {
-            return $this->toJson($errors, 400);
+        // Handle different file upload structures
+        if (is_array($imageFile)) {
+            if (empty($imageFile)) {
+                return $this->json(['error' => 'Empty file array received'], 400);
+            }
+            
+            // Check if it's a raw PHP $_FILES array structure
+            if (isset($imageFile['tmp_name']) && isset($imageFile['name'])) {
+                // Create UploadedFile from array
+                $imageFile = new UploadedFile(
+                    $imageFile['tmp_name'],
+                    $imageFile['name'],
+                    $imageFile['type'] ?? null,
+                    $imageFile['error'] ?? null,
+                    true // test mode
+                );
+            } else {
+                // For arrays, find the first UploadedFile object
+                foreach ($imageFile as $file) {
+                    if ($file instanceof UploadedFile) {
+                        $imageFile = $file;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!($imageFile instanceof UploadedFile)) {
+            return $this->json([
+                'error' => 'Invalid file upload format', 
+                'debug' => 'Type: ' . gettype($imageFile) . ', Class: ' . (is_object($imageFile) ? get_class($imageFile) : 'N/A'),
+                'all_files_debug' => $allFiles
+            ], 400);
+        }
+
+        if (!$imageFile->isValid()) {
+            return $this->json(['error' => 'Invalid file upload: ' . $imageFile->getErrorMessage()], 400);
+        }
+
+        // Basic image type validation
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($imageFile->getMimeType(), $allowedMimeTypes)) {
+            return $this->json(['error' => 'Invalid image type. Only JPEG, PNG, and GIF are allowed.'], 400);
         }
 
         $newFilename = $photoManager->uploadImage($imageFile);

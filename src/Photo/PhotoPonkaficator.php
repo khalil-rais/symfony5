@@ -3,7 +3,7 @@
 namespace App\Photo;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Intervention\Image\Constraint;
+use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\ImageManager;
 use Symfony\Component\Finder\Finder;
 
@@ -20,28 +20,22 @@ class PhotoPonkaficator
 
     public function ponkafy(string $imageContents): string
     {
-        $targetPhoto = $this->imageManager->make($imageContents);
+        $targetPhoto = $this->imageManager->read($imageContents);
 
         $ponkaFilename = $this->getRandomPonkaFilename();
-        $ponkaPhoto = $this->imageManager->make($ponkaFilename);
+        $ponkaPhoto = $this->imageManager->read($ponkaFilename);
 
         $targetWidth = $targetPhoto->width() * .3;
         $targetHeight = $targetPhoto->height() * .4;
 
-        $ponkaPhoto->resize($targetWidth, $targetHeight, function(Constraint $constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
+        $ponkaPhoto->resize($targetWidth, $targetHeight);
 
-        $targetPhoto = $targetPhoto->insert(
-            $ponkaPhoto,
-            'bottom-right'
-        );
+        $targetPhoto->place($ponkaPhoto, 'bottom-right');
 
         // for dramatic effect, make this *really* slow
         sleep(2);
 
-        return (string) $targetPhoto->encode();
+        return $targetPhoto->encode()->toString();
     }
 
     private function getRandomPonkaFilename(): string
