@@ -1,0 +1,11 @@
+framework:
+    messenger:
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transports
+            async: 'doctrine://default?queue_name=async'
+            failed: 'doctrine://default?queue_name=failed'
+            sync: 'sync://'
+
+        routing:
+            # Route your messages to the transports
+            'App\Message\AddPonkaToImage': async
