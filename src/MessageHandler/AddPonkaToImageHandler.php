@@ -7,22 +7,36 @@ use App\Message\AddPonkaToImage;
 use App\Photo\PhotoFileManager;
 use App\Photo\PhotoPonkaficator;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ImagePostRepository;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
-class AddPonkaToImageHandler implements MessageHandlerInterface
+class AddPonkaToImageHandler implements MessageHandlerInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
 
     private $ponkaficator;
     private $photoManager;
     private $entityManager;
 
-    public function __construct(PhotoPonkaficator $ponkaficator, PhotoFileManager $photoManager, EntityManagerInterface $entityManager){
+    private $imagePostRepository;
+
+    public function __construct(PhotoPonkaficator $ponkaficator, PhotoFileManager $photoManager, EntityManagerInterface $entityManager, ImagePostRepository $imagePostRepository){
         $this->ponkaficator = $ponkaficator;
         $this->photoManager = $photoManager;
         $this->entityManager = $entityManager;
+        $this->imagePostRepository = $imagePostRepository;
     }
     public function __invoke(AddPonkaToImage $addPonkaToImage)
     {
-        $imagePost = $addPonkaToImage->getImagePost();
+        $imagePostId = $addPonkaToImage->getImagePostId();
+        $imagePost = $this->imagePostRepository->find($imagePostId);
+        if (!$imagePost) {
+            if ($this->logger) {
+                $this->logger->alert(sprintf('Image post %d was missing!',$imagePostId));
+            }
+            return;
+        }
         /*
          * Start Ponkafication!
          */
