@@ -40,6 +40,9 @@ class AddPonkaToImageHandler implements MessageHandlerInterface, LoggerAwareInte
         /*
          * Start Ponkafication!
          */
+        if(true){
+            throw new \Exception('I failed randomly!!!!');
+        }
         $updatedContents = $this->ponkaficator->ponkafy(
             $this->photoManager->read($imagePost->getFilename())
         );

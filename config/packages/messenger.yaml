@@ -2,7 +2,10 @@ framework:
     messenger:
         transports:
             # https://symfony.com/doc/current/messenger.html#transports
-            async: 'doctrine://default?queue_name=async'
+            async:
+                dsn: 'doctrine://default?queue_name=async'
+                retry_strategy:
+                    delay: 500
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 
