@@ -7,12 +7,16 @@ framework:
                 dsn: 'doctrine://default?queue_name=async'
                 retry_strategy:
                     delay: 500
+            async_priority_high:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: high
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 
         routing:
             # Route your messages to the transports
-            'App\Message\AddPonkaToImage': async
+            'App\Message\AddPonkaToImage': async_priority_high
             'App\Message\DeletePhotoFile': async
         buses:
             messenger.bus.default:
