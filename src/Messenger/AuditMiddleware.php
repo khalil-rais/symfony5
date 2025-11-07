@@ -7,6 +7,7 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
+use Symfony\Component\Messenger\Stamp\SentStamp;
 
 class AuditMiddleware implements MiddlewareInterface
 {
@@ -29,9 +30,17 @@ class AuditMiddleware implements MiddlewareInterface
             'class' => get_class($envelope->getMessage())
         ];
 
+        $envelope = $stack->next()->handle($envelope, $stack);
+
         if ($envelope->last(ReceivedStamp::class)) {
             $this->logger->info(
                 '[{id}] Received & handling {class}',
+                $context
+            );
+        }
+        elseif ($envelope->last(SentStamp::class)) {
+            $this->logger->info(
+                '[{id}] Sent {class}',
                 $context
             );
         }
@@ -42,6 +51,6 @@ class AuditMiddleware implements MiddlewareInterface
             );
         }
 
-        return $stack->next()->handle($envelope, $stack);
+        return $envelope;
     }
 }
