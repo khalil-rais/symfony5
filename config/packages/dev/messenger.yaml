@@ -1,4 +1,5 @@
 framework:
     messenger:
         transports:
-            async: '%env(MESSENGER_TRANSPORT_DSN)%' 
+            async: 'sync://'
+            async_priority_high: 'sync://'
