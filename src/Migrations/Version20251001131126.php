@@ -22,19 +22,15 @@ final class Version20251001131126 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE article_reference DROP FOREIGN KEY FK_749619377294869C');
-        $this->addSql('ALTER TABLE article_tag DROP FOREIGN KEY FK_919694F97294869C');
-        $this->addSql('ALTER TABLE comment DROP FOREIGN KEY FK_9474526C7294869C');
-        $this->addSql('ALTER TABLE article_tag DROP FOREIGN KEY FK_919694F9BAD26311');
-        $this->addSql('ALTER TABLE api_token DROP FOREIGN KEY FK_7BA2F5EBA76ED395');
-        $this->addSql('ALTER TABLE article DROP FOREIGN KEY FK_23A0E66F675F31B');
-        $this->addSql('DROP TABLE api_token');
-        $this->addSql('DROP TABLE article');
-        $this->addSql('DROP TABLE article_reference');
-        $this->addSql('DROP TABLE article_tag');
-        $this->addSql('DROP TABLE comment');
-        $this->addSql('DROP TABLE tag');
-        $this->addSql('DROP TABLE user');
+        // Drop tables if they exist (foreign keys are automatically dropped with tables)
+        // These tables don't exist in this project, but this migration cleans them up if they do
+        $this->addSql('DROP TABLE IF EXISTS article_reference');
+        $this->addSql('DROP TABLE IF EXISTS article_tag');
+        $this->addSql('DROP TABLE IF EXISTS comment');
+        $this->addSql('DROP TABLE IF EXISTS api_token');
+        $this->addSql('DROP TABLE IF EXISTS article');
+        $this->addSql('DROP TABLE IF EXISTS tag');
+        $this->addSql('DROP TABLE IF EXISTS user');
     }
 
     public function down(Schema $schema) : void

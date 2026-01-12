@@ -1,0 +1,12 @@
+doctrine:
+    dbal:
+        # Use MySQL database from docker-compose for tests
+        driver: 'pdo_mysql'
+        server_version: '8.0'
+        charset: utf8mb4
+        default_table_options:
+            charset: utf8mb4
+            collate: utf8mb4_unicode_ci
+        # Connect to MySQL database from docker-compose
+        url: 'mysql://root:password@127.0.0.1:3306/main?serverVersion=8.0'
+

@@ -11,12 +11,12 @@ class ImagePostControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $uploadedFile = new UploadedFile(
-            __DIR__.'/../fixtures/ryan-fabien.jpg',
-            'ryan-fabien.jpg'
+            __DIR__.'/../fixtures/ryan-fabien.png',
+            'ryan-fabien.png'
         );
         $client->request('POST', '/api/images', [], [
             'file' => $uploadedFile
         ]);
-        dd($client->getResponse()->getContent());
+        $this->assertResponseIsSuccessful();
     }
 }
