@@ -18,7 +18,26 @@ framework:
             # Route your messages to the transports
             'App\Message\AddPonkaToImage': async_priority_high
             'App\Message\DeletePhotoFile': async
+    #Before we create our first event,
+    #I'll open config/packages/messenger.yaml.
+    #If our app leverages both commands and events,
+    #it's totally ok to use just one bus to handle all of that.
+    #But, in the interest of learning more,
+    #let's continue to use our existing bus only as a command bus
+    #and create a new bus to only use with events.
+    #To do that, under the "buses:" key, add a new one called "event.bus".
+    #Set this to "~"" which is null,  just because we don't have any other configuration
+    #that we need to put here yet.
+    #This will cause a new MessageBus service to be added to the container.
+        # Copy the name of the default bus.
+        # Once you define more than one bus,
+        # you need a default_bus key set to your "main" bus.
+        # This tells Symfony
+        # which MessageBus service to pass us
+        # when we use the MessageBusInterface type-hint.
+        default_bus: messenger.bus.default
         buses:
             messenger.bus.default:
                 middleware:
                     - App\Messenger\AuditMiddleware
+            event.bus: ~

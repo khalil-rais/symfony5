@@ -40,6 +40,12 @@ class ImagePostController extends AbstractController
      * @Route("/api/images", methods="POST")
      */
     public function create(Request $request, ValidatorInterface $validator, PhotoFileManager $photoManager, EntityManagerInterface $entityManager, MessageBusInterface $messageBus)
+/*
+    So far, whenever we needed the message bus - like in ImagePostController -
+    we autowired it by using the MessageBusInterface type-hint.
+    The question now is:
+    how can we get access to the new message bus service?
+ */
     {
         // Debug: Check all files received
         $allFiles = $request->files->all();
