@@ -17,7 +17,15 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Message\AddPonkaToImage': async_priority_high
-            'App\Message\DeletePhotoFile': async
+#Next, to get a clean start: remove the DeletePhotoFile command class itself and DeletePhotoFileHandler.
+#Finally, in config/packages/messenger.yaml, we're routing the command we just deleted.
+#Comment that out.
+#            'App\Message\DeletePhotoFile': async
+#Let's look at this with fresh eyes.
+#We've successfully made DeleteImagePostHandler perform its primary job only: deleting the ImagePost.
+#And now we're wondering: where should I put the code to do the secondary task of deleting the physical file?
+#We could put that logic right here, or leverage an event.
+
     #Before we create our first event,
     #I'll open config/packages/messenger.yaml.
     #If our app leverages both commands and events,
