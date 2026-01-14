@@ -17,6 +17,18 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Message\AddPonkaToImage': async_priority_high
+
+            # In fact, unlike with commands, when we dispatch an event,
+            # we don't actually care if there are any handlers for it.
+            # There could be zero, 5, 10 - we don't care!
+            # We're not going to use any return values from the handlers
+            # and, unlike with commands, we're not going to expect that anything specific happened.
+            # You're just screaming out into space: “Hey! An ImagePost was deleted!”
+            # Anyways, the last piece we need to fix to make this truly identical to before
+            # is, in config/packages/messenger.yaml, down under routing,
+            # route App\Message\Event\ImagePostDeletedEvent to the async transport.
+            'App\Message\Event\ImagePostDeletedEvent': async
+
 #Next, to get a clean start: remove the DeletePhotoFile command class itself and DeletePhotoFileHandler.
 #Finally, in config/packages/messenger.yaml, we're routing the command we just deleted.
 #Comment that out.
