@@ -75,4 +75,24 @@ framework:
             messenger.bus.default:
                 middleware:
                     - App\Messenger\AuditMiddleware
-            event.bus: ~
+            # In messenger.yaml, take the ~ off of event.bus and add a new option below:
+            # default_middleware: allow_no_handlers.
+            # The default_middleware option defaults to true
+            # and its main purpose is to allow you to set it to false if, for some reason,
+            # you wanted to completely remove the default middleware -
+            # the middleware that handle & send the messages, among other things.
+            # But you can also set it to allow_no_handlers
+            # if you want to keep the normal middleware,
+            # but hint to the HandleMessageMiddleware that it should not panic if there are zero handlers.
+            event.bus:
+                default_middleware: allow_no_handlers
+            # Go back and restart the worker.
+            # Then, delete another image come back here and it works!
+            # It says "No handler for message" but it doesn't freak out and cause a failure.
+            # 16:09:22 INFO [messenger] Received message App\Message\Event\ImagePostDeletedEvent ["message" => App\Message\Event\ImagePostDeletedEvent^ { …},"class" => "App\Message\Event\ImagePostDeletedEvent"]
+            # 16:09:22 INFO [messenger] No handler for message App\Message\Event\ImagePostDeletedEvent ["message" => App\Message\Event\ImagePostDeletedEvent^ { …},"class" => "App\Message\Event\ImagePostDeletedEvent"]
+            # 16:09:22 INFO [messenger] App\Message\Event\ImagePostDeletedEvent was handled successfully (acknowledging to transport). ["message" => App\Message\Event\ImagePostDeletedEvent^ { …},"class" => "App\Message\Event\ImagePostDeletedEvent"]
+            # So now our command bus and event bus do have a small difference
+            # though they're still almost identical
+            # and we could really still get away with sending both commands and events through the same bus.
+
