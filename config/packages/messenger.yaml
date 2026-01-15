@@ -27,6 +27,21 @@ framework:
             # Anyways, the last piece we need to fix to make this truly identical to before
             # is, in config/packages/messenger.yaml, down under routing,
             # route App\Message\Event\ImagePostDeletedEvent to the async transport.
+
+            # When you route a command class,
+            # you know exactly which one handler it has.
+            # And so, it's super easy to think about what
+            # that handler does and determine whether or not it can be handled async.
+            # With events, it's a bit more complicated:
+            # this one event class could have multiple handlers.
+            # And, in theory, you might want some to be handled immediately and others later.
+            # Because Messenger is built around routing the messages to transports - not the handlers -
+            # making some handlers sync and others async isn't natural.
+            # However, if you need to do this, it is possible:
+            # you can route a message to multiple transports,
+            # then configure Messenger to only
+            # call one handler when it's received from transport A
+            # and only the other handler when it's received from transport B.
             'App\Message\Event\ImagePostDeletedEvent': async
 
 #Next, to get a clean start: remove the DeletePhotoFile command class itself and DeletePhotoFileHandler.
