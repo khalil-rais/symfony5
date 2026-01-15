@@ -43,7 +43,11 @@ use App\Photo\PhotoFileManager;
     it's unlikely you'll decide to dispatch events that have no handlers.
     But, let's see how to fix it!
  */
-class RemoveFileWhenImagePostDeleted
+
+/*
+    Put the MessageHandlerInterface back on the class and restart our worker one more time.
+ */
+class RemoveFileWhenImagePostDeleted implements MessageHandlerInterface
 {
     private $photoFileManager;
     public function __construct(PhotoFileManager $photoFileManager){
