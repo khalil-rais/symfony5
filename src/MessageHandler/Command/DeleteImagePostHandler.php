@@ -1,12 +1,18 @@
 <?php
 
-namespace App\MessageHandler;
+namespace App\MessageHandler\Command;
 
-use App\Message\DeleteImagePost;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
+/*
+    Let's do the same thing for the handlers:
+    create a new subdirectory called Command/,
+    move those inside
+    then add the \Command namespace to each one.
+ */
+use App\Message\Command\DeleteImagePost;
 use App\Message\Event\ImagePostDeletedEvent;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class DeleteImagePostHandler implements MessageHandlerInterface
 {

@@ -16,7 +16,10 @@ framework:
 
         routing:
             # Route your messages to the transports
-            'App\Message\AddPonkaToImage': async_priority_high
+            # Start in messenger.yaml:
+            # we're referencing AddPonkaToImage.
+            # Add Command to that class name.
+            'App\Message\Command\AddPonkaToImage': async_priority_high
 
             # In fact, unlike with commands, when we dispatch an event,
             # we don't actually care if there are any handlers for it.

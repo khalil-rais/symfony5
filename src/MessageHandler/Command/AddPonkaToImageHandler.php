@@ -1,15 +1,21 @@
 <?php
 
-namespace App\MessageHandler;
+namespace App\MessageHandler\Command;
 
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
-use App\Message\AddPonkaToImage;
+use App\Message\Command\AddPonkaToImage;
 use App\Photo\PhotoFileManager;
 use App\Photo\PhotoPonkaficator;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ImagePostRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+
+/*
+    And finally, in the handlers, we have the same thing:
+    each handler has a use statements for the command class it handles.
+    Add the Command\ namespace on both.
+ */
 
 class AddPonkaToImageHandler implements MessageHandlerInterface, LoggerAwareInterface
 {

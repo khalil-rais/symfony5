@@ -3,11 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\ImagePost;
-use App\Message\DeleteImagePost;
-use App\Photo\PhotoPonkaficator;
-use App\Repository\ImagePostRepository;
-use App\Message\AddPonkaToImage;
+/*
+    Next, in ImagePostController, all the way on top,
+    we're referencing both commands.
+    Update the namespace on each one.
+ */
+use App\Message\Command\AddPonkaToImage;
+use App\Message\Command\DeleteImagePost;
 use App\Photo\PhotoFileManager;
+use App\Repository\ImagePostRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -15,12 +19,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\Image;
-use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 
 class ImagePostController extends AbstractController
 {
