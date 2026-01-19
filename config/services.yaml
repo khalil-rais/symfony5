@@ -9,6 +9,11 @@ services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
+        # Thanks to the _defaults section on top,
+        # all services in our src/ directory will, by default, have autoconfigure enabled,
+        # which is the feature that's responsible for automatically adding the messenger.message_handler tag to all services
+        # that implement MessageHandlerInterface.
+        # We're turning it off for services in this directory so that the tag isn't added twice.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             # keep in sync with flysystem.yaml settings
@@ -32,5 +37,47 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    # Now that we've separated our event handlers from our command handlers,
+    # we can do something special:
+    # we can tie each handler to the specific bus that it's intended for.
+    # Again, it's not super important to do this,
+    # but it'll tighten things up.
+    # Let me show you: open up config/services.yaml.
+    # This App\ line is responsible for
+    # auto-registering every class in the src/ directory as a service in the container.
+    # The line below repeats that for classes in the Controller/ directory.
+    # Why? This will override the controller services registered above
+    # and add a special tag that controllers need to work.
+    # We can use a similar trick with Messenger.
+    # Say App\MessageHandler\Command\,
+    # then use the resource key
+    # to re-auto-register all the classes in the ../src/MessageHandler/Command directory.
+    App\MessageHandler\Command\:
+            resource: '../src/MessageHandler/Command'
+            # If we only did this, absolutely nothing would change.
+            # This would register everything in this directory as a service,
+            # but that's already done by the first App\ entry anyways.
+            # But now we can add a tag to this with name: messenger.message_handler
+            # and bus: set to the name of my bus from messenger.yaml.
+            # Copy messenger.bus.default and say bus: messenger.bus.default.
+            tags: [{ name: messenger.message_handler, bus: messenger.bus.default }]
+            # There are a few things going on here.
+            # First, when Symfony sees a class in our code that implements MessageHandlerInterface,
+            # it automatically adds this messenger.message_handler tag.
+            # This is how Messenger knows which classes are message handlers.
+            # We're now adding that tag manually
+            # so that we can also say exactly which one bus this handler should be used on.
+            # Without the bus option, it's added to all buses.
+            # We also need to add one more key: autoconfigure: false.
+            autoconfigure: false
+    # Let's repeat this for the events:
+    # copy this section, paste, change the namespace to Event\,
+    # change the directory to Event
+    # and update the bus option to event.bus
+    # - the name of our other bus inside messenger.yaml.-
+    App\MessageHandler\Event\:
+        resource: '../src/MessageHandler/Event'
+        autoconfigure: false
+        tags: [{ name: messenger.message_handler, bus: event.bus }]
     Intervention\Image\ImageManager:
         factory: ['Intervention\Image\ImageManager', 'gd']
