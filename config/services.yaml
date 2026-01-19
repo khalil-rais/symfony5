@@ -82,5 +82,14 @@ services:
         resource: '../src/MessageHandler/Event'
         autoconfigure: false
         tags: [{ name: messenger.message_handler, bus: event.bus }]
+    # Before we dispatch the query,
+    # open up config/services.yaml so we can do our same trick of binding each handler to the correct bus.
+    # Copy the Event\ section,
+    # paste, change Event to Query in both places,
+    # then set the bus to query.bus.
+    App\MessageHandler\Query\:
+        resource: '../src/MessageHandler/Query'
+        autoconfigure: false
+        tags: [{ name: messenger.message_handler, bus: query.bus }]
     Intervention\Image\ImageManager:
         factory: ['Intervention\Image\ImageManager', 'gd']
