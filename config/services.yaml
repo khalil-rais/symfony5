@@ -60,7 +60,10 @@ services:
             # But now we can add a tag to this with name: messenger.message_handler
             # and bus: set to the name of my bus from messenger.yaml.
             # Copy messenger.bus.default and say bus: messenger.bus.default.
-            tags: [{ name: messenger.message_handler, bus: messenger.bus.default }]
+            # Where was the old key referenced in our code?
+            # Thanks to the fact that we autowire that service via its type-hint, almost nowhere, just in services.yaml.
+            # Change the bus option to command.bus as well.
+            tags: [{ name: messenger.message_handler, bus: command.bus }]
             # There are a few things going on here.
             # First, when Symfony sees a class in our code that implements MessageHandlerInterface,
             # it automatically adds this messenger.message_handler tag.

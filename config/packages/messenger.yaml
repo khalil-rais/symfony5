@@ -73,9 +73,18 @@ framework:
         # This tells Symfony
         # which MessageBus service to pass us
         # when we use the MessageBusInterface type-hint.
-        default_bus: messenger.bus.default
+        default_bus: command.bus
         buses:
-            messenger.bus.default:
+            # Oh, but while we're cleaning things up,
+            # back in config/packages/messenger.yaml,
+            # our main bus is called messenger.bus.default,
+            # which becomes the bus's service id in the container.
+            # We used this name just because that's the default value Symfony uses
+            # when you have only one bus.
+            # But because this is a command bus, let's call it that!
+            # Rename it to command.bus.
+            # And above, use that as our default_bus.
+            command.bus:
                 middleware:
                     - App\Messenger\AuditMiddleware
             # In messenger.yaml, take the ~ off of event.bus and add a new option below:
@@ -88,6 +97,11 @@ framework:
             # if you want to keep the normal middleware,
             # but hint to the HandleMessageMiddleware that it should not panic if there are zero handlers.
             event.bus:
+                # Oh, and this AuditMiddleware is something that we really should also use on event.bus:
+                # it logs the journey of messages
+                # which is equally valid here.
+                middleware:
+                    - App\Messenger\AuditMiddleware
                 default_middleware: allow_no_handlers
             # Go back and restart the worker.
             # Then, delete another image come back here and it works!
