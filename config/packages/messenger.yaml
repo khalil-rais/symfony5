@@ -112,4 +112,8 @@ framework:
             # So now our command bus and event bus do have a small difference
             # though they're still almost identical
             # and we could really still get away with sending both commands and events through the same bus.
+            # In config/packages/messenger.yaml, we have command.bus and event.bus.
+            # Let's add query.bus.
+            # I'll keep things simple and just set this to ~ to get the default settings.
+            query.bus: ~
 
