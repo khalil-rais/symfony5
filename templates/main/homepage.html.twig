@@ -1,7 +1,36 @@
 {% extends 'base.html.twig' %}
 
+{# and then in the template - templates/main/homepage.html.twig -
+ because our entire frontend is built in Vue.js,
+ let's override the title block on the page and use it there:
+ Ponka'd {{ imageCount }} Photos.#}
+{% block title %}Ponka'd {{ imageCount }} Photos{% endblock %}
 {% block body %}
     <div id="images-app">
         <image-app></image-app>
     </div>
 {% endblock %}
+{# Let's check it out!
+Move over, refresh and... it works!
+We've Ponka's 50 photos... at least according to our hardcoded logic.
+So... that's a query bus!
+It's not my favorite because we're not guaranteed what type it returns -
+the imageCount could really be a string or an object of any class.
+Because we're not calling a direct method,
+the data we get back feels a little fuzzy.
+Plus, because queries need to be handled synchronously,
+you're not saving any performance by leveraging a query bus:
+it's purely a programming pattern.
+But, my opinion is totally subjective,
+and a lot of people love query buses.
+In fact, we've been talking mostly about the tools themselves:
+command, event & query buses.
+But there are some deeper patterns like CQRS or event sourcing that these tools can unlock.
+This is not something we currently use here on SymfonyCasts...
+but if you're interested, you can read more about this topic -
+Matthias Noback's blog is my favorite source.
+If you look back on the Symfony docs,
+back on the main messenger page,
+all the way at the bottom,
+there's a spot here about getting results from your handler.
+It shows some shortcuts that you can use to more easily get the value from the bus.#}
