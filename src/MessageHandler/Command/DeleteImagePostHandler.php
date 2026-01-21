@@ -11,7 +11,15 @@ namespace App\MessageHandler\Command;
 use App\Message\Command\DeleteImagePost;
 use App\Message\Event\ImagePostDeletedEvent;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
+/*
+    Now that we've reviewed all of that,
+    it turns out that this is only part of the story.
+    If we want to, we can take more control of
+    how a message class is linked to its handler, including some extra config.
+    How? Instead of implementing MessageHandlerInterface,
+    implement MessageSubscriberInterface.
+ */
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /*
@@ -28,7 +36,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
     - implement that interface & create an __invoke() method with an argument type-hinted with the message class -
     then you're done!
  */
-class DeleteImagePostHandler implements MessageHandlerInterface
+class DeleteImagePostHandler implements MessageSubscriberInterface
 {
 
     /*
@@ -82,5 +90,22 @@ class DeleteImagePostHandler implements MessageHandlerInterface
             “An image post was just deleted! If anyone cares... do something!”
          */
 
+    }
+
+    /*
+        This is less of a huge change than it may seem.
+        If you open up MessageSubscriberInterface, it extends MessageHandlerInterface.
+        So, we're still effectively implementing the same interface,
+        but now we're forced to have one new method: getHandledMessages().
+        At the bottom of my class, I'll go to Code -> Generate - or Command + N on a Mac - and select "Implement Methods".
+        As soon as we implement this interface,
+        instead of magically looking for the __invoke() method and checking the type-hint on the argument for which message class this should handle,
+        Symfony will call this method.
+        Our job here? Tell it exactly which classes we handle,
+        which method to call.
+     */
+    public static function getHandledMessages(): iterable
+    {
+        // TODO: Implement getHandledMessages() method.
     }
 }
