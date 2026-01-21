@@ -52,6 +52,14 @@ services:
     # Say App\MessageHandler\Command\,
     # then use the resource key
     # to re-auto-register all the classes in the ../src/MessageHandler/Command directory.
+    # Then in config/services.yaml, we got a little bit fancier.
+    # By organizing each type of message - commands, events and queries - into different directories,
+    # we were able to add a tag to each service.
+    # This gives a bit more info to Messenger.
+    # It says:
+    # “Hey! I want you to make that normal connection between the DeleteImagePost message class and DeleteImagePostHandler,
+    # but I only want you to tell the "command bus" about that connection,
+    # because that's the only bus I'm going to dispatch that message into.”
     App\MessageHandler\Command\:
             resource: '../src/MessageHandler/Command'
             # If we only did this, absolutely nothing would change.
@@ -63,6 +71,9 @@ services:
             # Where was the old key referenced in our code?
             # Thanks to the fact that we autowire that service via its type-hint, almost nowhere, just in services.yaml.
             # Change the bus option to command.bus as well.
+
+            # Oh, and as a reminder, if this whole "tags" thing confuses you, skip it.
+            # It organizes things a bit more, but you can just as effectively have one bus that handles everything.
             tags: [{ name: messenger.message_handler, bus: command.bus }]
             # There are a few things going on here.
             # First, when Symfony sees a class in our code that implements MessageHandlerInterface,

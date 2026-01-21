@@ -14,6 +14,20 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
+/*
+    Open up DeleteImagePostHandler.
+    The main thing that a message bus needs to know
+    is the link between the DeleteImagePost message class and its handler.
+    It needs to know that when we dispatch a DeleteImagePost object,
+    it should call DeleteImagePostHandler.
+    How does Messenger know these two classes are connected?
+    It knows because our handler implements MessageHandlerInterface
+    - this "marks" it as a message handler -
+    and because its __invoke() method is type-hinted with DeleteImagePost.
+    If you follow these two rules
+    - implement that interface & create an __invoke() method with an argument type-hinted with the message class -
+    then you're done!
+ */
 class DeleteImagePostHandler implements MessageHandlerInterface
 {
 

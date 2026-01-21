@@ -33,6 +33,14 @@ class AddPonkaToImageHandler implements MessageHandlerInterface, LoggerAwareInte
         $this->entityManager = $entityManager;
         $this->imagePostRepository = $imagePostRepository;
     }
+    # Anyways, this system is quick to use but there are a few things that you can't change.
+    # For example, the method in your handler must be called __invoke(),
+    # that's just what Symfony looks for.
+    # And because a class can only have one method named __invoke(),
+    # this means that you can't have a single handler that handles multiple different message classes.
+    # I don't usually like to do this anyways,
+    # I prefer one message class per handler,
+    # but it is a technical limitation.
     public function __invoke(AddPonkaToImage $addPonkaToImage)
     {
         $imagePostId = $addPonkaToImage->getImagePostId();
