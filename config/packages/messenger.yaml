@@ -53,7 +53,7 @@ framework:
             # and only the other handler when it's received from transport B.
             'App\Message\Event\ImagePostDeletedEvent': async
             # then temporarily route this class to that transport in messenger.yaml
-            'App\Message\Command\DeleteImagePost': [async, async_priority_high]
+            # Let's comment that out and remove the routing config.
 
 #Next, to get a clean start: remove the DeletePhotoFile command class itself and DeletePhotoFileHandler.
 #Finally, in config/packages/messenger.yaml, we're routing the command we just deleted.

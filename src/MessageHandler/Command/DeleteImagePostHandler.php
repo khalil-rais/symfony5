@@ -175,7 +175,26 @@ class DeleteImagePostHandler implements MessageSubscriberInterface
                 and another one low?
                 Nope! This workflow is possible.
              */
-            'from_transport' => 'async'
+            /*
+                 First, route DeleteImagePost to both the async and async_priority_high transports.
+                 If we only did this,
+                 the message would be sent to both transports,
+                 it would be consumed two times,
+                 and every handler would be called twice
+                 which is totally not what we want.
+                 But when we add this from_transport option set to async,
+                 it means that this handler should only be called
+                 when a DeleteImagePost object is consumed from the async transport.
+                 If we configured a second handler with from_transport set to async_priority_high,
+                 that handler would only be called when the message is being consumed from that transport.
+                 In other words, you're sending the message to two transports,
+                 but each transport knows that it should only execute one handler.
+                 This allows your two handlers to be queued and executed by workers independently of each other.
+                 It's a really powerful feature
+                 but because Messenger is centered around sending messages to transports,
+                 over-using this can be confusing.
+             */
+            //'from_transport' => 'async'
         ];
     }
 }
