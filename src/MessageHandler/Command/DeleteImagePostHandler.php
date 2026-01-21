@@ -114,6 +114,17 @@ class DeleteImagePostHandler implements MessageSubscriberInterface
             Don't over-think that yield, it's just syntax sugar.
             You could also return an array with a DeleteImagePost::class string inside.
          */
-        yield DeleteImagePost::class;
+        /*
+            Ok but since we probably should use type-hints, this isn't that interesting yet.
+            What else can we do?
+            Well, by assigning this to an array, we can add some config.
+            For example, we can say: 'method' => '__invoke'.
+            Yep, we can now control which method Messenger will call.
+            That's especially useful if you decide that you want to add another yield to handle a second message
+            and want Messenger to call a different method.
+         */
+        yield DeleteImagePost::class => [
+            'method' => '__invoke',
+        ];
     }
 }
