@@ -148,6 +148,34 @@ class DeleteImagePostHandler implements MessageSubscriberInterface
                 but could be if you had two event handlers and really needed them to happen in a certain order.
              */
             'priority' => 10,
+            /*
+                The last option I want to mention is interesting but can also be confusing.
+                It's called from_transport.
+                If you look at messenger.yaml, this DeleteImagePost isn't being routed anywhere,
+                which means it's handled synchronously.
+                Let's pretend that we want to handle it asynchronously
+                and that we're routing it to the async transport.
+                Set from_transport to async.
+             */
+            /*
+                Now, pretend that the DeleteImagePost message actually has two handlers,
+                something that's very possible for events.
+                Assuming that we did not add this from_transport config yet,
+                if you sent DeleteImagePost to the async transport,
+                then when that message is read from that transport by a worker,
+                both handlers will be executed one after another.
+                But what if you wanted to, sort of, send one handler of that message to one transport,
+                maybe async_priority_high,
+                and another handler to another transport.
+                Well, in Messenger,
+                you don't send "handlers", you send messages
+                and when Messenger consumes a message,
+                it calls all the handlers for that message.
+                Does that mean it's impossible to make one handler of a message "high" priority
+                and another one low?
+                Nope! This workflow is possible.
+             */
+            'from_transport' => 'async'
         ];
     }
 }
