@@ -51,7 +51,10 @@ class DeleteImagePostHandler implements MessageSubscriberInterface
     }
 
 
-    public function __invoke(DeleteImagePost $deleteImagePost)
+    /*
+        But technically, this type-hint isn't needed anymore.
+     */
+    public function __invoke($deleteImagePost)
     {
         $imagePost  = $deleteImagePost->getImagePost();
         $filename = $imagePost->getFilename();
@@ -106,6 +109,11 @@ class DeleteImagePostHandler implements MessageSubscriberInterface
      */
     public static function getHandledMessages(): iterable
     {
-        // TODO: Implement getHandledMessages() method.
+        /*
+            The easiest thing you can put here is yield DeleteImagePost::class.
+            Don't over-think that yield, it's just syntax sugar.
+            You could also return an array with a DeleteImagePost::class string inside.
+         */
+        yield DeleteImagePost::class;
     }
 }
