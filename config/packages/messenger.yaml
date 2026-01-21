@@ -8,6 +8,10 @@ framework:
                 retry_strategy:
                     delay: 500
             async_priority_high:
+                # In config/packages/messenger.yaml, we're referencing this environment variable for both the async and async_priority_high transports.
+                # We've been storing messages in a database table.
+                # It was quick to set up, easy to use,
+                # - because we already understand databases - and robust enough for most use-cases.
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
                     # in config/packages/messenger.yaml we created two transport
