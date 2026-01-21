@@ -10,6 +10,12 @@ framework:
             async_priority_high:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
+                    # in config/packages/messenger.yaml we created two transport
+                    # - async & async_priority_high -
+                    # and we route different messages to each.
+                    # We did this so that, when we run our worker,
+                    # we can tell it to always read messages from async_priority_high first before reading messages from async.
+                    # That makes async_priority_high a place for us to send "higher" priority messages.
                     queue_name: high
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'

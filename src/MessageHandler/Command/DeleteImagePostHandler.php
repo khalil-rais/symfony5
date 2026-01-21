@@ -125,6 +125,29 @@ class DeleteImagePostHandler implements MessageSubscriberInterface
          */
         yield DeleteImagePost::class => [
             'method' => '__invoke',
+            /*
+                What else can we put here?
+                One option is priority - let's set it to... 10.
+                This option is much less interesting than it might look like at first.
+                We talked earlier about priority transports:
+             */
+            /*
+                The priority option here is less powerful.
+                If you send a message to a transport with a priority 0
+                and then you send another message to that same transport with priority 10,
+                what do you think will happen?
+                Which message will be handled first?
+                The answer: the first message that was sent - the one with the lower priority.
+                Basically, Messenger will always read messages in a first-in-first-out basis:
+                it will always read the oldest messages first.
+                The priority does not influence this.
+                So what does it do?
+                Well, if DeleteImagePost had two handlers and one had the default priority of zero and another had 10,
+                the handler with priority 10 would be called first.
+                That's not usually important,
+                but could be if you had two event handlers and really needed them to happen in a certain order.
+             */
+            'priority' => 10,
         ];
     }
 }
