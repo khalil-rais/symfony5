@@ -4,7 +4,7 @@ framework:
         transports:
             # https://symfony.com/doc/current/messenger.html#transports
             async:
-                dsn: 'doctrine://default?queue_name=async'
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 retry_strategy:
                     delay: 500
             async_priority_high:
@@ -21,6 +21,11 @@ framework:
                     # we can tell it to always read messages from async_priority_high first before reading messages from async.
                     # That makes async_priority_high a place for us to send "higher" priority messages.
                     queue_name: high
+            # Oh, but notice that I am still using doctrine for my failure transport
+            # and I'm going to keep that.
+            # The failure transport is a special type of transport
+            # and it turns out that the doctrine transport type actually has the most features for reviewing failed messages.
+            # You can use AMQP for this, but I recommend Doctrine.
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 

@@ -117,8 +117,17 @@ class ImagePostController extends AbstractController
         $entityManager->flush();
 
         $message = new AddPonkaToImage($imagePost->getId());
+        /*
+            Before we try this, I want to make one other change.
+            Open up src/Controller/ImagePostController.php and find the create() method.
+            This is the controller that's executed whenever we upload a photo
+            and it's responsible for dispatching the AddPonkaToImage command.
+            It also adds a 500 millisecond delay via this stamp.
+            Comment that out for now,
+            I'll show you why we're doing this a bit later.
+         */
         $envelope = new Envelope($message, [
-            new DelayStamp(500)
+            //new DelayStamp(500)
         ]);
         $messageBus->dispatch($envelope);
 
