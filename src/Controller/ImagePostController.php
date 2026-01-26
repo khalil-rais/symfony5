@@ -135,7 +135,9 @@ class ImagePostController extends AbstractController
             # At this moment, the delays exchange has no bindings,
             # but that will change when we send a delayed message.
             # To be able to really see what's happening, let's increase the delay to 60 seconds.
-            new DelayStamp(60000)
+            /*Let's change this delay back to one second,
+            so we're not waiting all day for our photos to be processed.*/
+            new DelayStamp(1000)
         ]);
         $messageBus->dispatch($envelope);
 
