@@ -132,7 +132,10 @@ class ImagePostController extends AbstractController
             # This stamp is a way to tell the transport system to wait at least 500 milliseconds
             # before allowing a worker to receive the message.
             # Let's change this to 10 seconds - so 10000 milliseconds.
-            new DelayStamp(1000)
+            # At this moment, the delays exchange has no bindings,
+            # but that will change when we send a delayed message.
+            # To be able to really see what's happening, let's increase the delay to 60 seconds.
+            new DelayStamp(60000)
         ]);
         $messageBus->dispatch($envelope);
 
