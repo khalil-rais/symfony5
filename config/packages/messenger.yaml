@@ -14,6 +14,33 @@ framework:
             # Messenger sends that to an exchange called messages.
             # You don't see that config here only because messages is the default exchange name in Messenger.
             async:
+                # Let's refactor our transports to use this "smarter" system.
+                # Under the async transport,
+                # add options,
+                # then exchange,
+                # and set name to messages.
+                options:
+                    exchange:
+                        name: messages
+                        # If we stopped here, this would change nothing:
+                        # this is the default exchange name in Messenger.
+                        # But now, add a type key set to direct.
+                        # This does change things:
+                        # the default value is fanout.
+                        # Add one more key below this: default_publish_routing_key set to normal.
+                        # I'll talk about that in a second.
+                        type: direct
+                        default_publish_routing_key: normal
+                    queues:
+                    # Next, add a queues section.
+                    # Let's "bind" this exchange to a queue called messages_normal.
+                    # But we won't stop there!
+                    # Under this, add binding_keys set to [normal].
+                    # That word normal could be any string.
+                    # But it's no accident that this matches
+                    # what we set for default_publish_routing_key.
+                        messages_normal:
+                            binding_keys: [normal]
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 retry_strategy:
                     delay: 500
