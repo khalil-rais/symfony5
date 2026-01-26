@@ -28,7 +28,24 @@ framework:
                     # This did work before with Doctrine,
                     # thanks to this queue_name: high option.
                     # The default value for this option is default.
-                    queue_name: high
+                    # Let's configure this inside of messenger.yaml.
+                    # Under options add exchange then name set to, how about, messages_high_priority.
+                    # Below this, add queues with just one key below: messages_high set to null.
+                    exchange:
+                        name: messages_high_priority
+                    queues:
+                        messages_high: ~
+                        # This config has three effects.
+                        # First, because we have the auto_setup feature enabled,
+                        # the first time we talk to RabbitMQ,
+                        # Messenger will create the messages_high_priority exchange,
+                        # the messages_high queue and bind them together.
+                        # The second effect is that
+                        # when we send messages to this transport,
+                        # they will be sent to the messages_high_priority exchange.
+                        # The third and final effect is that
+                        # when we consume from this transport,
+                        # Messenger will read messages from the messages_high queue.
             # Oh, but notice that I am still using doctrine for my failure transport
             # and I'm going to keep that.
             # The failure transport is a special type of transport
