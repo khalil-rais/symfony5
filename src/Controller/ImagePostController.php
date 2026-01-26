@@ -127,7 +127,12 @@ class ImagePostController extends AbstractController
             I'll show you why we're doing this a bit later.
          */
         $envelope = new Envelope($message, [
-            //new DelayStamp(500)
+            # When we started working with AMQP,
+            # I told you to go into ImagePostController and remove the DelayStamp.
+            # This stamp is a way to tell the transport system to wait at least 500 milliseconds
+            # before allowing a worker to receive the message.
+            # Let's change this to 10 seconds - so 10000 milliseconds.
+            new DelayStamp(1000)
         ]);
         $messageBus->dispatch($envelope);
 
