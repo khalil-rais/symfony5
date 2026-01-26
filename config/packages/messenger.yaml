@@ -1,12 +1,33 @@
 framework:
     messenger:
         failure_transport: failed
+        # In messenger.yaml, the messages sent to each transport - async and async_priority_high -
+        # need to ultimately be delivered into two different queues
+        # so that we can consume them independently.
+        # And we've accomplished that!
+        # But there are two different ways
+        # that we could have done this.
         transports:
             # https://symfony.com/doc/current/messenger.html#transports
+            # First, remember that in AMQP, messages are sent to an exchange, not a queue.
+            # Right now, when a message is routed to the async transport,
+            # Messenger sends that to an exchange called messages.
+            # You don't see that config here only because messages is the default exchange name in Messenger.
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 retry_strategy:
                     delay: 500
+            # When a message is routed to the async_priority_high transport,
+            # Messenger sends that to an exchange called messages_high_priority.
+            # Each transport always sends to exactly one exchange.
+            # Then, each exchange routes every message to a single queue,
+            # like the messages exchange sends to a messages queue
+            # and messages_high_priority exchange sends to a messages_high queue.
+            # There is not a routing key on the binding:
+            # Messenger binds each exchange to one queue, but with no routing key.
+            # That's how a "fanout" exchange works:
+            # it doesn't care about routing keys,
+            # it just sends each message to every queue bound to it.
             async_priority_high:
                 # In config/packages/messenger.yaml, we're referencing this environment variable for both the async and async_priority_high transports.
                 # We've been storing messages in a database table.
