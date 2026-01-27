@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
-use Symfony\Component\Messenger\Transport\AmqpExt\AmqpStamp;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
