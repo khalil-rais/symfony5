@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Messenger\Transport\AmqpExt\AmqpStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -137,7 +138,45 @@ class ImagePostController extends AbstractController
             # To be able to really see what's happening, let's increase the delay to 60 seconds.
             /*Let's change this delay back to one second,
             so we're not waiting all day for our photos to be processed.*/
-            new DelayStamp(1000)
+            new DelayStamp(1000),
+            /*
+                So, let's back up and look at the whole flow.
+                When we dispatch an AddPonkaToImage object,
+                our Messenger routing config always routes this to the async_priority_high transport.
+                This causes the message to be sent to the messages exchange
+                with a routing key set to high
+                and the binding logic means that it will ultimately be delivered to the messages_high queue.
+                Due to the way that Messenger's routing works,
+                the fact that you route a class to a transport,
+                every message class will always be delivered to the same queue.
+                But what if you did want to control this dynamically?
+                What if, at the moment you dispatch a message,
+                you needed to send that message to a different transport than normal?
+                Maybe you decide that this particular AddPonkaToImage message
+                is not important and should be routed to async.
+                Well... that's just not possible with Messenger:
+                each class is always routed to a specific transport.
+                But this end-result is possible,
+                if you know how to leverage routing keys.
+                Here's the trick: what if we could publish an AddPonkaToImage object,
+                but tell Messenger that when it sends it to the exchange,
+                it should use the normal routing key instead of high?
+                Yea, the message would technically still be routed to the async_priority_high transport,
+                but it would ultimately end up in the messages_normal queue.
+                That would do it!
+                Is that possible? Totally!
+                Open up ImagePostController
+                and find where we dispatch the message.
+                After the DelayStamp, add a new AmqpStamp
+                - but be careful not to choose AmqpReceivedStamp -
+                that's something different
+                and isn't useful for us.
+                This stamp accepts a few arguments and the first one - gasp! -
+                is the routing key to use!
+                Pass this normal.
+                Let's try it!
+             */
+            new AmqpStamp('normal')
         ]);
         $messageBus->dispatch($envelope);
 
