@@ -42,6 +42,25 @@ framework:
                         messages_normal:
                             binding_keys: [normal]
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                # Fortunately, using a different format is easy.
+                # I'll purge that message out of the queue one more time.
+                # Move over and open config/packages/messenger.yaml.
+                # One of the keys that you're allowed to have below each transport is called serializer.
+                # Set this to a special string:
+                # messenger.transport.symfony_serializer.
+                serializer: messenger.transport.symfony_serializer
+                # When a message is sent to a transport,
+                # whether that's Doctrine, AMQP or something else,
+                # it uses a "serializer" to encode that message into a string format that can be sent.
+                # Later, when it reads a message from a transport,
+                # it uses that same serializer to decode the data back into the message object.
+                # Messenger comes with two "serializers" out-of-the-box.
+                # The first one is the PHP serializer, which is the default.
+                # The second is the "Symfony Serializer",
+                # which uses Symfony's Serializer component.
+                # That is the serializer service that we just switched to.
+                # If you don't already have the serializer component installed,
+                # make sure you install it with:
                 retry_strategy:
                     delay: 500
             # When a message is routed to the async_priority_high transport,
