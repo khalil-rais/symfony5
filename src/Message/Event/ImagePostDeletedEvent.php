@@ -35,6 +35,23 @@ and select "Getters" to generate this one getter.
     {
         $this->filename = $filename;
     }
+    /*
+        But wait... if that's true -
+        if the Symfony serializer creates messages
+        that can be consumed by external systems or by our same app -
+        then why isn't it the default serializer in Messenger?
+        An excellent question!
+        The reason is that the Symfony serializer requires your classes to follow a few rules in order to be serialized and unserialized correctly,
+        like each property needs a setter method or a constructor argument
+        where the name matches the property name.
+        If your class doesn't follow those rules,
+        you can end up with a property
+        that is set on the original object,
+        but suddenly becomes null when it's read from the transport.
+        No fun.
+        In other words, the PHP serializer is easier and more dependable
+        when everything is done by the same app.
+     */
     public function getFilename(): string
     {
         return $this->filename;
