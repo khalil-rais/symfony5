@@ -10,6 +10,7 @@ use App\Entity\ImagePost;
  */
 use App\Message\Command\AddPonkaToImage;
 use App\Message\Command\DeleteImagePost;
+use App\Message\Command\LogEmoji;
 use App\Photo\PhotoFileManager;
 use App\Repository\ImagePostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -179,6 +180,16 @@ class ImagePostController extends AbstractController
             new AmqpStamp('normal')
         ]);
         $messageBus->dispatch($envelope);
+        /*
+            To prove it, go up to ImagePostController,
+            find the create() method and,
+            just to see make sure this is working, add:
+         */
+        $messageBus->dispatch(new LogEmoji(2));
+        /*
+            If this is working,
+            we should see a message in our logs each time we upload a photo.
+         */
 
         return $this->toJson($imagePost, 201);
     }
