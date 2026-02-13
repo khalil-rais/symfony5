@@ -134,6 +134,65 @@ framework:
             # You can use AMQP for this, but I recommend Doctrine.
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
+            # The first step is to create a transport
+            # that will read these messages from whatever queue the outside system
+            # is placing them into.
+            # We'll keep the async and async_priority_high transports:
+            # we'll continue to send and receive from those.
+            # But now create a new one called: external_messages.
+            # I'll use the same DSN because we're still consuming things from RabbitMQ.
+            # But for the options, instead of consuming messages from message_high or messages_normal,
+            # we'll consume them from whatever queue that outside system is using,
+            # let's pretend it's called messages_from_external.
+            # Set that to just ~
+
+            # By the way, it is important that we use a different transport
+            # that reads from a different queue for these external messages.
+            # Why? Because, as you'll see in a few minutes,
+            # these external messages will need special logic
+            # to decode them back into the correct object.
+            # We'll attach that special logic to the transport.
+            # Anyways, above this add auto_setup: false.
+
+            external_messages:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    # To support retry, you should use auto_setup
+                    # and configure a few more things.
+
+                    # Ok, there are a few important things happening here.
+                    # The first is that this queue config means
+                    # that when we consume from the external_messages transport,
+                    # Messenger will read messages from a queue called messages_from_external.
+                    # The second important thing is auto_setup: false.
+                    # This tells Messenger not to try to create this queue.
+                    # Because I guess our app could create that queue.
+                    # That would probably be fine,
+                    # but since we're expecting an external system to send messages to this queue,
+                    # I'm guessing that that system will want to be responsible for making sure it exists.
+                    auto_setup: false
+                    # Oh, and you probably also noticed
+                    # that I didn't add any exchange config.
+                    # That was on purpose.
+                    # An exchange is only used when sending a message.
+                    # And because we're not planning on ever sending a message through this transport,
+                    # that part of the transport just won't ever be used.
+
+                    # Correction: if you're using AMQP and want "retries" to work,
+                    # you will need to configure a routing & binding key
+                    # so that if a message needs to be sent to this transport (for redelivery),
+                    # Messenger can attach the correct binding key
+                    # so that the message will end up in the messages_from_external queue.
+                    # See the code block on this page for an updated example.
+                    # So with just this, we should be able to consume from the new transport.
+                    # Spin over to your terminal and run:
+                    exchange:
+                        name: messages
+                        type: direct
+                        default_publish_routing_key: from_external
+                    queues:
+                        messages_from_external:
+                            binding_keys: [from_external]
 
         routing:
             # Route your messages to the transports
