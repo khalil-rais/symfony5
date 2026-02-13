@@ -193,6 +193,24 @@ framework:
                     queues:
                         messages_from_external:
                             binding_keys: [from_external]
+                # Done! We rock!
+                # This is already a fully functional serializer
+                # that can read messages from a queue.
+                # But our transport won't just start "magically" using it:
+                # we need to configure that.
+                # And we already know how!
+                # We learned earlier that each transport can have a serializer option.
+                # Below the external transport, add serializer
+                # and set this to the id of our service,
+                # which is the same as the class name: App\Messenger\...
+                # and then I'll go copy the class name:
+
+                # This is why we created a separate transport with a separate queue:
+                # we only want the external messages to use our ExternalJsonMessengerSerializer.
+                # The other two transports - async and async_priority_high -
+                # will still use the simpler PhpSerializer...
+                # which is perfect.
+                serializer: App\Messenger\ExternalJsonMessengerSerializer
 
         routing:
             # Route your messages to the transports
