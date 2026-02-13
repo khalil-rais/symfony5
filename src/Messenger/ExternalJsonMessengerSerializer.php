@@ -6,6 +6,7 @@ use App\Message\Command\LogEmoji;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
+use Symfony\Component\Messenger\Stamp\BusNameStamp;
 
 /*
     Inside of our src/Messenger/ directory...,
@@ -76,7 +77,32 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             and it might also hold some stamps.
             At the bottom, return new Envelope() and put $message inside.
          */
-        return new Envelope($message, $stamps);
+        /*
+            But the BusNameStamp is one that you might want to add.
+            Sure, Messenger used the correct bus in this case by accident,
+            but we can be more explicit!
+            Head into ExternalJsonMessengerSerializer.
+            Change this to $envelope = new Envelope()
+            and, at the bottom, return $envelope.
+            Add the stamp with $envelope = $envelope->with(),
+            this is how you add a stamp, new BusNameStamp().
+            Then because our transport & serializer only handle this one message
+            and because this one message is a command,
+            we'll want to put the command bus here.
+            Copy the command.bus bus name and paste.
+            I'll add a comment that says
+            that this is technically only needed if you need the message to be sent through a non-default bus.
+         */
+        /*
+            Next, our serializer is great,
+            but we didn't code very defensively.
+            What would happen if the message contained invalid JSON or was missing the emoji field?
+            Would our app fail gracefully or explode?
+         */
+        $envelope = new Envelope($message, $stamps);
+        // needed only if you need this to be sent through the non-default bus
+        $envelope = $envelope->with(new BusNameStamp('command.bus'));
+        return $envelope;
     }
 
     /*
@@ -130,9 +156,6 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
                 'stamps' => serialize($allStamps)
             ],
         ];
-
-        throw new \Exception('Transport & serializer not meant for sending
-messages');
     }
 
 }
