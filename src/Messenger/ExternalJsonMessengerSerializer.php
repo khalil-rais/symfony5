@@ -57,6 +57,23 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
          */
         $data = json_decode($body, true);
         /*
+            This is looking great!
+            But there are two improvements I want to make.
+            First, we haven't been coding very defensively.
+            For example, what if, for some reason,
+            the message contains invalid JSON?
+            Let's check for that: if null === $data,
+         */
+        if (null === $data) {
+            throw new MessageDecodingFailedException('Invalid JSON');
+        }
+        /*
+            I'll show you why we're using this exact exception class in a minute.
+            But let's try this with some invalid JSON
+            and see what happens.
+            Go restart the worker so it sees our new code:
+         */
+        /*
             I'm not doing any error-checking yet,
             like to check that this is valid JSON,
             we'll do that a bit later.
