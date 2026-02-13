@@ -68,6 +68,16 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             throw new MessageDecodingFailedException('Invalid JSON');
         }
         /*
+            Let's add code to check for a different possible problem:
+            let's check to see if this emoji key is missing:
+            if not isset($data['emoji']),
+            this time throw a normal exception:
+            throw new \Exception('Missing the emoji key!').
+         */
+        if (!isset($data['emoji'])) {
+            throw new \Exception('Missing the emoji key!');
+        }
+        /*
             I'll show you why we're using this exact exception class in a minute.
             But let's try this with some invalid JSON
             and see what happens.
