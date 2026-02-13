@@ -179,7 +179,29 @@ class ImagePostController extends AbstractController
              */
             new AmqpStamp('normal')
         ]);
-        $messageBus->dispatch($envelope);
+        /*
+            Forget about asynchronous messages and external transports and all that stuff.
+            Open up ImagePostController.
+            As a reminder, when you dispatch a message,
+            you actually dispatch an Envelope object,
+            which is a simple "wrapper"
+            that contains the message itself
+            and may also contain some stamps
+            which add extra info.
+            If you dispatch the message object directly,
+            the message bus creates an Envelope for you and puts your message inside.
+            The point is, internally, Messenger is always working with an Envelope.
+            And when you call $messageBus->dispatch(),
+            it also returns an Envelope:
+            the final Envelope after Messenger has done all its work.
+            Let's see what that looks like:
+            dump() that whole $messageBus->dispatch() line.
+            Now, move over and upload a photo.
+            Once that's done,
+            find that request on the web debug toolbar,
+            and open the profiler.
+         */
+        dump($messageBus->dispatch($envelope));
         /*
             To prove it, go up to ImagePostController,
             find the create() method and,
