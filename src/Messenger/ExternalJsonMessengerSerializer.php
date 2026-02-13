@@ -25,6 +25,23 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
 
     public function decode(array $encodedEnvelope): Envelope
     {
+        /*
+            The method that we need to focus on is decode().
+            When a worker consumes a message from a transport,
+            the transport calls decode() on its serializer.
+            Our job is to read the message from the queue
+            and turn that into an Envelope object with the message object inside.
+            If you check out the SerializerInterface one more time,
+            you'll see that the argument we're passed - $encodedEnvelope -
+            is really just an array with the same two keys we saw a moment ago:
+            body and headers.
+            Let's separate the pieces first:
+            $body = $encodedEnvelope['body'] and
+            $headers = $encodedEnvelope['headers'].
+            The $body will be the raw JSON in the message.
+            We'll talk about the headers later:
+            it's empty right now.
+         */
         $body = $encodedEnvelope['body'];
         $headers = $encodedEnvelope['headers'];
 
