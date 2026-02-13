@@ -154,6 +154,13 @@ framework:
             # We'll attach that special logic to the transport.
             # Anyways, above this add auto_setup: false.
 
+            # Our shiny new external_messages transport reads messages from this messages_from_external queue,
+            # which we're pretending is being populated by an external application.
+            # We're taking this JSON and, in ExternalJsonMessengerSerializer, decoding it,
+            # creating the LogEmoji object,
+            # putting it into an Envelope, even adding a stamp to it,
+            # and ultimately returning it,
+            # so that it can then be dispatched back through the message bus system.
             external_messages:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
