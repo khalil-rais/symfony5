@@ -185,7 +185,20 @@ class ImagePostController extends AbstractController
             find the create() method and,
             just to see make sure this is working, add:
          */
-        $messageBus->dispatch(new LogEmoji(2));
+        /*
+            We've just created a new message class & handler,
+            then instantiated it and dispatched it directly into the message bus.
+            Yep, we just did something totally classic!
+            But it's actually pretty similar to our real goal!
+            Our real goal is to pretend that an outside system
+            is putting messages into a RabbitMQ queue, probably formatted as JSON,
+            and we will read those messages,
+            transform that JSON into a LogEmoji object
+            and basically dispatch that through the message bus.
+            It's really the same basic flow:
+            in both cases, we create a LogEmoji object and pass it to Messenger.
+         */
+        //$messageBus->dispatch(new LogEmoji(2));
         /*
             If this is working,
             we should see a message in our logs each time we upload a photo.
