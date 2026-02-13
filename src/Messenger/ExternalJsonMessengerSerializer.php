@@ -45,7 +45,24 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
         $body = $encodedEnvelope['body'];
         $headers = $encodedEnvelope['headers'];
 
+        /*
+            Ok, remember our goal here:
+            to turn this JSON into a LogEmoji object
+            and then put that into an Envelope object.
+            How? Let's keep it simple!
+            Start with
+            $data = json_decode($body, true)
+            to turn the JSON into an associative array.
+         */
         $data = json_decode($body, true);
+        /*
+            I'm not doing any error-checking yet,
+            like to check that this is valid JSON,
+            we'll do that a bit later.
+            Now say: $message = new LogEmoji($data['emoji'])
+            because emoji is the key in the JSON
+            that we've decided will hold the $emojiIndex.
+         */
         $message = new LogEmoji($data['emoji']);
 
         // in case of redelivery, unserialize any stamps
@@ -53,6 +70,12 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
         if (isset($headers['stamps'])) {
             $stamps = unserialize($headers['stamps']);
         }
+        /*
+            Finally, we need to return an Envelope object.
+            Remember: an Envelope is just a small wrapper around the message itself
+            and it might also hold some stamps.
+            At the bottom, return new Envelope() and put $message inside.
+         */
         return new Envelope($message, $stamps);
     }
 
