@@ -88,6 +88,83 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             Any new messages will start piling up behind it in the queue.
             So let's change the Exception to MessageDecodingFailedException.
          */
+        return $this->createLogEmojiEnvelope($data, $headers);
+    }
+
+    /*
+        The idea is beautifully simple:
+        when we send a message through a transport that uses this serializer,
+        the transport will call the encode() method
+        and pass us the Envelope object that contains the message.
+        Our job is to turn that into a string format
+        that can be sent to the transport.
+        Oh, well, notice that this returns an array.
+        But if you look at the SerializerInterface,
+        this method should return an array with two keys:
+        body - the body of the message -
+        and headers - any headers that should be sent.
+        Nice, right?
+        But we're actually never going to send any messages through our external transport...
+        so we don't need this method.
+        To prove that it will never be called,
+        throw a new Exception with:
+        “Transport & serializer not meant for sending messages”
+     */
+    /*
+        That'll give me a gentle reminder,
+        in case I do something silly and route a message to a transport
+        that uses this serializer by accident.
+        Actually, if you want your messages to be redelivered,
+        you do need to implement the encode() method.
+        See the code-block on this page for an example,
+        which includes a small update to decode().
+     */
+    public function encode(Envelope $envelope): array
+    {
+        // this is called if a message is redelivered for "retry"
+        $message = $envelope->getMessage();
+        // expand this logic later if you handle more than
+        // just one message class
+        if ($message instanceof LogEmoji) {
+            // recreate what the data originally looked like
+            $data = ['emoji' => $message->getEmojiIndex()];
+        } else {
+            throw new \Exception('Unsupported message class');
+        }
+        $allStamps = [];
+        foreach ($envelope->all() as $stamps) {
+            $allStamps = array_merge($allStamps, $stamps);
+        }
+        return [
+            'body' => json_encode($data),
+            'headers' => [
+                // store stamps as a header - to be read in decode()
+                'stamps' => serialize($allStamps)
+            ],
+        ];
+    }
+
+    /*
+        Let's start by reorganizing this class a bit.
+        Select the code at the bottom of this method,
+        the stuff related to the LogEmoji object,
+        and then go to the Refactor -> "Refactor This" menu,
+        which is Ctrl+T on a Mac.
+        Refactor this code to a method called createLogEmojiEnvelope.
+
+        Cool!
+        That created a private function down here with that code.
+        I'll add an array type-hint.
+        Back in decode(), we're already calling this method.
+        So, no big change.
+     */
+    /**
+     * @param mixed $data
+     * @param mixed $headers
+     * @return Envelope
+     */
+    private function createLogEmojiEnvelope(mixed $data, mixed $headers): Envelope
+    {
         if (!isset($data['emoji'])) {
             throw new MessageDecodingFailedException('Missing the emoji key!');
         }
@@ -144,59 +221,6 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
         // needed only if you need this to be sent through the non-default bus
         $envelope = $envelope->with(new BusNameStamp('command.bus'));
         return $envelope;
-    }
-
-    /*
-        The idea is beautifully simple:
-        when we send a message through a transport that uses this serializer,
-        the transport will call the encode() method
-        and pass us the Envelope object that contains the message.
-        Our job is to turn that into a string format
-        that can be sent to the transport.
-        Oh, well, notice that this returns an array.
-        But if you look at the SerializerInterface,
-        this method should return an array with two keys:
-        body - the body of the message -
-        and headers - any headers that should be sent.
-        Nice, right?
-        But we're actually never going to send any messages through our external transport...
-        so we don't need this method.
-        To prove that it will never be called,
-        throw a new Exception with:
-        “Transport & serializer not meant for sending messages”
-     */
-    /*
-        That'll give me a gentle reminder,
-        in case I do something silly and route a message to a transport
-        that uses this serializer by accident.
-        Actually, if you want your messages to be redelivered,
-        you do need to implement the encode() method.
-        See the code-block on this page for an example,
-        which includes a small update to decode().
-     */
-    public function encode(Envelope $envelope): array
-    {
-        // this is called if a message is redelivered for "retry"
-        $message = $envelope->getMessage();
-        // expand this logic later if you handle more than
-        // just one message class
-        if ($message instanceof LogEmoji) {
-            // recreate what the data originally looked like
-            $data = ['emoji' => $message->getEmojiIndex()];
-        } else {
-            throw new \Exception('Unsupported message class');
-        }
-        $allStamps = [];
-        foreach ($envelope->all() as $stamps) {
-            $allStamps = array_merge($allStamps, $stamps);
-        }
-        return [
-            'body' => json_encode($data),
-            'headers' => [
-                // store stamps as a header - to be read in decode()
-                'stamps' => serialize($allStamps)
-            ],
-        ];
     }
 
 }
