@@ -47,6 +47,30 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
         $headers = $encodedEnvelope['headers'];
 
         /*
+            The key question is:
+            if multiple types of messages are being added to the queue,
+            how can the serializer determine which type of message this is?
+            Well, we could add maybe a type key to the JSON itself.
+            That might be fine.
+            But, there's another spot on the message that can hold data: the headers.
+            These work a lot like HTTP headers:
+            they're just "extra" information you can store about the message.
+            Whatever header we put here will make it back to our serializer when it's consumed.
+            Ok, so let's add a new header called type set to emoji.
+            I just made that up. I'm not making this a class name,
+            because that external system won't know or care about what PHP classes we use internally to handle this.
+            It's just saying:
+            “This is an "emoji" type of message”
+            Back in our serializer, let's first check to make sure that header is set:
+            if not isset($headers['type']),
+            then throw a new MessageDecodingFailedException with:
+            “Missing "type" header”
+         */
+        if (!isset($headers['type'])) {
+            throw new MessageDecodingFailedException('Missing "type" header');
+        }
+
+        /*
             Ok, remember our goal here:
             to turn this JSON into a LogEmoji object
             and then put that into an Envelope object.
@@ -74,6 +98,28 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             this time throw a normal exception:
             throw new \Exception('Missing the emoji key!').
          */
+
+        /*
+            Then, down here, we'll use a good, old-fashioned switch case statement on $headers['type'].
+            If this is set to emoji,
+            return $this->createLogEmojiEnvelope().
+         */
+        switch ($headers['type']) {
+            case 'emoji':
+                $envelope = $this->createLogEmojiEnvelope($data, $headers);
+                break;
+            /*
+                After this, you would add any other "types" that the external system publishes,
+                like delete_photo.
+                In those cases you would instantiate a different message object
+                and return that.
+                And, if some unexpected "type" is passed,
+                let's throw a new MessageDecodingFailedException with “Invalid type "%s"”
+                passing $headers['type'] as the wildcard.
+             */
+            default:
+                throw new MessageDecodingFailedException(sprintf('Invalid type "%s"', $headers['type']));
+        }
         /*
             The same error!
             This is the difference between throwing a normal Exception in the serializer versus the special MessageDecodingFailedException.
@@ -88,7 +134,7 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             Any new messages will start piling up behind it in the queue.
             So let's change the Exception to MessageDecodingFailedException.
          */
-        return $this->createLogEmojiEnvelope($data, $headers);
+        return $envelope;
     }
 
     /*
@@ -128,6 +174,11 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
         if ($message instanceof LogEmoji) {
             // recreate what the data originally looked like
             $data = ['emoji' => $message->getEmojiIndex()];
+            /*
+                To support retries on failure,
+                you also need to re-add the "type" header inside encode():
+             */
+            $type = 'emoji';
         } else {
             throw new \Exception('Unsupported message class');
         }
@@ -139,7 +190,8 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             'body' => json_encode($data),
             'headers' => [
                 // store stamps as a header - to be read in decode()
-                'stamps' => serialize($allStamps)
+                'stamps' => serialize($allStamps),
+                'type' => $type,
             ],
         ];
     }
