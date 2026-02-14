@@ -74,8 +74,22 @@ class ExternalJsonMessengerSerializer implements SerializerInterface
             this time throw a normal exception:
             throw new \Exception('Missing the emoji key!').
          */
+        /*
+            The same error!
+            This is the difference between throwing a normal Exception in the serializer versus the special MessageDecodingFailedException.
+            When you throw a MessageDecodingFailedException, your serializer is basically saying:
+            “Hey! Something went wrong... and I do want to throw an exception.
+            But, I think we should discard this message from the queue:
+            there is no point to trying it over and over again!”
+            And that's super important.
+            If we don't discard this message,
+            each time our worker restarts,
+            it will fail on that same message, over-and-over again, forever.
+            Any new messages will start piling up behind it in the queue.
+            So let's change the Exception to MessageDecodingFailedException.
+         */
         if (!isset($data['emoji'])) {
-            throw new \Exception('Missing the emoji key!');
+            throw new MessageDecodingFailedException('Missing the emoji key!');
         }
         /*
             I'll show you why we're using this exact exception class in a minute.
