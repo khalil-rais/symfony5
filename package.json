@@ -19,10 +19,10 @@
     "license": "UNLICENSED",
     "private": true,
     "scripts": {
-        "dev-server": "encore dev-server",
-        "dev": "encore dev",
-        "watch": "encore dev --watch",
-        "build": "encore production --progress"
+        "dev-server": "NODE_OPTIONS=--openssl-legacy-provider encore dev-server",
+        "dev": "NODE_OPTIONS=--openssl-legacy-provider encore dev",
+        "watch": "NODE_OPTIONS=--openssl-legacy-provider encore dev --watch",
+        "build": "NODE_OPTIONS=--openssl-legacy-provider encore production --progress"
     },
     "browserslist": [
         "> .05%"

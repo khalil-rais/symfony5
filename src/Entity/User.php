@@ -10,70 +10,45 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @UniqueEntity(
- *     fields={"email"},
- *     message="I think you're already registered!"
- * )
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\UserRepository')]
+#[UniqueEntity(fields: ['email'], message: "I think you're already registered!")]
 class User implements UserInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups("main")
-     * @Assert\NotBlank(message="Please enter an email")
-     * @Assert\Email()
-     */
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[Groups('main')]
+    #[Assert\NotBlank(message: 'Please enter an email')]
+    #[Assert\Email]
     private $email;
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type: 'json')]
     private $roles = [];
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("main")
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups('main')]
     private $firstName;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $password;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("main")
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups('main')]
     private $twitterUsername;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ApiToken", mappedBy="user", orphanRemoval=true)
-     */
+    #[ORM\OneToMany(targetEntity: ApiToken::class, mappedBy: 'user', orphanRemoval: true)]
     private $apiTokens;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Article", mappedBy="author", fetch="EXTRA_LAZY")
-     */
+    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'author', fetch: 'EXTRA_LAZY')]
     private $articles;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     private $agreedTermsAt;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type: 'boolean')]
     private $subscribeToNewsletter = false;
 
     public function __construct()
@@ -115,7 +90,6 @@ class User implements UserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -141,7 +115,6 @@ class User implements UserInterface
      */
     public function getSalt()
     {
-        // not needed when using bcrypt or argon
     }
 
     /**
@@ -149,8 +122,6 @@ class User implements UserInterface
      */
     public function eraseCredentials()
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 
     public function getFirstName(): ?string
@@ -217,7 +188,6 @@ class User implements UserInterface
     {
         if ($this->apiTokens->contains($apiToken)) {
             $this->apiTokens->removeElement($apiToken);
-            // set the owning side to null (unless already changed)
             if ($apiToken->getUser() === $this) {
                 $apiToken->setUser(null);
             }
@@ -248,7 +218,6 @@ class User implements UserInterface
     {
         if ($this->articles->contains($article)) {
             $this->articles->removeElement($article);
-            // set the owning side to null (unless already changed)
             if ($article->getAuthor() === $this) {
                 $article->setAuthor(null);
             }

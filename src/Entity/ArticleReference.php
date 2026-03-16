@@ -7,48 +7,34 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\ArticleReferenceRepository")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\ArticleReferenceRepository')]
 class ArticleReference
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     * @Groups("main")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    #[Groups('main')]
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Article", inversedBy="articleReferences")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: Article::class, inversedBy: 'articleReferences')]
+    #[ORM\JoinColumn(nullable: false)]
     private $article;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups("main")
-     */
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Groups('main')]
     private $filename;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups({"main", "input"})
-     * @Assert\NotBlank()
-     * @Assert\Length(max=100)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['main', 'input'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private $originalFilename;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups("main")
-     */
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Groups('main')]
     private $mimeType;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: 'integer')]
     private $position = 0;
 
     public function __construct(Article $article)

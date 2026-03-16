@@ -6,7 +6,8 @@
 parameters:
     cache_adapter: cache.adapter.apcu
     locale: 'en'
-    uploads_base_url: '%env(SITE_BASE_URL)%/uploads'
+    default_site_base_url: 'http://localhost'
+    uploads_base_url: '%env(default:default_site_base_url:SITE_BASE_URL)%/uploads'
 
 services:
     # default configuration for services in *this* file
@@ -44,7 +45,6 @@ services:
 
     App\Form\TypeExtension\TextareaSizeExtension:
         tags:
-            - { name: form.type_extension,
-                extended_type: Symfony\Component\Form\Extension\Core\Type\TextareaType }
+            - { name: form.type_extension }
 
     Symfony\Component\Asset\Context\RequestStackContext: '@assets.context'

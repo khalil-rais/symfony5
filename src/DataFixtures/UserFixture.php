@@ -4,19 +4,19 @@ namespace App\DataFixtures;
 
 use App\Entity\ApiToken;
 use App\Entity\User;
-use Doctrine\Common\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixture extends BaseFixture
 {
-    private $passwordEncoder;
+    private $passwordHasher;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(UserPasswordHasherInterface $passwordHasher)
     {
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordHasher = $passwordHasher;
     }
 
-    protected function loadData(ObjectManager $manager)
+    protected function loadData(ObjectManager $manager): void
     {
         $this->createMany(10, 'main_users', function($i) use ($manager) {
             $user = new User();
@@ -31,7 +31,7 @@ class UserFixture extends BaseFixture
                 $user->setSubscribeToNewsletter(true);
             }
 
-            $user->setPassword($this->passwordEncoder->encodePassword(
+            $user->setPassword($this->passwordHasher->hashPassword(
                 $user,
                 'engage'
             ));
@@ -51,7 +51,7 @@ class UserFixture extends BaseFixture
             $user->setRoles(['ROLE_ADMIN']);
             $user->agreeToTerms();
 
-            $user->setPassword($this->passwordEncoder->encodePassword(
+            $user->setPassword($this->passwordHasher->hashPassword(
                 $user,
                 'engage'
             ));

@@ -7,7 +7,7 @@ use App\Entity\Comment;
 use App\Entity\Tag;
 use App\Service\UploaderHelper;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -32,7 +32,7 @@ class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
         $this->uploaderHelper = $uploaderHelper;
     }
 
-    protected function loadData(ObjectManager $manager)
+    protected function loadData(ObjectManager $manager): void
     {
         $this->createMany(10, 'main_articles', function($count) use ($manager) {
             $article = new Article();
@@ -80,7 +80,7 @@ EOF
         $manager->flush();
     }
 
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [
             TagFixture::class,

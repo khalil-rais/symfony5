@@ -3,11 +3,11 @@
 namespace App\DataFixtures;
 
 use App\Entity\Tag;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class TagFixture extends BaseFixture
 {
-    protected function loadData(ObjectManager $manager)
+    protected function loadData(ObjectManager $manager): void
     {
         $this->createMany(10, 'main_tags', function() {
             $tag = new Tag();
