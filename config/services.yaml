@@ -4,22 +4,28 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    cache_adapter: cache.adapter.apcu
+    locale: 'en'
+    uploads_base_url: '%env(SITE_BASE_URL)%/uploads'
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
-        # Thanks to the _defaults section on top,
-        # all services in our src/ directory will, by default, have autoconfigure enabled,
-        # which is the feature that's responsible for automatically adding the messenger.message_handler tag to all services
-        # that implement MessageHandlerInterface.
-        # We're turning it off for services in this directory so that the tag isn't added twice.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false       # Allows optimizing the container by removing unused services; this also means
+                            # fetching services directly from the container via $container->get() won't work.
+                            # The best practice is to be explicit about your dependencies anyway.
+
+        # setup special, global autowiring rules
         bind:
-            # keep in sync with flysystem.yaml settings
-            $publicAssetBaseUrl: '/uploads/images'
-            $uploadDirectory: '%kernel.project_dir%/public/uploads/images'
-            $messengerAuditLogger: '@monolog.logger.messenger_audit'
+            $markdownLogger: '@monolog.logger.markdown'
+            $isDebug: '%kernel.debug%'
+            $uploadsFilesystem: '@oneup_flysystem.uploads_filesystem_filesystem'
+            $uploadedAssetsBaseUrl: '%uploads_base_url%'
+
+    # custom aliases for autowiring
+    Nexy\Slack\Client: '@nexy_slack.client'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -33,74 +39,12 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
-
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Now that we've separated our event handlers from our command handlers,
-    # we can do something special:
-    # we can tie each handler to the specific bus that it's intended for.
-    # Again, it's not super important to do this,
-    # but it'll tighten things up.
-    # Let me show you: open up config/services.yaml.
-    # This App\ line is responsible for
-    # auto-registering every class in the src/ directory as a service in the container.
-    # The line below repeats that for classes in the Controller/ directory.
-    # Why? This will override the controller services registered above
-    # and add a special tag that controllers need to work.
-    # We can use a similar trick with Messenger.
-    # Say App\MessageHandler\Command\,
-    # then use the resource key
-    # to re-auto-register all the classes in the ../src/MessageHandler/Command directory.
-    # Then in config/services.yaml, we got a little bit fancier.
-    # By organizing each type of message - commands, events and queries - into different directories,
-    # we were able to add a tag to each service.
-    # This gives a bit more info to Messenger.
-    # It says:
-    # “Hey! I want you to make that normal connection between the DeleteImagePost message class and DeleteImagePostHandler,
-    # but I only want you to tell the "command bus" about that connection,
-    # because that's the only bus I'm going to dispatch that message into.”
-    App\MessageHandler\Command\:
-            resource: '../src/MessageHandler/Command'
-            # If we only did this, absolutely nothing would change.
-            # This would register everything in this directory as a service,
-            # but that's already done by the first App\ entry anyways.
-            # But now we can add a tag to this with name: messenger.message_handler
-            # and bus: set to the name of my bus from messenger.yaml.
-            # Copy messenger.bus.default and say bus: messenger.bus.default.
-            # Where was the old key referenced in our code?
-            # Thanks to the fact that we autowire that service via its type-hint, almost nowhere, just in services.yaml.
-            # Change the bus option to command.bus as well.
+    App\Form\TypeExtension\TextareaSizeExtension:
+        tags:
+            - { name: form.type_extension,
+                extended_type: Symfony\Component\Form\Extension\Core\Type\TextareaType }
 
-            # Oh, and as a reminder, if this whole "tags" thing confuses you, skip it.
-            # It organizes things a bit more, but you can just as effectively have one bus that handles everything.
-            tags: [{ name: messenger.message_handler, bus: command.bus }]
-            # There are a few things going on here.
-            # First, when Symfony sees a class in our code that implements MessageHandlerInterface,
-            # it automatically adds this messenger.message_handler tag.
-            # This is how Messenger knows which classes are message handlers.
-            # We're now adding that tag manually
-            # so that we can also say exactly which one bus this handler should be used on.
-            # Without the bus option, it's added to all buses.
-            # We also need to add one more key: autoconfigure: false.
-            autoconfigure: false
-    # Let's repeat this for the events:
-    # copy this section, paste, change the namespace to Event\,
-    # change the directory to Event
-    # and update the bus option to event.bus
-    # - the name of our other bus inside messenger.yaml.-
-    App\MessageHandler\Event\:
-        resource: '../src/MessageHandler/Event'
-        autoconfigure: false
-        tags: [{ name: messenger.message_handler, bus: event.bus }]
-    # Before we dispatch the query,
-    # open up config/services.yaml so we can do our same trick of binding each handler to the correct bus.
-    # Copy the Event\ section,
-    # paste, change Event to Query in both places,
-    # then set the bus to query.bus.
-    App\MessageHandler\Query\:
-        resource: '../src/MessageHandler/Query'
-        autoconfigure: false
-        tags: [{ name: messenger.message_handler, bus: query.bus }]
-    Intervention\Image\ImageManager:
-        factory: ['Intervention\Image\ImageManager', 'gd']
+    Symfony\Component\Asset\Context\RequestStackContext: '@assets.context'

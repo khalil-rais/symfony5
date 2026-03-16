@@ -18,6 +18,10 @@ Encore
      * and one CSS file (e.g. app.css) if you JavaScript imports CSS.
      */
     .addEntry('app', './assets/js/app.js')
+    .addEntry('article_show', './assets/js/article_show.js')
+    .addEntry('admin_article_form', './assets/js/admin_article_form.js')
+    .addStyleEntry('account', './assets/css/account.scss')
+    .addStyleEntry('login', './assets/css/login.scss')
     //.addEntry('page1', './assets/js/page1.js')
     //.addEntry('page2', './assets/js/page2.js')
 
@@ -27,8 +31,7 @@ Encore
     // will require an extra script tag for runtime.js
     // but, you probably want this, unless you're building a single-page app
     .enableSingleRuntimeChunk()
-
-    .enableVueLoader()
+    //.disableSingleRuntimeChunk()
 
     /*
      * FEATURE CONFIG
@@ -51,6 +54,12 @@ Encore
 
     // enables Sass/SCSS support
     .enableSassLoader()
+    .enablePostCssLoader()
+
+    .copyFiles({
+        from: './assets/images',
+        to: 'images/[path][name].[hash:8].[ext]'
+    })
 
     // uncomment if you use TypeScript
     //.enableTypeScriptLoader()
@@ -60,7 +69,7 @@ Encore
     //.enableIntegrityHashes()
 
     // uncomment if you're having problems with a jQuery plugin
-    //.autoProvidejQuery()
+    .autoProvidejQuery()
 
     // uncomment if you use API Platform Admin (composer req api-admin)
     //.enableReactPreset()
