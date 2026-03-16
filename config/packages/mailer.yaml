@@ -1,0 +1,25 @@
+# Like most things in Symfony,
+# the Mailer component is not installed by default.
+# No problem, find your terminal, open a new tab and run:
+# composer require symfony/mailer
+# Notice that I didn't just use composer require mailer, using the "mailer" alias.
+# Remember: Symfony Flex lets us say things like
+# composer require forms
+# or composer require templating
+# and then it maps that to a recommended package.
+# But at the time of this recording,
+# composer require mailer would not download the Mailer component.
+# Nope, it would download Swift Mailer
+# that was the recommended library for sending emails with Symfony before Symfony 4.3:
+# that's when the Mailer component was introduced.
+# And even when you're Googling for documentation about Symfony's Mailer,
+# be careful: you might end up on the docs for using SwiftMailer inside Symfony.
+# The Mailer docs might be the second or third result.
+# Anyways after this installs, yea!
+# We get some nice, post-install instructions.
+# We'll talk about all of this.
+# The first step is to create and configure an Email object!
+# Let's do that next then send it!
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
