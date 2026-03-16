@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Mime\Email;
 
 class SecurityController extends AbstractController
 {
@@ -68,6 +69,22 @@ class SecurityController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
+/*
+Time to send an email!
+After a user registers for a new account,
+we should probably send them a welcome email.
+The controller for this page lives at src/Controller/SecurityController.php,
+find the register() method.
+This is a very traditional controller:
+it creates a Symfony form,
+processes it,
+saves a new User object to the database
+and ultimately redirects when it finishes.
+Let's send an email right here:
+right after the user is saved, but before the redirect.
+Start with $email = (new Email()) - the one from the Mime namespace.
+ */
+            $email = (new Email());
 
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,
