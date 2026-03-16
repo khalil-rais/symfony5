@@ -84,8 +84,35 @@ Let's send an email right here:
 right after the user is saved, but before the redirect.
 Start with $email = (new Email()) - the one from the Mime namespace.
  */
-            $email = (new Email());
-
+            /*
+            I've put the new Email object in parentheses on purpose:
+            it allows us to immediately chain off of this to configure the message.
+            Pretty much all the methods on the Email class are delightfully boring & familiar.
+            Let's set the ->from() address to alienmailer@example.com,
+            the ->to() to the address of the user that just registered, so $user->getEmail(),
+            and this email needs a snazzy subject: “Welcome to the Space Bar!”!
+             */
+            $email = (new Email())
+                ->from('alienmailcarrier@example.com')
+                ->to($user->getEmail())
+                ->subject('Welcome to the Space Bar!')
+                /*
+                Finally, our email needs content!
+                If you've sent emails before,
+                then you might know that an email can have text content, HTML content or both.
+                We'll talk about HTML content soon.
+                But for now, let's set the ->text() content of the email to: “Nice to meet you”
+                And then open curly close curly, $user->getFirstName(), and, of course, a ❤ emoji.
+                 */
+                ->text("Nice to meet you {$user->getFirstName()}! ❤");
+                /*
+                There are a bunch more methods on this class, like cc(), addCc(), bcc() and more
+                but most of these are dead-easy to understand.
+                And because it's such a simple class,
+                you can look inside to see what else is possible, like replyTo().
+                We'll talk about many of these - like attaching files - later.
+                That's what it looks like to create an email.
+                 */
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,
                 $request,
