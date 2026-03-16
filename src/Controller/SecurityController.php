@@ -13,6 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 
 class SecurityController extends AbstractController
 {
@@ -44,7 +45,14 @@ class SecurityController extends AbstractController
     /**
      * @Route("/register", name="app_register")
      */
-    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $formAuthenticator)
+    public function register(MailerInterface $mailer, Request $request, UserPasswordHasherInterface $passwordHasher, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $formAuthenticator)
+    /*
+    Ok how do we send this email?
+    As soon as we installed the Mailer component,
+    Symfony configured a new mailer service for us that we can autowire by using the MailerInterface type-hint.
+    Let's add that as one of the arguments to our controller method:
+    MailerInterface $mailer.
+    */
     {
         $form = $this->createForm(UserRegistrationFormType::class);
         $form->handleRequest($request);
@@ -113,6 +121,11 @@ Start with $email = (new Email()) - the one from the Mime namespace.
                 We'll talk about many of these - like attaching files - later.
                 That's what it looks like to create an email.
                  */
+            /*
+                And what methods does this object have on it?
+                Oh, just one: $mailer->send() and pass this $email.
+             */
+            $mailer->send($email);
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,
                 $request,
