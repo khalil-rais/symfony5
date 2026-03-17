@@ -20,6 +20,18 @@
 # We'll talk about all of this.
 # The first step is to create and configure an Email object!
 # Let's do that next then send it!
+
+#When we installed the Mailer component,
+#its recipe did a couple of interesting things.
+#First, it created a new file called config/packages/mailer.yaml.
+#Let's open up that up.
+#As you can see:
+#the mailer system doesn't really have a lot of config.
+#The only thing here is the dsn: a URL that tells Mailer what server or cloud service to use for delivery.
+#This references an environment variable called MAILER_DSN.
+#Hey! That's the error we just saw:
+#“Environment variable not found: "MAILER_DSN".”
+
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
