@@ -106,7 +106,35 @@ Start with $email = (new Email()) - the one from the Mime namespace.
                 ->from(new Address('alienmailcarrier@example.com', 'The Space Bar'))
                 ->to(new Address($user->getEmail(), $user->getFirstName()))
                 ->subject('Welcome to the Space Bar!')
-                ->text("Nice to meet you {$user->getFirstName()}! ❤");
+                ->text("Nice to meet you {$user->getFirstName()}! ❤")
+                /*
+                    Every email can contain content in two formats, or "parts": a "text" part and an HTML part.
+                    And an email can contain just the text part, just the HTML part or both.
+                    Of course, these days, most email clients support HTML,
+                    so that's the format you really need to focus on.
+                    But there are still some situations where having a text version is useful,
+                    so we won't completely forget about text.
+                    You'll see what I mean.
+                    The email we just sent did not contain the HTML "part" - only the text version.
+                    How do we also include an HTML version of the content?
+                    Back in the controller, you can almost guess how:
+                    copy the ->text(...) line,
+                    delete the semicolon,
+                    paste and change the method to html().
+                    It's that simple! To make it fancier, put an <h1> around this.
+
+                    This email now has two "parts": a text part and an HTML part.
+                    The user's email client will choose which to show, usually HTML.
+                    Let's see what this looks like in Mailtrap.
+                    Click back to get to the registration form again,
+                    change the email address,
+                    add a password and register!
+                    No errors!
+                    Check out Mailtrap.
+                    Yeah! This time we have an HTML version!
+                    One of the things I love about Mailtrap is how easily we can see the original HTML source, the text or the rendered HTML.
+                 */
+                ->html("<h1>Nice to meet you {$user->getFirstName()}! ❤</h1>");;
                 /*
                 There are a bunch more methods on this class, like cc(), addCc(), bcc() and more
                 but most of these are dead-easy to understand.
