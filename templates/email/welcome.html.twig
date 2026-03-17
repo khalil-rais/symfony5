@@ -1,0 +1,110 @@
+{# So as simple as this Email was to build,
+we're not really going to put HTML right inside of our controller.
+We have our standards!
+Normally, when we need to write some HTML, we put that in a Twig template.
+When you need HTML for an email, we'll do the exact same thing.
+Mailer's integration with Twig is awesome.
+First, if you downloaded the course code,
+you should have a tutorial/ directory with a welcome.html.twig template file inside.
+Open up the templates/ directory.
+To organize our email-related templates,
+let's create a new sub-directory called email/.
+Then, paste the welcome.html.twig template inside.
+#}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Welcome to the Space Bar!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f3f3f3;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+        h1 {
+            background-color: #264459;
+            color: #ffffff;
+            padding: 30px 0 50px 0;
+            font-weight: normal;
+        }
+        hr {
+            border: none;
+            border-top: 3px solid #264459;
+            margin: 20px;
+        }
+        .container {
+            background-color: #fefefe;
+            width: 580px;
+            margin: 0 auto;
+        }
+        .bottom {
+            background-color: #efefee;
+        }
+        .block {
+            margin: 0;
+            padding: 10px 20px 20px 20px;
+        }
+        .logo {
+            width: 100%;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #264459;
+            color: #fefefe;
+            border: 1px solid #fff;
+            border-radius: 3px;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+            <a href="#homepage">
+                <img src="path/to/logo.png" class="logo" alt="SpaceBar Logo">
+            </a>
+        </div>
+        <div class="content">
+            <h1 class="text-center">Nice to meet you %name%!</h1>
+            <p class="block">
+                Welcome to <strong>the Space Bar</strong>, we can't wait to read what you have to write.
+                Get started on your first article and connect with the space bar community.
+            </p>
+            <p class="block text-center">
+                <a href="#new" class="btn">Get writing!</a>
+            </p>
+            <p class="block">
+                Check out our existing articles and share your thoughts in the comments!
+            </p>
+            <p class="block text-center">
+                <a href="#homepage" class="btn">Get reading!</a>
+            </p>
+            <p class="block">
+                We're so excited that you've decided to join us in our corner of the universe,
+                it's a friendly one with other creative and insightful writers just like you!
+                Need help from a friend? We're always just a message away.
+            </p>
+        </div>
+        <div class="footer">
+            <p class="block">
+                Cheers,<br><br>
+                Your friendly <em>Space Bar Team</em>
+            </p>
+            <p class="block bottom text-center">
+                Sent with ❤️ from the friendly folks at The Space Bar
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

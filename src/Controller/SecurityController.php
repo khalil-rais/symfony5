@@ -16,6 +16,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Exception\ExceptionInterface as MailerException;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 class SecurityController extends AbstractController
 {
@@ -102,10 +103,34 @@ Start with $email = (new Email()) - the one from the Mime namespace.
             the ->to() to the address of the user that just registered, so $user->getEmail(),
             and this email needs a snazzy subject: “Welcome to the Space Bar!”!
              */
-            $email = (new Email())
+
+            /*
+            Say hello to our fancy new templates/email/welcome.html.twig file.
+            This is a full HTML page with embedded styling via a <style> tag
+            and nothing else interesting: it's 100% static.
+            This %name% thing I added here isn't a variable:
+            it's just a reminder of something that we need to make dynamic later.
+            But first, let's use this!
+            As soon as your email needs to leverage a Twig template,
+            you need to change from the Email class to TemplatedEmail.
+            Hold Command or Ctrl and click that class to jump into it.
+            Ah, this TemplatedEmail class extends the normal Email:
+            we're really still using the same class as before,
+            but with a few extra methods related to templates.
+            Let's use one of these.
+            Remove both the html() and text() calls - you'll see why in a minute -
+            and replace them with ->htmlTemplate() and then the normal path to the template: email/welcome.html.twig.
+            And that's it!
+            Before we try this, let's make a few things in the template dynamic,
+            like the URLs and the image path.
+            But, there's an important thing to remember with emails: paths must always be absolute.
+            That's next.
+            */
+            $email = (new TemplatedEmail())
                 ->from(new Address('alienmailcarrier@example.com', 'The Space Bar'))
                 ->to(new Address($user->getEmail(), $user->getFirstName()))
                 ->subject('Welcome to the Space Bar!')
+                ->htmlTemplate('email/welcome.html.twig')
                 ->text("Nice to meet you {$user->getFirstName()}! ❤")
                 /*
                     Every email can contain content in two formats, or "parts": a "text" part and an HTML part.
