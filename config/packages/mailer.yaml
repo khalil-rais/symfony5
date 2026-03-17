@@ -32,6 +32,7 @@
 #Hey! That's the error we just saw:
 #“Environment variable not found: "MAILER_DSN".”
 
+# Use APP_MAILER_DSN so your DSN is not overridden by MAILER_DSN from Symfony CLI / Docker.
 framework:
     mailer:
-        dsn: '%env(MAILER_DSN)%'
+        dsn: '%env(APP_MAILER_DSN)%'

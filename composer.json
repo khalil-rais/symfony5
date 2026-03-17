@@ -21,6 +21,7 @@
         "php-http/guzzle7-adapter": "^1.0",
         "phpdocumentor/reflection-docblock": "^6.0",
         "phpstan/phpdoc-parser": "^2.3",
+        "railsware/mailtrap-php": "^1.9",
         "sensio/framework-extra-bundle": "^6.0",
         "stof/doctrine-extensions-bundle": "^1.7",
         "symfony/asset": "^5.4",

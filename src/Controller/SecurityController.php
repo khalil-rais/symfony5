@@ -12,8 +12,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Exception\ExceptionInterface as MailerException;
 
 class SecurityController extends AbstractController
 {
@@ -101,17 +103,9 @@ Start with $email = (new Email()) - the one from the Mime namespace.
             and this email needs a snazzy subject: “Welcome to the Space Bar!”!
              */
             $email = (new Email())
-                ->from('alienmailcarrier@example.com')
-                ->to($user->getEmail())
+                ->from(new Address('alienmailcarrier@example.com', 'The Space Bar'))
+                ->to(new Address($user->getEmail(), $user->getFirstName()))
                 ->subject('Welcome to the Space Bar!')
-                /*
-                Finally, our email needs content!
-                If you've sent emails before,
-                then you might know that an email can have text content, HTML content or both.
-                We'll talk about HTML content soon.
-                But for now, let's set the ->text() content of the email to: “Nice to meet you”
-                And then open curly close curly, $user->getFirstName(), and, of course, a ❤ emoji.
-                 */
                 ->text("Nice to meet you {$user->getFirstName()}! ❤");
                 /*
                 There are a bunch more methods on this class, like cc(), addCc(), bcc() and more
@@ -125,7 +119,13 @@ Start with $email = (new Email()) - the one from the Mime namespace.
                 And what methods does this object have on it?
                 Oh, just one: $mailer->send() and pass this $email.
              */
-            $mailer->send($email);
+            try {
+                $mailer->send($email);
+                $this->addFlash('success', 'Welcome email sent! Check your mailbox (or Mailtrap inbox for the SMTP credentials in APP_MAILER_DSN).');
+            } catch (MailerException $e) {
+                $this->addFlash('warning', 'Your account was created but the welcome email could not be sent: ' . $e->getMessage());
+            }
+
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,
                 $request,
