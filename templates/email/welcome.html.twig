@@ -70,7 +70,16 @@ Then, paste the welcome.html.twig template inside.
 <div class="body">
     <div class="container">
         <div class="header text-center">
-            <a href="#homepage">
+            {#
+                The problem is that this will generate a relative URL,
+                it will literally generate href="/".
+                But for an email, all paths must be absolute.
+                To force that, change path() to url().
+
+                That's it! Symfony will detect the domain name - localhost:8000 while we're coding locally -
+                and use that to prefix the URL.
+            #}
+            <a href="{{ url('app_homepage') }}">
                 <img src="path/to/logo.png" class="logo" alt="SpaceBar Logo">
             </a>
         </div>
@@ -81,13 +90,23 @@ Then, paste the welcome.html.twig template inside.
                 Get started on your first article and connect with the space bar community.
             </p>
             <p class="block text-center">
-                <a href="#new" class="btn">Get writing!</a>
+                {#
+                    Let's fix a few other URLs: for the link to create a new article,
+                    replace the hardcoded string with url()
+                    and the name of that route,
+                    which if you looked in the app, is admin_article_new.
+                #}
+                <a href="{{ url('admin_article_new') }}" class="btn">Get writing!</a>
             </p>
             <p class="block">
                 Check out our existing articles and share your thoughts in the comments!
             </p>
             <p class="block text-center">
-                <a href="#homepage" class="btn">Get reading!</a>
+                {#
+                At the bottom, there's one more link to the homepage.
+                Say {{ url('app_homepage') }}.
+                #}
+                <a href="{{ url('app_homepage') }}" class="btn">Get reading!</a>
             </p>
             <p class="block">
                 We're so excited that you've decided to join us in our corner of the universe,
