@@ -79,8 +79,22 @@ Then, paste the welcome.html.twig template inside.
                 That's it! Symfony will detect the domain name - localhost:8000 while we're coding locally -
                 and use that to prefix the URL.
             #}
+            {#
+                But this leaves us with the same problem we had for the generated URLs!
+                By default, the asset() function generates relative URLs:
+                they don't contain the domain name.
+                To fix that, wrap this in another function: absolute_url().
+                And... done! Ready to try this?
+                Move over to the site, go back, change the email address again...
+                we're going to do this a lot, type a new password, hit enter.
+                Ok. no errors a good sign!
+                Over in Mailtrap, it's already there!
+                Oh, it looks so much better: we even have a working image and,
+                if we hover over a link, the URL does contain our domain: localhost:8000.
+                This is even more obvious in the HTML source: everything has a full URL.
+            #}
             <a href="{{ url('app_homepage') }}">
-                <img src="path/to/logo.png" class="logo" alt="SpaceBar Logo">
+                <img src="{{ absolute_url(asset('build/images/email/logo.png')) }}" class="logo" alt="SpaceBar Logo">
             </a>
         </div>
         <div class="content">
