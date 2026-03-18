@@ -57,7 +57,14 @@
 <div class="body">
     <div class="container">
         <div class="header text-center">
-            <a href="#homepage">
+            {#
+                The problem is that this will generate a relative URL,
+                it will literally generate href="/".
+                But for an email, all paths must be absolute.
+                To force that, change path() to url().
+
+            #}
+            <a href="{{ url('app_homepage') }}">
                 <img src="path/to/logo.png" class="logo" alt="SpaceBar Logo">
             </a>
         </div>
