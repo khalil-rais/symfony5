@@ -126,6 +126,13 @@ Start with $email = (new Email()) - the one from the Mime namespace.
             But, there's an important thing to remember with emails: paths must always be absolute.
             That's next.
             */
+            /*
+                When you set the HTML part of an email,
+                Mailer helps out by creating the "text" version for us!
+                If you did want to control this manually, in SecurityController,
+                you could set this the text by calling either the text() method or textTemplate()
+                to render a template that would only contain text.
+             */
             $email = (new TemplatedEmail())
                 ->from(new Address('alienmailcarrier@example.com', 'The Space Bar'))
                 ->to(new Address($user->getEmail(), $user->getFirstName()))
