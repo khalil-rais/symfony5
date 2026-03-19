@@ -4,3 +4,33 @@ twig:
     strict_variables: '%kernel.debug%'
     form_themes:
         - bootstrap_4_layout.html.twig
+    # How do we do that?
+    # We're going to do it entirely from inside of Twig with a special function
+    # that points to that image.
+    # But to do this, we need a way to refer to the image file from inside of Twig.
+    # We're going to do that by adding a new twig path.
+    # Open up config/packages/twig.yaml
+    # and I'll close a few files.
+    # One of the config keys you can put under twig is called paths.
+    # Add one new "path" below this: assets/images
+    # I'm literally referring to the assets/images directory.
+    # Set to the word "images".
+    # That part could be anything.
+    #
+    # Ok so what did this just do?
+    # Forget about emails entirely for a minute.
+    # Out-of-the-box, when you render a template with Twig,
+    # it knows to look for that file in the templates/ directory,
+    # and only in the templates/ directory.
+    # If you have template files that live somewhere else,
+    # that is where "paths" are handy.
+    # For example, pretend that, for some crazy reason,
+    # we decided to put a template inside the assets/images/ directory called dark-energy.html.twig.
+    # Thanks to the item we added under paths,
+    # we could render that template by using a special path @images/dark-energy.html.twig.
+    # This feature is referred to as "namespaced Twig paths".
+    # You configure any directory,
+    # set it to a string "namespace" - like images -
+    # then refer to that directory from twig by using @ then the namespace.
+    paths:
+        'assets/images': images
