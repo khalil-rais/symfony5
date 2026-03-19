@@ -166,7 +166,18 @@ Start with $email = (new Email()) - the one from the Mime namespace.
                     Yeah! This time we have an HTML version!
                     One of the things I love about Mailtrap is how easily we can see the original HTML source, the text or the rendered HTML.
                  */
-                ->html("<h1>Nice to meet you {$user->getFirstName()}! ❤</h1>");;
+                ->html("<h1>Nice to meet you {$user->getFirstName()}! ❤</h1>")
+                /*
+                    In both cases - htmlTemplate() and textTemplate() -
+                    you're probably going to want to pass some data into the template to make the mail dynamic.
+                    The way to do this is not via a second argument to htmlTemplate().
+                    Nope, to pass variables into the templates,
+                    call context() and give this an array.
+                    Let's pass a user variable set to the $user that was just registered.
+                 */
+                ->context([
+                    'user' => $user,
+                ]);
                 /*
                 There are a bunch more methods on this class, like cc(), addCc(), bcc() and more
                 but most of these are dead-easy to understand.
