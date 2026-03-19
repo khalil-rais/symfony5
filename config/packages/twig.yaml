@@ -34,3 +34,11 @@ twig:
     # then refer to that directory from twig by using @ then the namespace.
     paths:
         'assets/images': images
+        # So far, we've seen that the inline_css filter is smart enough to notice any style tags in the template
+        # and use that CSS to style the HTML tags.
+        # But you can also point the filter to an external CSS file.
+        # Go back to config/packages/twig.yaml.
+        # To point to the CSS file, we need to add another Twig path:
+        # let's set the assets/css directory to styles.
+        # So, @styles will point here.
+        'assets/css': styles

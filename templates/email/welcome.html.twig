@@ -13,7 +13,30 @@
     Let's see this in action.
     Go back to /register and fill the form back in and... register!
 #}
-{% apply inline_css %}
+{#
+    Back in welcome.html.twig, we can pass an argument to inline_css():
+    a string of styles that it should use.
+    To get that, use the source() function, @styles/ and then the name of our file email.css.
+
+    The source() function is a standard Twig function
+    that you don't see very often.
+    It tells Twig to go find the file - which could be a CSS file or another Twig template -
+    and return its contents.
+    It's basically a file_get_contents() for Twig.
+    That's perfect, because inline_css() doesn't want the path to a CSS file,
+    it wants the string styles it should use.
+    Let's try this!
+    Hit back once again in your browser, bump the email, type a password, submit
+    and it looks good!
+    And this time in the HTML source,
+    the style tag is not there
+    but the inline styles are.
+    That's another benefit of the CSS file:
+    it got rid of the extra style tag,
+    which makes our email a little bit smaller.
+
+#}
+{% apply inline_css(source('@styles/email.css')) %}
 {# So as simple as this Email was to build,
 we're not really going to put HTML right inside of our controller.
 We have our standards!
@@ -43,54 +66,6 @@ Then, paste the welcome.html.twig template inside.
         Change the text to {{ email.subject }}.
     #}
     <title>{{ email.subject }}</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f3f3f3;
-            font-family: Helvetica, Arial, sans-serif;
-        }
-        h1 {
-            background-color: #264459;
-            color: #ffffff;
-            padding: 30px 0 50px 0;
-            font-weight: normal;
-        }
-        hr {
-            border: none;
-            border-top: 3px solid #264459;
-            margin: 20px;
-        }
-        .container {
-            background-color: #fefefe;
-            width: 580px;
-            margin: 0 auto;
-        }
-        .bottom {
-            background-color: #efefee;
-        }
-        .block {
-            margin: 0;
-            padding: 10px 20px 20px 20px;
-        }
-        .logo {
-            width: 100%;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #264459;
-            color: #fefefe;
-            border: 1px solid #fff;
-            border-radius: 3px;
-            font-size: 20px;
-            font-weight: bold;
-            text-decoration: none;
-        }
-    </style>
 </head>
 <body>
 <div class="body">
