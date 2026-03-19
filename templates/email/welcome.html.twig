@@ -1,3 +1,19 @@
+{#
+    In welcome.html.twig, all the way on top, add {% apply inline_css %}.
+    inline_css is actually a filter and in Twig,
+    you normally use a filter with the | symbol,
+    like foo|inline_css.
+    But if you want to run a lot of stuff through a filter,
+    you can do it with this handy apply tag.
+    At the bottom of the template, say {% endapply %}.
+
+    This passes our entire template through this filter
+    which reads the CSS from inside the style tag
+    and uses that to add style attributes to every HTML element that it finds.
+    Let's see this in action.
+    Go back to /register and fill the form back in and... register!
+#}
+{% apply inline_css %}
 {# So as simple as this Email was to build,
 we're not really going to put HTML right inside of our controller.
 We have our standards!
@@ -189,3 +205,4 @@ Then, paste the welcome.html.twig template inside.
 </div>
 </body>
 </html>
+{% endapply %}
