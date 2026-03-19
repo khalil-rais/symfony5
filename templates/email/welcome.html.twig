@@ -16,7 +16,17 @@ Then, paste the welcome.html.twig template inside.
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>Welcome to the Space Bar!</title>
+    {#
+        Go back to the welcome.html.twig email template.
+        All the way at the top, we have a title tag set to
+        “Welcome to the Space Bar!”
+        Having a <title> tag in an email is usually not that important
+        but it doesn't hurt to have it and make it match the email's subject.
+        Now that we know about the email variable,
+        we can do this properly.
+        Change the text to {{ email.subject }}.
+    #}
+    <title>{{ email.subject }}</title>
     <style>
         body {
             margin: 0;
