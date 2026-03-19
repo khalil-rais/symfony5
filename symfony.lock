@@ -535,6 +535,9 @@
             "ref": "ddb2e0a77773b7fd75d8d649545f174e664500ab"
         }
     },
+    "twig/extra-bundle": {
+        "version": "v3.7.1"
+    },
     "twig/twig": {
         "version": "v2.6.2"
     },
