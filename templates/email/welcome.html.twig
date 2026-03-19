@@ -104,7 +104,22 @@ Then, paste the welcome.html.twig template inside.
                 This is even more obvious in the HTML source: everything has a full URL.
             #}
             <a href="{{ url('app_homepage') }}">
-                <img src="{{ absolute_url(asset('build/images/email/logo.png')) }}" class="logo" alt="SpaceBar Logo">
+                {#
+                    In our case, we're not planning to put a template inside the assets/images/ directory and render it.
+                    But we can leverage the Twig path to refer to the logo file.
+                    Back in the template, remove all the asset stuff that was pointing to the logo.
+                    Replace it with {{ email.image() }}.
+                    Remember, the email variable is an instance of this WrappedTemplatedEmail class.
+                    We're literally calling this image() method:
+                    we pass it the physical path to an image file,
+                    and it takes care of embedding it.
+                    What's the path to the logo file? It's @images/email/logo.png.
+
+                    Yep, thanks to our config,
+                    @images points to assets/images,
+                    and then we put the path after that - email/logo.png.
+                #}
+                <img src="{{ email.image('@images/email/logo.png') }}" class="logo" alt="SpaceBar Logo">
             </a>
         </div>
         <div class="content">
