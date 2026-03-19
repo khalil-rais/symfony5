@@ -138,7 +138,6 @@ Start with $email = (new Email()) - the one from the Mime namespace.
                 ->to(new Address($user->getEmail(), $user->getFirstName()))
                 ->subject('Welcome to the Space Bar!')
                 ->htmlTemplate('email/welcome.html.twig')
-                ->text("Nice to meet you {$user->getFirstName()}! ❤")
                 /*
                     Every email can contain content in two formats, or "parts": a "text" part and an HTML part.
                     And an email can contain just the text part, just the HTML part or both.
