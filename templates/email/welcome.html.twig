@@ -118,7 +118,20 @@ Then, paste the welcome.html.twig template inside.
                 In your browser, go back one page, tweak the email, type a password,
                 hit enter and then there it is!
             #}
-            <h1 class="text-center">Nice to meet you {{ user.firstName }}!</h1>
+            {#
+                In the template, use {{ email.toName }}.
+                This will call the toName() method,
+                which should give us the first name.
+                This is nice but the real advantage of NamedAddress can be seen in the inbox.
+                Try the flow from the start: find your browser, go back, change the email again -
+                we'll be doing this a lot - type a password, submit and go check Mailtrap.
+                There it is: “Nice to meet you Fox.”
+                It's now getting that from the NamedAddress.
+                The real beauty is on top: from "The Space Bar",
+                then the email and to "Fox" next to that email.
+                This is how pretty much all emails you receive appear to come from a specific "name", not just an address.
+            #}
+            <h1 class="text-center">Nice to meet you {{ email.toName }}!</h1>
             <p class="block">
                 Welcome to <strong>the Space Bar</strong>, we can't wait to read what you have to write.
                 Get started on your first article and connect with the space bar community.

@@ -176,7 +176,10 @@ Start with $email = (new Email()) - the one from the Mime namespace.
                     Let's pass a user variable set to the $user that was just registered.
                  */
                 ->context([
-                    'user' => $user,
+                    /*
+                     * To prove it, let's get crazy and comment-out the user variable in context.
+                     */
+                    //'user' => $user,
                 ]);
                 /*
                 There are a bunch more methods on this class, like cc(), addCc(), bcc() and more
