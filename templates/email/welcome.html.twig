@@ -1,183 +1,120 @@
 {#
-    In welcome.html.twig, all the way on top, add {% apply inline_css %}.
-    inline_css is actually a filter and in Twig,
-    you normally use a filter with the | symbol,
-    like foo|inline_css.
-    But if you want to run a lot of stuff through a filter,
-    you can do it with this handy apply tag.
-    At the bottom of the template, say {% endapply %}.
-
-    This passes our entire template through this filter
-    which reads the CSS from inside the style tag
-    and uses that to add style attributes to every HTML element that it finds.
-    Let's see this in action.
-    Go back to /register and fill the form back in and... register!
+Now if you downloaded the course code,
+you should have a tutorial/ directory,
+which holds the original welcome.html.twig and an inky/ directory with an updated welcome.html.twig.
+This is basically the same template but written in that special "Inky" markup: containers, rows, columns, etc.
+Copy the contents and let's close a few things.
+Then open up templates/email/welcome.html.twig and completely replace this file with the updated version.
+It's really the same email as before:
+it has the same dynamic URLs and is printing the recipient's name.
+It's just different markup.
+Oh, and notice that the inline_css() stuff we added a few minutes ago is gone!
+Don't worry: we'll put that back in a minute.
+But until then, forget about CSS.
+If we sent this email right now, it would literally send with this markup.
+To transform this into the table-based markup we want,
+we'll use another special filter on the entire template.
+On top, add {% apply inky_to_html %} and all the way at the bottom,
+put {% endapply %}.
+I'll indent this to make it look nice.
+Let's try it!
+Find your browser and make sure you're on the registration page.
+Let's register as thetruthisoutthere11@example.com, any password, check the terms, register and error!
+Ah, but we know this error!
+Well, not this exact error, but almost!
+This is Twig telling us that we're trying to use a filter that requires an extra library.
+Cool! Copy the composer require line, move back over to your terminal, and paste:
+composer require twig/inky-extra
+Make sure you have XSL extension installed for your PHP to be able to use Inky.
+To check it - you can run
+php -m | grep xsl
+in your console and check the output has "xsl".
+When that finishes move back to your browser,
+go back to the registration form,
+tweak that email and register!
+I think it worked!
+Let's go check it out.
+There's the new email!
+Oof, it looks terrible but that's only because it doesn't any CSS yet.
+Check out the HTML source.
+So cool: it transformed our clean markup into table elements!
+We just took a huge step towards making our emails look good in every email client
+without needing to write bad markup.
 #}
-{#
-    Back in welcome.html.twig, we can pass an argument to inline_css():
-    a string of styles that it should use.
-    To get that, use the source() function, @styles/ and then the name of our file email.css.
-
-    The source() function is a standard Twig function
-    that you don't see very often.
-    It tells Twig to go find the file - which could be a CSS file or another Twig template -
-    and return its contents.
-    It's basically a file_get_contents() for Twig.
-    That's perfect, because inline_css() doesn't want the path to a CSS file,
-    it wants the string styles it should use.
-    Let's try this!
-    Hit back once again in your browser, bump the email, type a password, submit
-    and it looks good!
-    And this time in the HTML source,
-    the style tag is not there
-    but the inline styles are.
-    That's another benefit of the CSS file:
-    it got rid of the extra style tag,
-    which makes our email a little bit smaller.
-
-#}
-{% apply inline_css(source('@styles/email.css')) %}
-{# So as simple as this Email was to build,
-we're not really going to put HTML right inside of our controller.
-We have our standards!
-Normally, when we need to write some HTML, we put that in a Twig template.
-When you need HTML for an email, we'll do the exact same thing.
-Mailer's integration with Twig is awesome.
-First, if you downloaded the course code,
-you should have a tutorial/ directory with a welcome.html.twig template file inside.
-Open up the templates/ directory.
-To organize our email-related templates,
-let's create a new sub-directory called email/.
-Then, paste the welcome.html.twig template inside.
-#}
-<!doctype html>
-<html lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width">
-    {#
-        Go back to the welcome.html.twig email template.
-        All the way at the top, we have a title tag set to
-        “Welcome to the Space Bar!”
-        Having a <title> tag in an email is usually not that important
-        but it doesn't hurt to have it and make it match the email's subject.
-        Now that we know about the email variable,
-        we can do this properly.
-        Change the text to {{ email.subject }}.
-    #}
-    <title>{{ email.subject }}</title>
-</head>
-<body>
-<div class="body">
-    <div class="container">
-        <div class="header text-center">
-            {#
-                The problem is that this will generate a relative URL,
-                it will literally generate href="/".
-                But for an email, all paths must be absolute.
-                To force that, change path() to url().
-
-                That's it! Symfony will detect the domain name - localhost:8000 while we're coding locally -
-                and use that to prefix the URL.
-            #}
-            {#
-                But this leaves us with the same problem we had for the generated URLs!
-                By default, the asset() function generates relative URLs:
-                they don't contain the domain name.
-                To fix that, wrap this in another function: absolute_url().
-                And... done! Ready to try this?
-                Move over to the site, go back, change the email address again...
-                we're going to do this a lot, type a new password, hit enter.
-                Ok. no errors a good sign!
-                Over in Mailtrap, it's already there!
-                Oh, it looks so much better: we even have a working image and,
-                if we hover over a link, the URL does contain our domain: localhost:8000.
-                This is even more obvious in the HTML source: everything has a full URL.
-            #}
-            <a href="{{ url('app_homepage') }}">
-                {#
-                    In our case, we're not planning to put a template inside the assets/images/ directory and render it.
-                    But we can leverage the Twig path to refer to the logo file.
-                    Back in the template, remove all the asset stuff that was pointing to the logo.
-                    Replace it with {{ email.image() }}.
-                    Remember, the email variable is an instance of this WrappedTemplatedEmail class.
-                    We're literally calling this image() method:
-                    we pass it the physical path to an image file,
-                    and it takes care of embedding it.
-                    What's the path to the logo file? It's @images/email/logo.png.
-
-                    Yep, thanks to our config,
-                    @images points to assets/images,
-                    and then we put the path after that - email/logo.png.
-                #}
-                <img src="{{ email.image('@images/email/logo.png') }}" class="logo" alt="SpaceBar Logo">
-            </a>
-        </div>
-        <div class="content">
-            {#
-                As soon as we do this, in welcome.html.twig,
-                we can replace that weird %name% placeholder with {{ user.firstName }},
-                because user is a instance of our User entity
-                and it has a getFirstName() method on it.
-
-                Let's try it!
-                In your browser, go back one page, tweak the email, type a password,
-                hit enter and then there it is!
-            #}
-            {#
-                In the template, use {{ email.toName }}.
-                This will call the toName() method,
-                which should give us the first name.
-                This is nice but the real advantage of NamedAddress can be seen in the inbox.
-                Try the flow from the start: find your browser, go back, change the email again -
-                we'll be doing this a lot - type a password, submit and go check Mailtrap.
-                There it is: “Nice to meet you Fox.”
-                It's now getting that from the NamedAddress.
-                The real beauty is on top: from "The Space Bar",
-                then the email and to "Fox" next to that email.
-                This is how pretty much all emails you receive appear to come from a specific "name", not just an address.
-            #}
-            <h1 class="text-center">Nice to meet you {{ email.toName }}!</h1>
-            <p class="block">
-                Welcome to <strong>the Space Bar</strong>, we can't wait to read what you have to write.
-                Get started on your first article and connect with the space bar community.
-            </p>
-            <p class="block text-center">
-                {#
-                    Let's fix a few other URLs: for the link to create a new article,
-                    replace the hardcoded string with url()
-                    and the name of that route,
-                    which if you looked in the app, is admin_article_new.
-                #}
-                <a href="{{ url('admin_article_new') }}" class="btn">Get writing!</a>
-            </p>
-            <p class="block">
-                Check out our existing articles and share your thoughts in the comments!
-            </p>
-            <p class="block text-center">
-                {#
-                At the bottom, there's one more link to the homepage.
-                Say {{ url('app_homepage') }}.
-                #}
-                <a href="{{ url('app_homepage') }}" class="btn">Get reading!</a>
-            </p>
-            <p class="block">
-                We're so excited that you've decided to join us in our corner of the universe,
-                it's a friendly one with other creative and insightful writers just like you!
-                Need help from a friend? We're always just a message away.
-            </p>
-        </div>
-        <div class="footer">
-            <p class="block">
-                Cheers,<br><br>
-                Your friendly <em>Space Bar Team</em>
-            </p>
-            <p class="block bottom text-center">
-                Sent with ❤️ from the friendly folks at The Space Bar
-            </p>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+{% apply inky_to_html %}
+    <container>
+        <row class="header">
+            <columns>
+                <a href="{{ url('app_homepage') }}">
+                    <img src="{{ email.image('@images/email/logo.png') }}" class="logo" alt="SpaceBar Logo">
+                </a>
+            </columns>
+        </row>
+        <row class="welcome">
+            <columns>
+                <spacer size="35"></spacer>
+                <h1>
+                    <center>
+                        Nice to meet you {{ email.toName }}!
+                    </center>
+                </h1>
+                <spacer size="10"></spacer>
+            </columns>
+        </row>
+        <spacer size="30"></spacer>
+        <row>
+            <columns>
+                <p>
+                    Welcome to <strong>the Space Bar</strong>, we can't wait to read what you have to write.
+                    Get started on your first article and connect with the space bar community.
+                </p>
+            </columns>
+        </row>
+        <row>
+            <columns>
+                <center>
+                    <button href="{{ url('admin_article_new') }}">Get writing!</button>
+                </center>
+            </columns>
+        </row>
+        <row>
+            <columns>
+                <p>
+                    Check out our existing articles and share your thoughts in the comments!
+                </p>
+            </columns>
+        </row>
+        <row>
+            <columns>
+                <center>
+                    <button href="{{ url('app_homepage') }}">Get reading!</button>
+                </center>
+            </columns>
+        </row>
+        <row>
+            <columns>
+                <p>
+                    We're so excited that you've decided to join us in our corner of the universe,
+                    it's a friendly one with other creative and insightful writers just like you!
+                    Need help from a friend? We're always just a message away.
+                </p>
+            </columns>
+        </row>
+        <row class="footer">
+            <columns>
+                <p>Cheers,</p>
+                <p>Your friendly <em>Space Bar Team</em></p>
+            </columns>
+        </row>
+        <row class="bottom">
+            <columns>
+                <center>
+                    <spacer size="20"></spacer>
+                    <div>
+                        Sent with ❤️ from the friendly folks at The Space Bar
+                    </div>
+                </center>
+            </columns>
+        </row>
+    </container>
 {% endapply %}
