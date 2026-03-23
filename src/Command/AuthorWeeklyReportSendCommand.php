@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use App\Repository\UserRepository;
+use App\Repository\ArticleRepository;
 
 /*
 Let's bootstrap the command the lazy way.
@@ -51,11 +52,20 @@ class AuthorWeeklyReportSendCommand extends Command
         Hit Alt + Enter and select "Initialize fields"
         to create that property and set it. Perfect.
     */
-    public function __construct(UserRepository $userRepository)
+
+    private $articleRepository;
+
+    public function __construct(UserRepository $userRepository, ArticleRepository $articleRepository)
     {
         parent::__construct(null);
 
         $this->userRepository = $userRepository;
+        /*
+            Boom! Back in the command, autowire the repository via the second constructor argument:
+            ArticleRepository $articleRepository.
+            Hit Alt + Enter to initialize that field.
+         */
+        $this->articleRepository = $articleRepository;
     }
 
     protected function configure(): void
@@ -91,7 +101,43 @@ class AuthorWeeklyReportSendCommand extends Command
             ->findAllSubscribedToNewsletter();
         $io->progressStart(count($authors));
         foreach ($authors as $author) {
+            /*
+                Inside the foreach, the next step is to find all the articles this user published -
+                if any - from the past week.
+             */
             $io->progressAdvance();
+            /*
+                Down in execute, we can say
+                $articles = $this->articleRepository->findAllPublishedLastWeekByAuthor()
+                and pass that $author.
+             */
+            $articles = $this->articleRepository
+                ->findAllPublishedLastWeekByAuthor($author);
+            // Skip authors who do not have published articles for the last week
+            if (count($articles) === 0) {
+                /*
+                    Phew! Because we're actually querying for all users, not everyone will be an author...
+                    and even less will have authored some articles in the past 7 days.
+                    Let's skip those to avoid sending empty emails:
+                    if count($articles) is zero, then continue.
+                    By the way, in a real app, where you would have hundreds, thousands or even more users,
+                    querying for all that have subscribed is not going to work.
+                    Instead, I would make my query smarter by only returning users
+                    that are authors or even query for a limited number of authors,
+                    keep track of which you've sent to already,
+                    then run the command over and over again until everyone has gotten their update.
+                    These aren't even the only options.
+                    The point is: I'm being a little loose with how much data I'm querying for:
+                    be careful in a real app.
+                    Ok, I think we're good! I mean, we're not actually emailing yet,
+                    but let's make sure it runs.
+                    Find your terminal and run the command again:
+                    php bin/console app:author-weekly-report:send
+                    All smooth. Next... let's actually send an email!
+                    And then, fix the duplication we're going to have between our two email templates.
+                 */
+                continue;
+            }
         }
         $io->progressFinish();
 
