@@ -41,7 +41,29 @@ So cool: it transformed our clean markup into table elements!
 We just took a huge step towards making our emails look good in every email client
 without needing to write bad markup.
 #}
-{% apply inky_to_html %}
+{#
+And I still do want to include my custom email.css code.
+Copy the source() stuff,
+add a second argument to inline_css -
+you can pass this as many arguments of CSS as you want -
+and point this at email.css.
+That should do it!
+
+Ok, time to see the final product!
+Go back to the registration page,
+update the email, add a password, enter and go check out Mailtrap.
+There it is and it looks awesome.
+Well, it looks exactly like it did before,
+but in the HTML source, now that we have a table-based layout,
+we know this will display more consistently across all email clients.
+I won't say perfect because you'll need to do some testing -
+but it's now much more likely to look good.
+So that's "Foundation for Emails".
+It's, one, a CSS framework for emails a lot like Bootstrap for emails
+and two, a tool to transform the pretty markup known as Inky into the ugly table-based HTML
+that the CSS framework styles and that email clients require.
+#}
+{% apply inky_to_html | inline_css(source('@styles/foundation-emails.css'), source('@styles/email.css')) %}
     <container>
         <row class="header">
             <columns>
