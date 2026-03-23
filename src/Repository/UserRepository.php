@@ -44,6 +44,30 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /*
+     * @return User[]
+     */
+    public function findAllSubscribedToNewsletter(): array
+    {
+        /*
+            The first thing we need to do is find all users
+            that have this $subscribeToNewsletter property set to true in the database.
+            To keep our code squeaky clean,
+            let's add a custom repository method for that in UserRepository.
+            How about public function findAllSubscribedToNewsletter().
+            This will return an array.
+            
+            Inside, return $this->createQueryBuilder(), u as the alias, ->andWhere('u.subscribeToNewsletter = 1'),
+            ->getQuery() and ->getResult().
+            
+            Above the method, we can advertise that this specifically returns an array of User objects.
+         */
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.subscribeToNewsletter = 1')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return User[] Returns an array of User objects
 //     */
