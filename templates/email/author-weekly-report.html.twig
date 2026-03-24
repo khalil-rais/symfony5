@@ -1,0 +1,52 @@
+{#
+We found all the authors
+that want to receive an update about the articles they wrote during the last 7 days.
+Now, let's send them that update as an email.
+If you downloaded the course code,
+you should have a tutorial/ directory with an inky/ directory and a file inside called author-weekly-report.html.twig.
+Copy that and throw it into templates/email/.
+Nice! This template is already written using the Inky markup:
+the markup that Inky will translate into HTML
+that will work in any email client.
+But mostly, other than a link to the homepage and the user's name,
+this is a boring, empty email:
+we still need to print the core content of the email.
+#}
+<container>
+    {# Header #}
+    <hr>
+    <spacer size="20"></spacer>
+    <row>
+        <columns>
+            <p>
+                What a week {{ email.toName }}! Here's a quick review of what you've been up to on the Space Bar this week
+            </p>
+        </columns>
+    </row>
+    <row>
+        <columns>
+            <table>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Comments</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Article Title</td>
+                    <td>99</td>
+                </tr>
+            </table>
+        </columns>
+    </row>
+    <row>
+        <columns>
+            <center>
+                <spacer size="20"></spacer>
+                <button href="{{ url('app_homepage') }}">Check on the Space Bar</button>
+                <spacer size="20"></spacer>
+            </center>
+        </columns>
+    </row>
+    {# Footer #}
+</container>
