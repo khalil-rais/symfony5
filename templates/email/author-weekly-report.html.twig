@@ -53,8 +53,27 @@ You need to be extra careful when you send an email from the command line.
                     <th>Title</th>
                     <th>Comments</th>
                 </tr>
-                <tr>
-                </tr>
+                {#
+                We sent the email,
+                but it's missing its core content:
+                info about the articles that each author wrote last week.
+                That's no problem for us:
+                we're already passing an articles variable to the template via context().
+                In the template, replace the <tr> with {% for article in articles %}:
+                add the <tr>, a <td> and print some data: {{ loop.index }} to number the list, 1, 2, 3, 4, etc, {{ article.title }}
+                and finally, how about:
+                {{ article.comments|length }}.
+                That's good enough. Double check that by running the command:
+                php bin/console app:author-weekly-report:send
+                And in Mailtrap we are good.
+                #}
+                {% for article in articles %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ article.title }}</td>
+                        <td>{{ article.comments|length }}</td>
+                    </tr>
+                {% endfor %}
             </table>
         </columns>
         <td>1</td>
