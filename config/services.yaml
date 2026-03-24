@@ -8,6 +8,11 @@ parameters:
     locale: 'en'
     default_site_base_url: 'http://localhost'
     uploads_base_url: '%env(default:default_site_base_url:SITE_BASE_URL)%/uploads'
+    # Back in services.yaml, use these values: %env(SITE_BASE_SCHEME)% and %env(SITE_BASE_HOST)%
+    # config/services.yaml
+    # Cool!
+    router.request_context.scheme: '%env(SITE_BASE_SCHEME)%'
+    router.request_context.host: '%env(SITE_BASE_HOST)%'
 
 services:
     # default configuration for services in *this* file
