@@ -63,15 +63,26 @@ It's, one, a CSS framework for emails a lot like Bootstrap for emails
 and two, a tool to transform the pretty markup known as Inky into the ugly table-based HTML
 that the CSS framework styles and that email clients require.
 #}
-{% apply inky_to_html | inline_css(source('@styles/foundation-emails.css'), source('@styles/email.css')) %}
-    <container>
-        <row class="header">
-            <columns>
-                <a href="{{ url('app_homepage') }}">
-                    <img src="{{ email.image('@images/email/logo.png') }}" class="logo" alt="SpaceBar Logo">
-                </a>
-            </columns>
-        </row>
+{#
+Now that we have this nifty template,
+back in welcome.html.twig, life gets simpler.
+On top start with {% extends 'email/emailBase.html.twig' %}.
+Then, delete the apply and endapply,
+and replace it with {% block content %}... and {% endblock %}.
+#}
+{#
+If you're wondering why we don't need the inky_to_html and inline_css filter stuff anymore,
+it's because the contents of this template will be put into a block
+that is inside of those same filters.
+The content will go through those filters
+but we don't need to worry about adding them in every template.
+Now we can delete most of the content:
+all we really need is the welcome row and down below,
+we can get rid of the bottom and footer stuff.
+Celebrate your inner desire for order by unindenting this.
+#}
+{% extends 'email/emailBase.html.twig' %}
+{% block content %}
         <row class="welcome">
             <columns>
                 <spacer size="35"></spacer>
@@ -122,21 +133,4 @@ that the CSS framework styles and that email clients require.
                 </p>
             </columns>
         </row>
-        <row class="footer">
-            <columns>
-                <p>Cheers,</p>
-                <p>Your friendly <em>Space Bar Team</em></p>
-            </columns>
-        </row>
-        <row class="bottom">
-            <columns>
-                <center>
-                    <spacer size="20"></spacer>
-                    <div>
-                        Sent with ❤️ from the friendly folks at The Space Bar
-                    </div>
-                </center>
-            </columns>
-        </row>
-    </container>
-{% endapply %}
+{% endblock %}
