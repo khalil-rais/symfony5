@@ -14,6 +14,18 @@ parameters:
     router.request_context.scheme: '%env(SITE_BASE_SCHEME)%'
     router.request_context.host: '%env(SITE_BASE_HOST)%'
 
+    # This works, but if you need to override the scheme or host in .env.local,
+    # you would also need to repeat the SITE_BASE_URL= to set it again.
+    # A better solution would be to set the SITE_BASE_URL just once using a config trick in services.yaml:
+    env(SITE_BASE_URL): '%env(SITE_BASE_SCHEME)%://%env(SITE_BASE_HOST)%'
+    # Try the command one last time:
+    # php bin/console app:author-weekly-report:send
+    # And check it out in Mailtrap!
+    # Yes! This time the link points to localhost:8000.
+    # Next! Let's talk about attaching files to an email.
+    # Hmm, but to make it more interesting,
+    # let's first learn how to generate a styled PDF.
+
 services:
     # default configuration for services in *this* file
     _defaults:
