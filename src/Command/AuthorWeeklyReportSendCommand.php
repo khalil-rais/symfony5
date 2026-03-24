@@ -11,6 +11,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use App\Repository\UserRepository;
 use App\Repository\ArticleRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mailer\MailerInterface;
 
 /*
 Let's bootstrap the command the lazy way.
@@ -54,8 +57,18 @@ class AuthorWeeklyReportSendCommand extends Command
     */
 
     private $articleRepository;
+    /*
+        Done! Another beautiful Email object.
+        We're a machine! How do we send it?
+        Oh, we know that too:
+        we need the mailer service.
+        Add a third argument to the constructor:
+        MailerInterface $mailer.
+        I'll do our usual Alt+Enter trick and select "Initialize Fields" to create that property and set it.
+     */
+    private $mailer;
 
-    public function __construct(UserRepository $userRepository, ArticleRepository $articleRepository)
+    public function __construct(UserRepository $userRepository, ArticleRepository $articleRepository, MailerInterface $mailer)
     {
         parent::__construct(null);
 
@@ -66,6 +79,7 @@ class AuthorWeeklyReportSendCommand extends Command
             Hit Alt + Enter to initialize that field.
          */
         $this->articleRepository = $articleRepository;
+        $this->mailer = $mailer;
     }
 
     protected function configure(): void
@@ -138,6 +152,72 @@ class AuthorWeeklyReportSendCommand extends Command
                  */
                 continue;
             }
+            /*
+                To send this email, we know the drill!
+                In the command, start with $email = (new TemplatedEmail()), ->from()
+                and ah: let's cheat a little.
+
+                Go back to src/Controller/SecurityController.php,
+                find the register() method
+                and copy its from() line:
+                we'll probably always send from the same user.
+                And yes, we'll learn how not to duplicate this later.
+                I'll re-type the "S" on NamedAddress
+                and hit tab to add the missing use statement on top.
+
+                In Symfony 4.4 and higher, use new Address() -
+                it works the same way as the old NamedAddress.
+                Ok, let's finish the rest: ->to() with new NamedAddress() $author->getEmail()
+                and $author->getFirstName(), ->subject('Your weekly report on The Space Bar!')
+                and ->htmlTemplate() to render email/author-weekly-report.html.twig.
+             */
+            $email = (new TemplatedEmail())
+                ->from(new Address('alienmailcarrier@example.com', 'The Space Bar'))
+                ->to(new Address($author->getEmail(), $author->getFirstName()))
+                ->subject('Your weekly report on The Space Bar!')
+                ->htmlTemplate('email/author-weekly-report.html.twig')
+                /*
+                    Do we need to pass any variables to the template?
+                    Technically no: the only variable we're using so far is the built-in email variable.
+                    But we will need the articles, so let's call ->context([]).
+                    Pass this an author variable.
+                    I'm not sure if we'll actually need that
+                    and the $articles that this author recently wrote.
+                 */
+                ->context([
+                    'author' => $author,
+                    'articles' => $articles,
+                ]);
+            /*
+                Back down below, give a co-worker a serious "nod",
+                as if you're about to take on a task of great gravity,
+                but instead, send an email: $this->mailer->send($email).
+                Love that. In our fixtures, thanks to some randomness we're using,
+                about 75% of users will be  subscribed to the newsletter.
+                Before we run the command, let's make sure the data is fresh with recent article created dates.
+                Run: php bin/console doctrine:fixtures:load
+                This should add enough users and articles
+                that about 1-2 authors will be subscribed to the newsletter and have recent articles.
+                Try that command: php bin/console app:author-weekly-report:send
+                Ha! It didn't explode!
+                It found 6 authors... or really, 6 users that are subscribed to the newsletter
+                but anywhere from 0 to 6 of these might actually have recent articles.
+                Spin over to Mailtrap.
+                If you don't see any emails - try reloading the fixtures again
+                ust in case you got some bad random data,
+                then re-run the command.
+                Oh, and if you got an error when running the command about too many emails being sent,
+                you've hit a limit on Mailtrap.
+                The free plan only allows sending 2 emails each 10 seconds.
+                In that case, ignore the error - because two emails did send -
+                or reload your fixtures to hopefully send less emails.
+                We have exactly one email: phew! So... we rock! Or do we?
+                I see a few problems.
+                First, the link to the homepage is broken:
+                it links to localhost. Not localhost:8000 - or whatever our real domain is - just localhost.
+                When you send emails from a console command, your paths break. More on that later.
+             */
+            $this->mailer->send($email);
         }
         $io->progressFinish();
 
