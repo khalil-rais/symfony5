@@ -7,6 +7,8 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\ExceptionInterface as MailerException;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
+use Twig\Environment;
 
 /*
 So what we're going to do is, in the Service/ directory,
@@ -26,10 +28,21 @@ class Mailer
         I'll hit Alt + Enter and go to "Initialize fields" to create that property and set it.
      */
     private $mailer;
+    private $twig;
+    private $entrypointLookup;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct(MailerInterface $mailer, Environment $twig, EntrypointLookupInterface $entrypointLookup)
     {
         $this->mailer = $mailer;
+        $this->twig = $twig;
+        $this->entrypointLookup = $entrypointLookup;
+        /*
+            This time, we need to inject a few more services
+            - for entrypointLookup, twig and pdf.
+            Let's add those on top: Environment $twig, Pdf $pdf and EntrypointLookupInterface $entrypointLookup.
+            I'll do my Alt + Enter shortcut and go to "Initialize fields" to create those three properties
+            and set them.
+         */
     }
 
     /*
@@ -76,16 +89,38 @@ class Mailer
         that we're going to send to - which is a User object - and the array of articles.
         Ok, over in our new Mailer class, add a public function sendAuthorWeeklyReportMessage() with a User object argument called $author and an array of Article objects.
      */
-    /*
-        Time to steal some code!
-        Back in the command, copy everything related to sending the email,
-        which in this case includes the entrypoint reset, Twig render, PDF code and the actual email logic.
-        Paste that into Mailer.
-     */
     public function sendAuthorWeeklyReportMessage( User $author, array $articles)
     {
+        /*
+            Time to steal some code!
+            Back in the command, copy everything related to sending the email,
+            which in this case includes the entrypoint reset, Twig render, PDF code and the actual email logic.
+            Paste that into Mailer.
+         */
+        $this->entrypointLookup->reset();
+        /*
+            Back in the method!
+            We're already using the properties
+            and everything looks happy!
+            Oh, and it's minor, but I'm going to move the "entrypoint reset" code below the render.
+            This is subtle but it makes sure that the Encore stuff is reset after we render our template.
+            If some other part of our app calls this methods and then renders its own template,
+            Encore will now be ready to do work correctly for them.
+         */
+        $this->entrypointLookup->reset();
 
-
+        $email = (new TemplatedEmail())
+            ->from(new Address('alienmailcarrier@example.com',
+                'The Space Bar'))
+            ->to(new Address($author->getEmail(), $author->getFirstName()))
+            ->subject('Your weekly report on the Space Bar!')
+            ->htmlTemplate('email/author-weekly-report.html.twig')
+            ->context([
+                'author' => $author,
+                'articles' => $articles,
+            ]
+        );
+        $this->mailer->send($email);
     }
 
 }
