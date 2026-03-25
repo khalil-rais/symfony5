@@ -8,7 +8,7 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Twig\Environment;
 use App\Entity\User;
 use App\Service\Mailer;
-
+use Symfony\Component\Mime\Address;
 
 class MailerTest extends TestCase
 {
@@ -91,8 +91,22 @@ class MailerTest extends TestCase
         $user = new User();
         $user->setFirstName('Victor');
         $user->setEmail('victor@symfonycasts.com');
-        $mailer->sendWelcomeMessage($user);
 
+        /*
+            You don't have to do this,
+            but it'll make our unit test more useful and keep it simple.
+            Now we can say $email = $mailer->sendWelcomeMessage()
+            and we can check pretty much anything on that email.
+            I'll paste in some asserts:
+         */
+        $email = $mailer->sendWelcomeMessage($user);
+        $this->assertSame('Welcome to the Space Bar!', $email->getSubject());
+        $this->assertCount(1, $email->getTo());
+        /** @var Address[] $namedAddresses */
+        $namedAddresses = $email->getTo();
+        $this->assertInstanceOf(Address::class, $namedAddresses[0]);
+        $this->assertSame('Victor', $namedAddresses[0]->getName());
+        $this->assertSame('victor@symfonycasts.com', $namedAddresses[0]->getAddress());
 
     }
 

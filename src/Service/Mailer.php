@@ -51,7 +51,7 @@ class Mailer
         the only info we need is the User object.
         Create a new public function sendWelcomeMessage() with a User $user argument.
      */
-    public function sendWelcomeMessage(User $user)
+    public function sendWelcomeMessage(User $user): TemplatedEmail
     {
         /*
             Then, grab the logic from the controller
@@ -78,6 +78,19 @@ class Mailer
                 //'user' => $user,
             ]);
         $this->mailer->send($email);
+        /*
+            The tricky thing is that the majority of this method is about creating the Email
+            and we're not testing what that object looks like at all.
+            And maybe we don't need to?
+            I tend to unit test logic that scares me and manually test other things -
+            like the wording inside an email.
+            But let's at least assert a few basic things.
+            How? An easy way is to return the email from each method:
+            return $email and then advertise that this method returns a TemplatedEmail.
+            I'll do the same for the other method:
+            return $email and add the TemplatedEmail return type.
+         */
+        return $email;
 
     }
 
@@ -89,7 +102,7 @@ class Mailer
         that we're going to send to - which is a User object - and the array of articles.
         Ok, over in our new Mailer class, add a public function sendAuthorWeeklyReportMessage() with a User object argument called $author and an array of Article objects.
      */
-    public function sendAuthorWeeklyReportMessage( User $author, array $articles)
+    public function sendAuthorWeeklyReportMessage( User $author, array $articles): TemplatedEmail
     {
         /*
             Time to steal some code!
@@ -121,6 +134,8 @@ class Mailer
             ]
         );
         $this->mailer->send($email);
+
+        return $email;
     }
 
 }
