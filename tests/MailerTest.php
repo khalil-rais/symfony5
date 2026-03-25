@@ -2,7 +2,7 @@
 
 namespace App\Tests;
 
-use Monolog\Test\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class MailerTest extends TestCase
 {
