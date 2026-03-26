@@ -10,8 +10,18 @@ use App\Entity\User;
 use App\Service\Mailer;
 use Symfony\Component\Mime\Address;
 use App\Entity\Article;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class MailerTest extends TestCase
+/*
+    To make this test able to use real objects,
+    we need to change extends from TestCase to KernelTestCase.
+ */
+class MailerTest extends KernelTestCase
+/*
+    That class extends the normal TestCase
+    but gives us the ability to boot Symfony's service container in the background.
+    Specifically, it gives us the ability, down in the method, to say: self::bootKernel().
+ */
 {
     /*
         The idea is that this will test the Mailer class,
@@ -125,6 +135,10 @@ class MailerTest extends TestCase
             copy all of its code except for the asserts,
             paste them down here and change the method to sendAuthorWeeklyReportMessage().
          */
+        /*
+            That will give us the ability to fetch real service objects and use them.
+         */
+        self::bootKernel();
         $symfonyMailer = $this->createMock(MailerInterface::class);
         $symfonyMailer->expects($this->once())
             ->method('send');
