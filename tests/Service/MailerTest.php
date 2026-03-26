@@ -139,16 +139,33 @@ class MailerTest extends KernelTestCase
             That will give us the ability to fetch real service objects and use them.
          */
         self::bootKernel();
+        /*
+            So we'll leave $symfonyMailer mocked,
+            leave the $entrypointLookup mocked,
+            but for the Pdf,
+            get the real Pdf service.
+            How? In the test environment,
+            we can fetch things out of the container using the same type-hints as normal.
+            So, $pdf = self::$container,
+            bootKernel() set that property.
+            ->get() passing this Pdf::class.
+            Do the same for Twig: self::$container->get(Environment::class).
+            Tip: Starting in Symfony 5.3, instead of self::$container,
+            use static::getContainer() to get the container from inside a test.
+            Also, calling bootKernel() is no longer needed.
+         */
+        //$pdf = self::$container->get(Pdf::class);
+        $twig = static::getContainer()->get(Environment::class);
+        /*
+            I love that!
+            Again, the downside is that you really do need to have wkhtmltopdf installed correctly anywhere you run your tests.
+            That's the cost of doing this.
+         */
         $symfonyMailer = $this->createMock(MailerInterface::class);
         $symfonyMailer->expects($this->once())
             ->method('send');
-        $twig = $this->createMock(Environment::class);
         $entrypointLookup = $this->createMock(EntrypointLookupInterface::class);
-        $user = new User();
-        $user->setFirstName('Victor');
-        $user->setEmail('victor@symfonycasts.com');
-        $mailer = new Mailer($symfonyMailer, $twig, $entrypointLookup);
-        $email = $mailer->sendWelcomeMessage($user);
+
         /*
             This needs a User object,
             but it also needs an array of articles.
@@ -168,7 +185,26 @@ class MailerTest extends KernelTestCase
         */
         $mailer = new Mailer($symfonyMailer, $twig, $entrypointLookup);
         $email = $mailer->sendAuthorWeeklyReportMessage($user, [$article]);
-
+        /*
+            Before we try it, at the bottom,
+            we don't have any asserts yet.
+            Let's add at least one:
+            $this->assertCount() that 1 is the count of $email->getAttachments().
+         */
+        $this->assertCount(0, $email->getAttachments());
+        /*
+            We could go further and look closer at the attachment
+            maybe make sure that it looks like it's in a PDF format
+            but this is a good start.
+            Now let's try this.
+            Find your terminal and run our normal:
+            php bin/phpunit
+            It is slower this time  and then.. ah!
+            What just happened?
+            Two things. First, because this booted up a lot more code,
+            we're seeing a ton of deprecation warnings.
+            These are annoying, but we can ignore them.
+         */
     }
 
 
