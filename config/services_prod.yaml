@@ -1,0 +1,35 @@
+parameters:
+    # Here we tell it to use cache.adapter.filesystem.
+    # This is great!
+    # It means that we don't need any special extension for the cache system while developing
+    # but on production, we use the superior APCu.
+    # The problem now is that,
+    # when we run our tests,
+    # those are run in the test environment
+    # and since the test environment doesn't load services_dev.yaml,
+    # it's using the default APCu adapter!
+    # By the way, there is a services_test.yaml file but it has nothing in it.
+    # In fact, you can delete this: it's for a feature that's not needed anymore.
+
+    # Then, only in the prod environment,
+    # let's change this to apcu.
+    # To do that, rename services_dev.yaml to services_prod.yaml
+    # and change the parameter inside to cache.adapter.apcu.
+    # Now the test environment should use the filesystem.
+    # Let's try it!
+    # And if you ignore the deprecations it worked!
+    # It actually generated the PDF inside the test!
+    # To totally prove it, real quick, in the test, var_dump($email->getAttachments())
+    # and run the test again:
+    # Yea! It's so ugly. The attachment is some DataPart object
+    # and you can see the crazy PDF content inside.
+    # Go take off that dump.
+    # Ok, the last type of test is a functional test.
+    # And this is where things get more interesting especially in relation to Mailer.
+    # If we want to make a functional test for the registration form,
+    # do we expect our test to send a real email?
+    # Or should we disable email delivery somehow while testing?
+    # And, in both cases, is it possible to submit the registration form in a functional test
+    # and then assert that an email was in fact sent?
+    # This is good stuff!
+    cache_adapter: 'cache.adapter.apcu'

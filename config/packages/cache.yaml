@@ -12,6 +12,13 @@ framework:
         #default_redis_provider: redis://localhost
 
         # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
+        # The second thing is that the test failed!
+        # But... weird - not how I expected:
+        # something about APCu is not enabled.
+        # Huh? Why is it suddenly trying to use APCu?
+        # The cause of this is specific to our app,
+        # but it's an interesting situation.
+        # Open up config/packages/cache.yaml.
         app: '%cache_adapter%'
 
         # Namespaced pools use the above "app" backend by default

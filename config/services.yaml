@@ -4,7 +4,26 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    cache_adapter: cache.adapter.apcu
+    # See this app key?
+    # This is where you can tell Symfony
+    # where it should store things
+    # that need to be added to cache at runtime,
+    # like the filesystem, redis or APCu.
+    # In an earlier tutorial, we set this to a parameter that we invented: %cache_adapter%.
+    # This allows us to do something cool.
+    # Open config/services.yaml.
+    # Here, we set cache_adapter to cache.adapter.apcu:
+    # we told Symfony to store cache in APCu.
+    # And apparently, I don't have that extension installed on my local machine.
+    # Ok fine but then how the heck is the website working?
+    # Shouldn't we be getting this error everywhere?
+    # Yep except that we override this value in services_dev.yaml -
+    # a file that is only loaded in the dev environment.
+
+    # So, honestly I should have set this all up better.
+    # And now, I will.
+    # Change the default cache adapter to cache.adapter.filesystem.
+    cache_adapter: cache.adapter.filesystem
     locale: 'en'
     default_site_base_url: 'http://localhost'
     uploads_base_url: '%env(default:default_site_base_url:SITE_BASE_URL)%/uploads'
