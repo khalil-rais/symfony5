@@ -9,6 +9,7 @@ use Twig\Environment;
 use App\Entity\User;
 use App\Service\Mailer;
 use Symfony\Component\Mime\Address;
+use App\Entity\Article;
 
 class MailerTest extends TestCase
 {
@@ -109,5 +110,52 @@ class MailerTest extends TestCase
         $this->assertSame('victor@symfonycasts.com', $namedAddresses[0]->getAddress());
 
     }
+
+    /*
+        I also want to test the method that sends the weekly update email.
+        But because the real complexity of this method is centered around generating the PDF,
+        instead of a unit test,
+        let's write an integration test.
+        In MailerTest, add a second method: testIntegrationSendAuthorWeeklyReportMessage().
+     */
+    public function testIntegrationSendAuthorWeeklyReportMessage()
+    {
+        /*
+            Let's start the same way as the first method:
+            copy all of its code except for the asserts,
+            paste them down here and change the method to sendAuthorWeeklyReportMessage().
+         */
+        $symfonyMailer = $this->createMock(MailerInterface::class);
+        $symfonyMailer->expects($this->once())
+            ->method('send');
+        $twig = $this->createMock(Environment::class);
+        $entrypointLookup = $this->createMock(EntrypointLookupInterface::class);
+        $user = new User();
+        $user->setFirstName('Victor');
+        $user->setEmail('victor@symfonycasts.com');
+        $mailer = new Mailer($symfonyMailer, $twig, $entrypointLookup);
+        $email = $mailer->sendWelcomeMessage($user);
+        /*
+            This needs a User object,
+            but it also needs an array of articles.
+            Let's create one: $article = new Article().
+            These articles are passed to the template where we print their title.
+            So let's at least populate that property: $article->setTitle():
+            “Black Holes: Ultimate Party Pooper”
+         */
+        $user = new User();
+        $user->setFirstName('Victor');
+        $user->setEmail('victor@symfonycasts.com');
+        $article = new Article();
+        $article->setTitle('Black Holes: Ultimate Party Pooper');
+        /*
+            Use this for the 2nd argument of sendAuthorWeeklyReportMessage():
+            an array with just this inside.
+        */
+        $mailer = new Mailer($symfonyMailer, $twig, $entrypointLookup);
+        $email = $mailer->sendAuthorWeeklyReportMessage($user, [$article]);
+
+    }
+
 
 }
