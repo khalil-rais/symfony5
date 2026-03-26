@@ -27,7 +27,7 @@ class SecurityControllerTest extends WebTestCase
             In this case, we want to make a GET request to /register to load the form.
          */
         $client = static::createClient();
-        $crawler = $client->request('GET', '/');
+        $crawler = $client->request('GET', '/register');
         /*
             The assertResponseIsSuccessful() method is a helper assertion from Symfony
             that will make sure the response wasn't an error or a redirect.
