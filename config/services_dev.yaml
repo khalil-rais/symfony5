@@ -1,0 +1,42 @@
+# Next, we need to register EnvelopeListener as a service
+# but only in the dev environment:
+# I don't want to change the recipients on production.
+# To do that, in the config/ directory, create a new file called services_dev.yaml.
+# Thanks to that _dev part, this will only be loaded in the dev environment.
+# At the top, start with the same _defaults code
+# that we have on top of our main services file: services:, then the magic _defaults: to set upsome default options that we want to apply to every service registered in this file.
+# The default config we want is autowire: true and autoconfigure: true.
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+# Now, let's register EnvelopeListener as a service.
+# Copy its namespace, paste, add a \
+# then go copy the class name and put that here too.
+# For arguments, the class has two:
+# $sender and an array of $recipients.
+# We'll focus on setting the "sender" globally in a few minutes...
+# but for right now, I don't want to use that feature...
+# so we can set the argument to null.
+# Under arguments, use - null for sender
+# and, for recipients, - [] with one email inside.
+# To reference the environment variable we created,
+# say %env()%, then copy the variable name - DEV_MAIL_RECIPIENT -
+# and paste it in the middle.
+# That should be it!
+# This will register the service and,
+# thanks to autoconfigure, Symfony will configure it as an event subscriber.
+    Symfony\Component\Mailer\EventListener\EnvelopeListener:
+        arguments:
+            - null
+            - [ '%env(DEV_MAIL_RECIPIENT)%' ]
+# Testing time! Move over, refresh and... ah!
+# I have a typo!
+# The key should be _defaults with an "s". Try it again.
+# This time register with a fake email:
+# thetruthisoutthere13@example.com, any password, agree to the terms and register!
+# Because our app is configured to use SendGrid...
+# that should have sent a real email.
+# Check the inbox - we have a new one!
+# That's the original email from a minute ago on top...
+# and here's the new one.
