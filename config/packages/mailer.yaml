@@ -36,3 +36,22 @@
 framework:
     mailer:
         dsn: '%env(APP_MAILER_DSN)%'
+    # I'll hit Shift+Shift and look for EnvelopeListener so we can see inside.
+    # Start by looking for getSubscribedEvents().
+    # Yep! This is listening on MessageEvent.
+    # Here's the idea:
+    # if you used this class,
+    # you could instantiate it
+    # and pass a custom sender or a custom array of recipients.
+    # Then, whenever an email is sent,
+    # the onMessage() method would be called
+    # and it would override that stuff on the email.
+    # I love it!
+    # Even though this class lives inside Mailer,
+    # Symfony doesn't activate it by default:
+    # it's not currently being used.
+    # In Symfony 4.4, some new config options were been added
+    # so you can activate & configure it easily:
+    envelope:
+        sender: 'sender@example.org'
+        recipients: ['redirected@example.org']
