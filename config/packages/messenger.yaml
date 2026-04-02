@@ -18,3 +18,34 @@ framework:
         routing:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
+            # Great.
+            # As soon as you install Messenger,
+            # when Mailer sends an email, internally,
+            # it will automatically start doing that by dispatching a message through Messenger.
+            # Hit Shift + Shift to open a class called SendEmailMessage.
+            # Specifically, Mailer will create this object,
+            # put our Email message inside,
+            # and dispatch it through Messenger.
+            # Now, if we only installed messenger,
+            # the fact that this is being dispatched through the message bus
+            # would make absolutely no difference.
+            # The emails would still be handled immediately - or synchronously.
+            # But now we can tell Messenger to "send" instances of SendEmailMessage
+            # to our async transport instead of "handling" them -
+            # meaning delivering the email - right now.
+            # We do that via the routing section.
+            # Go copy the namespace of the SendEmailMessage class
+            # and, under routing, I'll clear out the comments
+            # and say Symfony\Component\Mailer\Messenger\,
+            # copy the class name,
+            # and paste: SendEmailMessage.
+            # Set this to async.
+            #
+            # Hey! We just made all emails async! Woo!
+            # Let's try it: find the registration page, register as "Fox",
+            # email thetruthisoutthere15@example.com, any password, agree to the terms
+            # and register!
+            # You may not have noticed,
+            # but if you compared the response times of submitting the form before and after that change...
+            # this was way, way faster.
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
