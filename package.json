@@ -26,5 +26,8 @@
     },
     "browserslist": [
         "> .05%"
-    ]
+    ],
+    "dependencies": {
+        "foundation-emails": "^2.5.1"
+    }
 }
