@@ -1,0 +1,5 @@
+# Dev only: SMTP envelope recipients → DEV_MAIL_RECIPIENT (merges with packages/mailer.yaml).
+framework:
+    mailer:
+        envelope:
+            recipients: ['%env(DEV_MAIL_RECIPIENT)%']

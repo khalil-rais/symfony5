@@ -1,57 +1,5 @@
-# Like most things in Symfony,
-# the Mailer component is not installed by default.
-# No problem, find your terminal, open a new tab and run:
-# composer require symfony/mailer
-# Notice that I didn't just use composer require mailer, using the "mailer" alias.
-# Remember: Symfony Flex lets us say things like
-# composer require forms
-# or composer require templating
-# and then it maps that to a recommended package.
-# But at the time of this recording,
-# composer require mailer would not download the Mailer component.
-# Nope, it would download Swift Mailer
-# that was the recommended library for sending emails with Symfony before Symfony 4.3:
-# that's when the Mailer component was introduced.
-# And even when you're Googling for documentation about Symfony's Mailer,
-# be careful: you might end up on the docs for using SwiftMailer inside Symfony.
-# The Mailer docs might be the second or third result.
-# Anyways after this installs, yea!
-# We get some nice, post-install instructions.
-# We'll talk about all of this.
-# The first step is to create and configure an Email object!
-# Let's do that next then send it!
-
-#When we installed the Mailer component,
-#its recipe did a couple of interesting things.
-#First, it created a new file called config/packages/mailer.yaml.
-#Let's open up that up.
-#As you can see:
-#the mailer system doesn't really have a lot of config.
-#The only thing here is the dsn: a URL that tells Mailer what server or cloud service to use for delivery.
-#This references an environment variable called MAILER_DSN.
-#Hey! That's the error we just saw:
-#“Environment variable not found: "MAILER_DSN".”
-
-# Use APP_MAILER_DSN so your DSN is not overridden by MAILER_DSN from Symfony CLI / Docker.
+# Mailer DSN (use APP_MAILER_DSN so Symfony CLI / Docker do not override MAILER_DSN).
+# Dev-only recipient redirect: config/packages/dev/mailer.yaml (framework.mailer.envelope).
 framework:
     mailer:
         dsn: '%env(APP_MAILER_DSN)%'
-    # I'll hit Shift+Shift and look for EnvelopeListener so we can see inside.
-    # Start by looking for getSubscribedEvents().
-    # Yep! This is listening on MessageEvent.
-    # Here's the idea:
-    # if you used this class,
-    # you could instantiate it
-    # and pass a custom sender or a custom array of recipients.
-    # Then, whenever an email is sent,
-    # the onMessage() method would be called
-    # and it would override that stuff on the email.
-    # I love it!
-    # Even though this class lives inside Mailer,
-    # Symfony doesn't activate it by default:
-    # it's not currently being used.
-    # In Symfony 4.4, some new config options were been added
-    # so you can activate & configure it easily:
-    envelope:
-        sender: 'sender@example.org'
-        recipients: ['redirected@example.org']
