@@ -7,6 +7,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         {% block stylesheets %}
+            {#
+                This is why, in base.html.twig we simply use encore_entry_link_tags()
+                and it takes care of everything.
+                How? Behind the scenes, it looks in the public/build/ directory for an entrypoints.json file that Encore builds.
+                This is the key: it tells us exactly which CSS and JS files are needed for each entrypoint - like app.
+                Or, for email, yep!
+                It contains the two CSS files.
+                The problem is that we don't want to just output link tags.
+                We actually need to read the source of those files and pass that to inline_css().
+            #}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
     </head>
