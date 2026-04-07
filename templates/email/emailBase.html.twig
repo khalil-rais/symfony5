@@ -13,6 +13,12 @@ We do it all the time in normal twig:
 create a base template, a base email template.
 In the templates/email directory, add a new file called emailBase.html.twig.
 #}
+{#
+Now open up the email layout file: templates/email/emailBase.html.twig.
+When we used inline_css(), we pointed it at the foundation-emails.css file  and the email.css file.
+But now we only really need to point it at email.scss
+because, in theory, that will include the styles from both files.
+#}
 {% apply inky_to_html | inline_css(source('@styles/foundation-emails.css'), source('@styles/email.css')) %}
     <container>
         <row class="header">

@@ -22,6 +22,24 @@ Encore
     .addEntry('admin_article_form', './assets/js/admin_article_form.js')
     .addStyleEntry('account', './assets/css/account.scss')
     .addStyleEntry('login', './assets/css/login.scss')
+    /*
+        The problem is that this is now a Sass file
+        and inline_css only works with CSS files:
+        we can't point it at a Sass file and expect it transform the Sass into CSS.
+        And even if it were a CSS file,
+        the @import won't work unless we process this through Encore.
+        So here's the plan:
+        we're going to pretend that email.scss is just an ordinary CSS file
+        that we want to include on some page on our site.
+        Open up webpack.config.js.
+        Whenever we have some page-specific CSS or JS,
+        we add a new entry for it.
+        In this case, because we don't need any JavaScript,
+        we can add a "style" entry.
+        Say .addStyleEntry() - call the entry,
+        how about, email, and point it at the file: ./assets/css/email.scss.
+    */
+    .addStyleEntry('email', './assets/css/email.scss')
     //.addEntry('page1', './assets/js/page1.js')
     //.addEntry('page2', './assets/js/page2.js')
 
