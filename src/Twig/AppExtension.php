@@ -14,10 +14,20 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 class AppExtension extends AbstractExtension implements ServiceSubscriberInterface
 {
     private $container;
+    private $publicDir;
 
-    public function __construct(ContainerInterface $container)
+    /*
+
+     */
+    public function __construct(ContainerInterface $container, string $publicDir)
     {
         $this->container = $container;
+        /*
+            Back in AppExtension,
+            add the string $publicDir argument.
+            I'll hit "Alt + Enter" and go to "Initialize fields" to create that property and set it.
+         */
+        $this->publicDir = $publicDir;
     }
 
     public function getFunctions(): array
@@ -70,9 +80,16 @@ class AppExtension extends AbstractExtension implements ServiceSubscriberInterfa
             that's how you access the service using a service subscriber -
             then ->getCssFiles($entryName).
          */
-        $files = $this->container
-            ->get(EntrypointLookupInterface::class)
-            ->getCssFiles($entryName);
+        /*
+            Tip:
+            To avoid missing CSS if you send your emails via Messenger
+            (or if you send multiple emails during the same request),
+            "reset" Encore's internal cache before calling getCssFiles():
+            replace the first 3 lines with these
+         */
+        $entryPointLookupInterface = $this->container->get(EntrypointLookupInterface::class);
+        $entryPointLookupInterface->reset();
+        $files = $entryPointLookupInterface->getCssFiles($entryName);
         /*
             This will return an array with something like these two paths.
             Next, foreach over $files as $file and, above create a new $source variable set to an empty string.
@@ -80,9 +97,15 @@ class AppExtension extends AbstractExtension implements ServiceSubscriberInterfa
          */
         $source = '';
         foreach ($files as $file) {
-
+            /*
+                Down in the method, we can say
+                $source .= file_get_contents($this->publicDir.$file) -
+                each $file path should already have a / at the beginning.
+                Finish the method with return $source.
+             */
+            $source .= file_get_contents($this->publicDir.'/'.$file);
         }
-
+        return $source;
     }
 
     public static function getSubscribedServices()

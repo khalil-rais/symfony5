@@ -60,6 +60,22 @@ services:
             $isDebug: '%kernel.debug%'
             $uploadsFilesystem: '@oneup_flysystem.uploads_filesystem_filesystem'
             $uploadedAssetsBaseUrl: '%uploads_base_url%'
+            # We could hardcode the path to the public/ directory right here.
+            # But instead, let's set up a new "binding" that we can pass through the constructor.
+            # Open up config/services.yaml.
+            # In our Symfony Fundamentals Course, we talk about
+            # how the global bind below _defaults can be used to allow scalar arguments
+            # to be autowired into our services.
+            # Add a new one:
+            # string $publicDir set to %kernel.project_dir% -
+            # that's a built-in parameter - /public.
+            string $publicDir: '%kernel.project_dir%/public'
+            # This string part before $publicDir is optional.
+            # But by adding it, we're literally saying that this value should be passed
+            # if an argument is exactly string $publicDir.
+            # Being able to add the type-hint to a bind is a new feature in Symfony 4.2.
+            # We didn't use it on the earlier binds,
+            # but we could have.
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'
