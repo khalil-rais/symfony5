@@ -32,4 +32,4 @@ yarn-error.log
 /public/media/cache/
 ###< liip/imagine-bundle ###
 
-/bin
+/bin/
