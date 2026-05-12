@@ -62,6 +62,7 @@ class SecurityController extends AbstractController
             if (true === $userModel->agreeTerms) {
                 $user->agreeToTerms();
             }
+            $user->setSubscribeToNewsletter(false);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);

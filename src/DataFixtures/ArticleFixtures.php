@@ -6,7 +6,7 @@ use App\Entity\Article;
 use App\Entity\Comment;
 use App\Entity\Tag;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
 {
@@ -22,7 +22,7 @@ class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
         'lightspeed.png',
     ];
 
-    protected function loadData(ObjectManager $manager)
+    protected function loadData(ObjectManager $manager): void
     {
         $this->createMany(10, 'main_articles', function($count) use ($manager) {
             $article = new Article();
@@ -68,7 +68,7 @@ EOF
         $manager->flush();
     }
 
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [
             TagFixture::class,

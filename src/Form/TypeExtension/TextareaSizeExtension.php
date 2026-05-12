@@ -2,17 +2,17 @@
 
 namespace App\Form\TypeExtension;
 
+use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormTypeExtensionInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TextareaSizeExtension implements FormTypeExtensionInterface
+class TextareaSizeExtension extends AbstractTypeExtension
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public static function getExtendedTypes(): iterable
     {
+        return [TextareaType::class];
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -20,19 +20,10 @@ class TextareaSizeExtension implements FormTypeExtensionInterface
         $view->vars['attr']['rows'] = $options['rows'];
     }
 
-    public function finishView(FormView $view, FormInterface $form, array $options)
-    {
-    }
-
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'rows' => 10
+            'rows' => 10,
         ]);
-    }
-
-    public function getExtendedType()
-    {
-        return TextareaType::class;
     }
 }

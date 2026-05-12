@@ -4,7 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\ApiToken;
 use App\Entity\User;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserFixture extends BaseFixture
@@ -16,13 +16,14 @@ class UserFixture extends BaseFixture
         $this->passwordEncoder = $passwordEncoder;
     }
 
-    protected function loadData(ObjectManager $manager)
+    protected function loadData(ObjectManager $manager): void
     {
         $this->createMany(10, 'main_users', function($i) use ($manager) {
             $user = new User();
             $user->setEmail(sprintf('spacebar%d@example.com', $i));
             $user->setFirstName($this->faker->firstName);
             $user->agreeToTerms();
+            $user->setSubscribeToNewsletter($this->faker->boolean());
 
             if ($this->faker->boolean) {
                 $user->setTwitterUsername($this->faker->userName);
@@ -47,6 +48,7 @@ class UserFixture extends BaseFixture
             $user->setFirstName($this->faker->firstName);
             $user->setRoles(['ROLE_ADMIN']);
             $user->agreeToTerms();
+            $user->setSubscribeToNewsletter(false);
 
             $user->setPassword($this->passwordEncoder->encodePassword(
                 $user,
