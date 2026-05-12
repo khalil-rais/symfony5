@@ -86,8 +86,18 @@ class ArticleAdminController extends BaseController
             Add the @Route() with,
             how about, /admin/upload/test and name="upload_test".
             But don't do anything else yet.
+        */
+        /*
+            In some ways, uploading a file is really no different than any other form field:
+            you're always just sending data to the server
+            where each data has a key equal to its name attribute.
+            So, the same as any form, to read the submitted data,
+            we'll need the request object.
+            Add a new argument with a Request type-hint - the one from HttpFoundation - $request.
+            Then say: dd() - that's dump & die - $request->files->get('image').
+            I'm using image because that's the name attribute used on the field.
          */
-        // ... line 75
+        dd($request->files->get('image'));
     }
 
     /**
