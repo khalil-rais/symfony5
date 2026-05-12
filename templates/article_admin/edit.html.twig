@@ -2,7 +2,29 @@
 
 {% block content_body %}
     <h1>Edit the Article! 🚀</h1>
+    {#
+        Copy the route name,
+        then open the template for the edit page:
+        templates/article_admin/edit.html.twig.
+        The Symfony form lives inside the _form.html.twig template.
+        So, above that form tag, add a new form tag, with method="POST" and action="" set to {{ path('upload_test') }}.
+        Inside, we only need one thing <input type="file">.
+        We need to give this a name so we can reference it on the server:
+        how about name="image".
+        Finally, add <button type="submit"> and I'll add some classes
+        so that this isn't the ugliest button ever.
+        Say: Upload!
+    #}
+    <form method="POST" action="{{ path('upload_test') }}">
+        <input type="file" name="image">
 
+        <button type="submit" class="btn btn-primary">Upload !</button>
+    </form>
+
+    <hr>
+    {#
+        That's it! The simplest possible file upload setup: one field, one button.
+    #}
     {{ include('article_admin/_form.html.twig', {
         button_text: 'Update!'
     }) }}

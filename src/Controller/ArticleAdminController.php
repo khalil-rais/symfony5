@@ -68,6 +68,29 @@ class ArticleAdminController extends BaseController
     }
 
     /**
+     * @Route("/admin/upload/test", name="upload_test")
+     */
+    public function temporaryUploadAction(Request $request)
+    {
+        /*
+            This page uses a Symfony form.
+            And we will learn how to add a file upload field to a form object.
+            But let's start simpler - with a good old-fashioned HTML form.
+            The controller behind this page live at src/Controller/ArticleAdminController.php,
+            and we're on the edit() action.
+            Create a totally new, temporary endpoint:
+            public function temporaryUploadAction().
+            We're going to create an HTML form in our template,
+            put an input file field inside,
+            and make it submit to this action.
+            Add the @Route() with,
+            how about, /admin/upload/test and name="upload_test".
+            But don't do anything else yet.
+         */
+        // ... line 75
+    }
+
+    /**
      * @Route("/admin/article/location-select", name="admin_article_location_select")
      * @IsGranted("ROLE_USER")
      */
