@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class UserRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, User::class);
     }
@@ -40,30 +40,6 @@ class UserRepository extends ServiceEntityRepository
             ->andWhere('u.email LIKE :query')
             ->setParameter('query', '%'.$query.'%')
             ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
-    }
-
-    /*
-     * @return User[]
-     */
-    public function findAllSubscribedToNewsletter(): array
-    {
-        /*
-            The first thing we need to do is find all users
-            that have this $subscribeToNewsletter property set to true in the database.
-            To keep our code squeaky clean,
-            let's add a custom repository method for that in UserRepository.
-            How about public function findAllSubscribedToNewsletter().
-            This will return an array.
-            
-            Inside, return $this->createQueryBuilder(), u as the alias, ->andWhere('u.subscribeToNewsletter = 1'),
-            ->getQuery() and ->getResult().
-            
-            Above the method, we can advertise that this specifically returns an array of User objects.
-         */
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.subscribeToNewsletter = 1')
             ->getQuery()
             ->getResult();
     }

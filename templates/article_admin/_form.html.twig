@@ -2,24 +2,6 @@
     {{ form_row(articleForm.title, {
         label: 'Article title'
     }) }}
-
-    <div class="row">
-        <div class="col-sm-9">
-            {{ form_row(articleForm.imageFile, {
-                attr: {
-                    'placeholder': 'Select an article image'
-                }
-            }) }}
-        </div>
-        <div class="col-sm-3">
-            {% if articleForm.vars.data.imageFilename|default %}
-                <a href="{{ uploaded_asset(articleForm.vars.data.imagePath) }}" target="_blank">
-                    <img src="{{ articleForm.vars.data.imagePath|imagine_filter('squared_thumbnail_small') }}" height="100">
-                </a>
-            {% endif %}
-        </div>
-    </div>
-
     {{ form_row(articleForm.author) }}
     {{ form_row(articleForm.location, {
         attr: {

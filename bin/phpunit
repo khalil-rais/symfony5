@@ -1,20 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-/**
- * Prefer Composer's phpunit/phpunit so we do not run simple-phpunit's nested Composer
- * install (bin/.phpunit/...) which can pin platform PHP to 7.0.99 and break resolution.
- */
-$projectDir = dirname(__DIR__);
-$composerPhpunit = $projectDir.'/vendor/phpunit/phpunit/phpunit';
-
-if (is_file($composerPhpunit)) {
-    require $composerPhpunit;
-    return;
-}
-
-if (!file_exists($projectDir.'/vendor/symfony/phpunit-bridge/bin/simple-phpunit')) {
-    fwrite(STDERR, "PHPUnit not found. Run: composer install\n");
+if (!file_exists(dirname(__DIR__).'/vendor/symfony/phpunit-bridge/bin/simple-phpunit')) {
+    echo "Unable to find the `simple-phpunit` script in `vendor/symfony/phpunit-bridge/bin/`.\n";
     exit(1);
 }
 
@@ -25,7 +13,7 @@ if (false === getenv('SYMFONY_PHPUNIT_REMOVE')) {
     putenv('SYMFONY_PHPUNIT_REMOVE=');
 }
 if (false === getenv('SYMFONY_PHPUNIT_DIR')) {
-    putenv('SYMFONY_PHPUNIT_DIR='.$projectDir.'/bin/.phpunit');
+    putenv('SYMFONY_PHPUNIT_DIR='.__DIR__.'/.phpunit');
 }
 
-require $projectDir.'/vendor/symfony/phpunit-bridge/bin/simple-phpunit';
+require dirname(__DIR__).'/vendor/symfony/phpunit-bridge/bin/simple-phpunit';

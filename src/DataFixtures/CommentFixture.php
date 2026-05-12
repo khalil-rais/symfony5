@@ -5,11 +5,11 @@ namespace App\DataFixtures;
 use App\Entity\Article;
 use App\Entity\Comment;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\Persistence\ObjectManager;
 
 class CommentFixture extends BaseFixture implements DependentFixtureInterface
 {
-    protected function loadData(ObjectManager $manager): void
+    protected function loadData(ObjectManager $manager)
     {
         $this->createMany(100, 'main_comments', function() {
             $comment = new Comment();
@@ -28,7 +28,7 @@ class CommentFixture extends BaseFixture implements DependentFixtureInterface
         $manager->flush();
     }
 
-    public function getDependencies(): array
+    public function getDependencies()
     {
         return [ArticleFixtures::class];
     }

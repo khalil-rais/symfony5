@@ -5,8 +5,7 @@ namespace App\Repository;
 use App\Entity\Article;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Persistence\ManagerRegistry;
-use App\Entity\User;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * @method Article|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,7 +15,7 @@ use App\Entity\User;
  */
 class ArticleRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, Article::class);
     }
@@ -56,32 +55,5 @@ class ArticleRepository extends ServiceEntityRepository
     private function getOrCreateQueryBuilder(QueryBuilder $qb = null)
     {
         return $qb ?: $this->createQueryBuilder('a');
-    }
-
-    /**
-     * @return Article[]
-     */
-    public function findAllPublishedLastWeekByAuthor(User $author): array
-    {
-        /*
-            Open up ArticleRepository and add a new method for this -
-            findAllPublishedLastWeekByAuthor() - with a single argument: the User object.
-            This will return an array of articles:
-            let's advertise that above.
-            The query itself is pretty simple:
-            return $this->createQueryBuilder() with ->andWhere('a.author = :author)
-            to limit to only this author -
-            we'll set the :author parameter in a second - then ->andWhere('a.publishedAt > :week_ago').
-            For the placeholders, call setParameter() to set author to the $author variable,
-            and ->setParameter() again to set week_ago to a new \DateTime('-1 week').
-            Finish with the normal ->getQuery() and ->getResult().
-         */
-        return $this->createQueryBuilder('a')
-            ->andWhere('a.author = :author')
-            ->andWhere('a.publishedAt > :week_ago')
-            ->setParameter('author', $author)
-            ->setParameter('week_ago', new \DateTime('-1 week'))
-            ->getQuery()
-            ->getResult();
     }
 }

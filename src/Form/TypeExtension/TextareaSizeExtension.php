@@ -31,8 +31,8 @@ class TextareaSizeExtension implements FormTypeExtensionInterface
         ]);
     }
 
-    public static function getExtendedTypes(): iterable
+    public function getExtendedType()
     {
-        return [TextareaType::class];
+        return TextareaType::class;
     }
 }

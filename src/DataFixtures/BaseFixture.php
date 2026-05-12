@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\Persistence\ObjectManager;
 use Faker\Factory;
 use Faker\Generator;
 
@@ -17,9 +17,9 @@ abstract class BaseFixture extends Fixture
 
     private $referencesIndex = [];
 
-    abstract protected function loadData(ObjectManager $manager): void;
+    abstract protected function loadData(ObjectManager $manager);
 
-    public function load(ObjectManager $manager): void
+    public function load(ObjectManager $manager)
     {
         $this->manager = $manager;
         $this->faker = Factory::create();
@@ -59,19 +59,13 @@ abstract class BaseFixture extends Fixture
         }
     }
 
-    /**
-     * @return object
-     */
-    protected function getRandomReference(string $groupName)
-    {
+    protected function getRandomReference(string $groupName) {
         if (!isset($this->referencesIndex[$groupName])) {
             $this->referencesIndex[$groupName] = [];
 
-            foreach ($this->referenceRepository->getReferencesByClass() as $class => $refs) {
-                foreach ($refs as $key => $ref) {
-                    if (strpos((string) $key, $groupName . '_') === 0) {
-                        $this->referencesIndex[$groupName][] = ['name' => $key, 'class' => $class];
-                    }
+            foreach ($this->referenceRepository->getReferences() as $key => $ref) {
+                if (strpos($key, $groupName.'_') === 0) {
+                    $this->referencesIndex[$groupName][] = $key;
                 }
             }
         }
@@ -80,19 +74,16 @@ abstract class BaseFixture extends Fixture
             throw new \InvalidArgumentException(sprintf('Did not find any references saved with the group name "%s"', $groupName));
         }
 
-        $entry = $this->faker->randomElement($this->referencesIndex[$groupName]);
+        $randomReferenceKey = $this->faker->randomElement($this->referencesIndex[$groupName]);
 
-        return $this->getReference($entry['name'], $entry['class']);
+        return $this->getReference($randomReferenceKey);
     }
 
-    /**
-     * @return object[]
-     */
-    protected function getRandomReferences(string $groupName, int $count): array
+    protected function getRandomReferences(string $className, int $count)
     {
         $references = [];
         while (count($references) < $count) {
-            $references[] = $this->getRandomReference($groupName);
+            $references[] = $this->getRandomReference($className);
         }
 
         return $references;

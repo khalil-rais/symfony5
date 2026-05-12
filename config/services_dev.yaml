@@ -1,7 +1,2 @@
-# Dev-only service overrides (optional).
-# Mail recipient redirection: config/packages/dev/mailer.yaml
-
-services:
-    _defaults:
-        autowire: true
-        autoconfigure: true
+parameters:
+    cache_adapter: 'cache.adapter.filesystem'

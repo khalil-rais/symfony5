@@ -7,17 +7,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         {% block stylesheets %}
-            {#
-                This is why, in base.html.twig we simply use encore_entry_link_tags()
-                and it takes care of everything.
-                How? Behind the scenes, it looks in the public/build/ directory for an entrypoints.json file that Encore builds.
-                This is the key: it tells us exactly which CSS and JS files are needed for each entrypoint - like app.
-                Or, for email, yep!
-                It contains the two CSS files.
-                The problem is that we don't want to just output link tags.
-                We actually need to read the source of those files and pass that to inline_css().
-            #}
-            {{ encore_entry_link_tags('app') }}
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+            <link rel="stylesheet" href="{{ asset('css/font-awesome.css') }}">
+            <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
         {% endblock %}
     </head>
 
@@ -79,12 +71,6 @@
             </div>
         {% endfor %}
 
-        {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">
-                {{ message }}
-            </div>
-        {% endfor %}
-
         {% block body %}{% endblock %}
 
         <footer class="footer">
@@ -95,7 +81,12 @@
 
 
         {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
+            <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+            <script>
+                $('.dropdown-toggle').dropdown();
+            </script>
         {% endblock %}
     </body>
 </html>

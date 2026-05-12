@@ -9,15 +9,9 @@ use App\Security\LoginFormAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mailer\Exception\ExceptionInterface as MailerException;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use App\Service\Mailer;
 
 class SecurityController extends AbstractController
 {
@@ -49,13 +43,7 @@ class SecurityController extends AbstractController
     /**
      * @Route("/register", name="app_register")
      */
-    public function register(Mailer $mailer, Request $request, UserPasswordHasherInterface $passwordHasher, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $formAuthenticator)
-    /*
-        I love it!
-        This will simplify life dramatically in SecurityController.
-        Delete all the logic and then above
-        replace the MailerInterface argument with our shiny new Mailer class.
-    */
+    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $formAuthenticator)
     {
         $form = $this->createForm(UserRegistrationFormType::class);
         $form->handleRequest($request);
@@ -65,9 +53,8 @@ class SecurityController extends AbstractController
             $userModel = $form->getData();
 
             $user = new User();
-            $user->setFirstName($userModel->firstName);
             $user->setEmail($userModel->email);
-            $user->setPassword($passwordHasher->hashPassword(
+            $user->setPassword($passwordEncoder->encodePassword(
                 $user,
                 $userModel->plainPassword
             ));
@@ -75,15 +62,10 @@ class SecurityController extends AbstractController
             if (true === $userModel->agreeTerms) {
                 $user->agreeToTerms();
             }
-            $user->setSubscribeToNewsletter($userModel->subscribeToNewsletter);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
-            /*
-                Below, it's as simple as $mailer->sendWelcomeMessage($user).
-             */
-            $mailer->sendWelcomeMessage($user);
 
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,

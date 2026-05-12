@@ -4,19 +4,19 @@ namespace App\DataFixtures;
 
 use App\Entity\ApiToken;
 use App\Entity\User;
-use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserFixture extends BaseFixture
 {
-    private $passwordHasher;
+    private $passwordEncoder;
 
-    public function __construct(UserPasswordHasherInterface $passwordHasher)
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->passwordHasher = $passwordHasher;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
-    protected function loadData(ObjectManager $manager): void
+    protected function loadData(ObjectManager $manager)
     {
         $this->createMany(10, 'main_users', function($i) use ($manager) {
             $user = new User();
@@ -27,11 +27,8 @@ class UserFixture extends BaseFixture
             if ($this->faker->boolean) {
                 $user->setTwitterUsername($this->faker->userName);
             }
-            if ($this->faker->boolean(75)) {
-                $user->setSubscribeToNewsletter(true);
-            }
 
-            $user->setPassword($this->passwordHasher->hashPassword(
+            $user->setPassword($this->passwordEncoder->encodePassword(
                 $user,
                 'engage'
             ));
@@ -51,7 +48,7 @@ class UserFixture extends BaseFixture
             $user->setRoles(['ROLE_ADMIN']);
             $user->agreeToTerms();
 
-            $user->setPassword($this->passwordHasher->hashPassword(
+            $user->setPassword($this->passwordEncoder->encodePassword(
                 $user,
                 'engage'
             ));

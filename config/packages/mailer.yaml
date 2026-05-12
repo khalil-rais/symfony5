@@ -1,5 +1,0 @@
-# Mailer DSN (use APP_MAILER_DSN so Symfony CLI / Docker do not override MAILER_DSN).
-# Dev-only recipient redirect: config/packages/dev/mailer.yaml (framework.mailer.envelope).
-framework:
-    mailer:
-        dsn: '%env(APP_MAILER_DSN)%'

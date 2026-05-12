@@ -2,30 +2,42 @@
 
 namespace App\Entity;
 
-use App\Entity\Traits\TimestampableEntityTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\CommentRepository')]
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
+ */
 class Comment
 {
-    use TimestampableEntityTrait;
+    use TimestampableEntity;
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
     private $authorName;
 
-    #[ORM\Column(type: 'text')]
+    /**
+     * @ORM\Column(type="text")
+     */
     private $content;
 
-    #[ORM\ManyToOne(targetEntity: Article::class, inversedBy: 'comments')]
-    #[ORM\JoinColumn(nullable: false)]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Article", inversedBy="comments")
+     * @ORM\JoinColumn(nullable=false)
+     */
     private $article;
 
-    #[ORM\Column(type: 'boolean')]
+    /**
+     * @ORM\Column(type="boolean")
+     */
     private $isDeleted = false;
 
     public function getId()

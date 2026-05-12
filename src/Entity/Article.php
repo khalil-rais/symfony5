@@ -3,72 +3,93 @@
 namespace App\Entity;
 
 use App\Repository\CommentRepository;
-use App\Service\UploaderHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Traits\TimestampableEntityTrait;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\ArticleRepository')]
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\ArticleRepository")
+ */
 class Article
 {
-    use TimestampableEntityTrait;
+    use TimestampableEntity;
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank(message: 'Get creative and think of a title!')]
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Get creative and think of a title!")
+     */
     private $title;
 
-    #[ORM\Column(type: 'string', length: 100, unique: true)]
-    #[Gedmo\Slug(fields: ['title'])]
+    /**
+     * @ORM\Column(type="string", length=100, unique=true)
+     * @Gedmo\Slug(fields={"title"})
+     */
     private $slug;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
     private $content;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
     private $publishedAt;
 
-    #[ORM\Column(type: 'integer')]
+    /**
+     * @ORM\Column(type="integer")
+     */
     private $heartCount = 0;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private $imageFilename;
 
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'article', fetch: 'EXTRA_LAZY')]
-    #[ORM\OrderBy(['createdAt' => 'DESC'])]
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="article", fetch="EXTRA_LAZY")
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
     private $comments;
 
-    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'articles')]
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="articles")
+     */
     private $tags;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: 'Please set an author')]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="articles")
+     * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotNull(message="Please set an author")
+     */
     private $author;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private $location;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private $specificLocationName;
-
-    #[ORM\OneToMany(targetEntity: ArticleReference::class, mappedBy: 'article')]
-    #[ORM\OrderBy(['position' => 'ASC'])]
-    private $articleReferences;
 
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
-        $this->articleReferences = new ArrayCollection();
     }
 
     public function getId()
@@ -87,6 +108,7 @@ class Article
 
         return $this;
     }
+
 
     public function getSlug(): ?string
     {
@@ -162,7 +184,7 @@ class Article
 
     public function getImagePath()
     {
-        return UploaderHelper::ARTICLE_IMAGE.'/'.$this->getImageFilename();
+        return 'images/'.$this->getImageFilename();
     }
 
     /**
@@ -197,6 +219,7 @@ class Article
     {
         if ($this->comments->contains($comment)) {
             $this->comments->removeElement($comment);
+            // set the owning side to null (unless already changed)
             if ($comment->getArticle() === $this) {
                 $comment->setArticle(null);
             }
@@ -281,13 +304,5 @@ class Article
         $this->specificLocationName = $specificLocationName;
 
         return $this;
-    }
-
-    /**
-     * @return Collection|ArticleReference[]
-     */
-    public function getArticleReferences(): Collection
-    {
-        return $this->articleReferences;
     }
 }

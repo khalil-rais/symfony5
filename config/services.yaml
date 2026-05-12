@@ -4,46 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    # See this app key?
-    # This is where you can tell Symfony
-    # where it should store things
-    # that need to be added to cache at runtime,
-    # like the filesystem, redis or APCu.
-    # In an earlier tutorial, we set this to a parameter that we invented: %cache_adapter%.
-    # This allows us to do something cool.
-    # Open config/services.yaml.
-    # Here, we set cache_adapter to cache.adapter.apcu:
-    # we told Symfony to store cache in APCu.
-    # And apparently, I don't have that extension installed on my local machine.
-    # Ok fine but then how the heck is the website working?
-    # Shouldn't we be getting this error everywhere?
-    # Yep except that we override this value in services_dev.yaml -
-    # a file that is only loaded in the dev environment.
-
-    # So, honestly I should have set this all up better.
-    # And now, I will.
-    # Change the default cache adapter to cache.adapter.filesystem.
-    cache_adapter: cache.adapter.filesystem
+    cache_adapter: cache.adapter.apcu
     locale: 'en'
-    default_site_base_url: 'http://localhost'
-    uploads_base_url: '%env(default:default_site_base_url:SITE_BASE_URL)%/uploads'
-    # Back in services.yaml, use these values: %env(SITE_BASE_SCHEME)% and %env(SITE_BASE_HOST)%
-    # config/services.yaml
-    # Cool!
-    router.request_context.scheme: '%env(SITE_BASE_SCHEME)%'
-    router.request_context.host: '%env(SITE_BASE_HOST)%'
-
-    # This works, but if you need to override the scheme or host in .env.local,
-    # you would also need to repeat the SITE_BASE_URL= to set it again.
-    # A better solution would be to set the SITE_BASE_URL just once using a config trick in services.yaml:
-    env(SITE_BASE_URL): '%env(SITE_BASE_SCHEME)%://%env(SITE_BASE_HOST)%'
-    # Try the command one last time:
-    # php bin/console app:author-weekly-report:send
-    # And check it out in Mailtrap!
-    # Yes! This time the link points to localhost:8000.
-    # Next! Let's talk about attaching files to an email.
-    # Hmm, but to make it more interesting,
-    # let's first learn how to generate a styled PDF.
 
 services:
     # default configuration for services in *this* file
@@ -58,24 +20,6 @@ services:
         bind:
             $markdownLogger: '@monolog.logger.markdown'
             $isDebug: '%kernel.debug%'
-            $uploadsFilesystem: '@oneup_flysystem.uploads_filesystem_filesystem'
-            $uploadedAssetsBaseUrl: '%uploads_base_url%'
-            # We could hardcode the path to the public/ directory right here.
-            # But instead, let's set up a new "binding" that we can pass through the constructor.
-            # Open up config/services.yaml.
-            # In our Symfony Fundamentals Course, we talk about
-            # how the global bind below _defaults can be used to allow scalar arguments
-            # to be autowired into our services.
-            # Add a new one:
-            # string $publicDir set to %kernel.project_dir% -
-            # that's a built-in parameter - /public.
-            string $publicDir: '%kernel.project_dir%/public'
-            # This string part before $publicDir is optional.
-            # But by adding it, we're literally saying that this value should be passed
-            # if an argument is exactly string $publicDir.
-            # Being able to add the type-hint to a bind is a new feature in Symfony 4.2.
-            # We didn't use it on the earlier binds,
-            # but we could have.
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'
@@ -97,6 +41,5 @@ services:
 
     App\Form\TypeExtension\TextareaSizeExtension:
         tags:
-            - { name: form.type_extension }
-
-    Symfony\Component\Asset\Context\RequestStackContext: '@assets.context'
+            - { name: form.type_extension,
+                extended_type: Symfony\Component\Form\Extension\Core\Type\TextareaType }

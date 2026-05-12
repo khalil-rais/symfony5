@@ -4,22 +4,32 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\ApiTokenRepository')]
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\ApiTokenRepository")
+ */
 class ApiToken
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
     private $token;
 
-    #[ORM\Column(type: 'datetime')]
+    /**
+     * @ORM\Column(type="datetime")
+     */
     private $expiresAt;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'apiTokens')]
-    #[ORM\JoinColumn(nullable: false)]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="apiTokens")
+     * @ORM\JoinColumn(nullable=false)
+     */
     private $user;
 
     public function __construct(User $user)
