@@ -137,12 +137,56 @@ class ArticleAdminController extends BaseController
             Set $newFilename to uniqid(),
             a '-' then $uploadedFile->getClientOriginalName().
             Below, use $newFilename.
-         */
-        $newFilename = uniqid().'-'.$uploadedFile->getClientOriginalName();
+        */
+        /*
+            The other thing I want to solve
+            is the possibility that someone uploads an image with a totally insane file extension - like .potato.
+            We can fix this really nicely.
+            Create a new variable called $originalFilename set to pathinfo() with $uploadedFile->getClientOriginalName() and the constant PATHINFO_FILENAME.
+            This will give us the original filename - astronaut.jpg - but without the file extension:
+            so, just astronaut.
+            Then, for the filename, use $originalFilename, a dash, the uniqid(), a period, and now the real extension of the file: $uploadedFile->guessExtension().
+            Oh, see how there are two methods: ->guessClientExtension() and ->guessExtension()?
+            The difference is important: the guessExtension() method looks at the file contents,
+            determines the mime type, and returns the file extension for that.
+            But the guessClientExtension() uses the mime type the user sent which can't be trusted.
+        */
+        $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $newFilename = $originalFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
         dd($uploadedFile->move(
             $destination,
             $newFilename
         ));
+        /*
+            So, we're not validating that this is an image file yet,
+            but no matter what they upload,
+            we should now get the correct file extension.
+            Give it a try! Nice! We've got a .jpeg ending.
+            ArticleAdminController.php on line 156:
+            Symfony\Component\HttpFoundation\File\File {#843 ▼
+              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
+              filename: "neural_network-6a04a0d6f1368.png"
+              basename: "neural_network-6a04a0d6f1368.png"
+              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural_network-6a04a0d6f1368.png"
+              extension: "png"
+              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural_network-6a04a0d6f1368.png"
+              aTime: 2026-05-13 16:03:34
+              mTime: 2026-05-13 16:03:34
+              cTime: 2026-05-13 16:03:34
+              inode: 95782540
+              size: 943116
+              perms: 0100666
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+         */
         /*
             ArticleAdminController.php on line 142:
             Symfony\Component\HttpFoundation\File\File {#887 ▼
