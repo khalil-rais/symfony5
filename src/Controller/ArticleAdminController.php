@@ -131,10 +131,54 @@ class ArticleAdminController extends BaseController
             it's one of the pieces of data that is sent up on the request,
             along with the file contents.
          */
+        /*
+            There are a few ways to handle the unique problem,
+            but the easiest one is just to add some sort of unique id to the filename.
+            Set $newFilename to uniqid(),
+            a '-' then $uploadedFile->getClientOriginalName().
+            Below, use $newFilename.
+         */
+        $newFilename = uniqid().'-'.$uploadedFile->getClientOriginalName();
         dd($uploadedFile->move(
             $destination,
-            $uploadedFile->getClientOriginalName()
+            $newFilename
         ));
+        /*
+            ArticleAdminController.php on line 142:
+            Symfony\Component\HttpFoundation\File\File {#887 ▼
+              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
+              filename: "6a049e612377f-image.png"
+              basename: "6a049e612377f-image.png"
+              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/6a049e612377f-image.png"
+              extension: "png"
+              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/6a049e612377f-image.png"
+              aTime: 2026-05-13 15:53:05
+              mTime: 2026-05-13 15:53:04
+              cTime: 2026-05-13 15:53:05
+              inode: 95779177
+              size: 110234
+              perms: 0100666
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+         */
+        /*
+            Let's try that! Better.
+            It's kind of an ugly hash on the beginning of the filename,
+            but it does solve the unique problem.
+            You can also use a shorter hash or,
+            when we actually save this data to our Article object,
+            you could use the Article id instead of the hash.
+            Or, if you really want to keep the original filename exactly as it was,
+            well we'll talk about that later when we upload "references" to our Article.
+         */
         /*
             ArticleAdminController.php on line 134:
             Symfony\Component\HttpFoundation\File\File {#887 ▼
