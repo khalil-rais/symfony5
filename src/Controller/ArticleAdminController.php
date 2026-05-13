@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Behat\Transliterator\Transliterator;
 
 class ArticleAdminController extends BaseController
 {
@@ -152,7 +153,50 @@ class ArticleAdminController extends BaseController
             But the guessClientExtension() uses the mime type the user sent which can't be trusted.
         */
         $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-        $newFilename = $originalFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+        /*
+            There's one last thing you might want to do and it's really optional.
+            Go back to the form.
+            One of my files has uppercase letters and spaces inside.
+            Let's try uploading that.
+            It works! There is no problem with storing spaces or most weird characters on a filesystem.
+            But if you want to guarantee cleaner filenames,
+            there's an easy way to do that.
+            I'll use a class called Urlizer: this comes from the gedmo/doctrine-extensions library.
+            It has a nice method called urlize() and we can wrap our $originalFilename in that to make it a bit cleaner.
+         */
+        $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
+        /*
+            Try that out. Nice!
+            ArticleAdminController.php on line 157:
+            Symfony\Component\HttpFoundation\File\File {#847 ▼
+              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
+              filename: "neural-network-6a04a3648225e.png"
+              basename: "neural-network-6a04a3648225e.png"
+              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural-network-6a04a3648225e.png"
+              extension: "png"
+              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural-network-6a04a3648225e.png"
+              aTime: 2026-05-13 16:14:28
+              mTime: 2026-05-13 16:14:28
+              cTime: 2026-05-13 16:14:28
+              inode: 95788058
+              size: 943116
+              perms: 0100666
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+            So now we have a unique, normalized filename that at least looks a bit like the original filename.
+            Later, we'll see how we can keep the exact original filename in all cases if you care.
+            But unless your users are downloading these files,
+            the exact filenames aren't usually that important.
+            Next: it's time to put this upload field properly into our Symfony form and save the filename to the Article entity.
+         */
         dd($uploadedFile->move(
             $destination,
             $newFilename
