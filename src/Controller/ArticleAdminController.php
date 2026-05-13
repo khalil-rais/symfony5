@@ -98,6 +98,133 @@ class ArticleAdminController extends BaseController
             I'm using image because that's the name attribute used on the field.
          */
         dd($request->files->get('image'));
+        /*
+            ArticleAdminController.php on line 100:
+            Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
+              -test: false
+              -originalName: "image (2).png"
+              -mimeType: "image/png"
+              -error: 0
+              path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
+              filename: "php9hokarb4di64a3ZaKFK"
+              basename: "php9hokarb4di64a3ZaKFK"
+              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php9hokarb4di64a3ZaKFK"
+              extension: ""
+              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php9hokarb4di64a3ZaKFK"
+              aTime: 2026-05-13 07:18:49
+              mTime: 2026-05-13 07:18:49
+              cTime: 2026-05-13 07:18:49
+              inode: 95313761
+              size: 120507
+              perms: 0100600
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+         */
+
+        /*
+            Refresh the form so the new attribute is rendered.
+            Let's choose the astronaut again.
+            And before hitting Upload,
+            open up your developer tools and go to the Network tab:
+            I want to see what this request looks like.
+            Hit upload!
+            Nice! This time we get an UploadedFile object full of useful data.
+            But before we dive into that,
+            look down at the network tools and find the POST request we just made.
+
+            Accept
+            	text/html,application/xhtml+xml,application/xml;q=0.9,*;q=0.8
+            Accept-Encoding
+            	gzip, deflate, br, zstd
+            Accept-Language
+            	en-US,en;q=0.5
+            Cache-Control
+            	no-cache
+            Connection
+            	keep-alive
+            Content-Length
+            	120724
+            Content-Type
+            	multipart/form-data; boundary=----geckoformboundary2461054baf588057a19dfbf058ec8444
+            Cookie
+            	PHPSESSID=d8d3fdd9a91b39ff2ae3e17825e56150
+            Host
+            	127.0.0.1:8000
+            Origin
+            	https://127.0.0.1:8000
+            Pragma
+            	no-cache
+            Priority
+            	u=0, i
+            Referer
+            	https://127.0.0.1:8000/admin/article/41/edit
+            Sec-Fetch-Dest
+            	document
+            Sec-Fetch-Mode
+            	navigate
+            Sec-Fetch-Site
+            	same-origin
+            Sec-Fetch-User
+                ?1
+                TE
+            	trailers
+            Upgrade-Insecure-Requests
+            	1
+            User-Agent
+            	Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    
+            If you look at the request headers, here it is:
+            our browser sent a
+            Content-Type: multipart/form-data header.
+            This is because of the enctype attribute.
+            It also added this weird boundary=----WebkitFormBoundary thing.
+            Ok: this stuff is super-nerdy-cool.
+            Normally, when you do not have that enctype attribute,
+            when you submit a form,
+            all of the data is sent in the body of the request in a big string full of
+            what looks like query parameters.
+            That's kind of invisible to us, because PHP parses all of that and makes
+            the data available.
+            But when you add the multipart/form-data attribute,
+            it tells our browser to send the data in a different format.
+            It's actually kind of hard to see what the body of these requests look like - Chrome hides it.
+            No worries! Through the magic of TV boom!
+            This is what the body of that request looks like.
+            Weird, right! Each field is separated by this mysterious WebkitFormBoundary thing,
+            which is the string that we saw in the Content-Type header!
+            Our form only has one field,
+            but if we had multiple, this separator would be between every field.
+            Our browsers invents this string,
+            separates each piece of data with it,
+            then sends this separator up with the request
+            so that the server knows how to parse everything.
+            Why is this cool?
+            Because we can now send up multiple pieces of information about our name="image" field,
+            like the original filename on our system and what type of file it is,
+            which by the way, can be totally faked by the user.
+            More on that later. After all that, we've got the data itself!
+            If you look all the way at the bottom,
+            it has another WebKitFormBoundary line.
+            If there were more fields on this form,
+            you'd see their data below - all separated by another "boundary".
+            So that's it! It literally tells our browser to send the data in a different format,
+            and PHP understands both formats just fine.
+            We need this format when doing file uploads because a file upload is more than just its contents:
+            we also want to send some metadata.
+            And also, due to how the data is encoded,
+            if you were able to send binary data on a normal request,
+            without the multipart/form-data encoding,
+            it would increase the amount of data you need to upload by as much as three times!
+            Not great for uploads!
+         */
     }
 
     /**
