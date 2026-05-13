@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ArticleAdminController extends BaseController
 {
@@ -73,6 +74,18 @@ class ArticleAdminController extends BaseController
     public function temporaryUploadAction(Request $request)
     {
         /*
+            Let's get to work inside of our controller to move the file.
+            First, set the uploaded file to a new $uploadedFile variable.
+            And, unfortunately, the phpdoc on this get() method is a bit generic,
+            so it doesn't tell our editor that this will be an UploadedFile object.
+            Because I'm obsessed with auto-completion,
+            let's add inline doc about this:
+            this will be an UploadedFile object - but not the one from Guzzle - the one from HttpFoundation in Symfony.
+         */
+        /** @var UploadedFile $uploadedFile */
+        $uploadedFile = $request->files->get('image');
+
+        /*
             This page uses a Symfony form.
             And we will learn how to add a file upload field to a form object.
             But let's start simpler - with a good old-fashioned HTML form.
@@ -97,7 +110,62 @@ class ArticleAdminController extends BaseController
             Then say: dd() - that's dump & die - $request->files->get('image').
             I'm using image because that's the name attribute used on the field.
          */
-        dd($request->files->get('image'));
+        /*
+            And guess what? This UploadedFile object has a super useful method on it: move()!
+            Give it the destination directory and it'll take care of the rest.
+            To get that directory, say $destination =
+            and we need to get the path to our uploads/ directory.
+            The best way is to read a parameter: $this->getParameter('kernel.project_dir'),
+            to get the absolute path to the root of the app - then /public/uploads.
+            Then add $uploadedFile->move() and pass it $destination.
+            Hold Command or Ctrl and click this method.
+            Ah, it returns a File object that represents the new file.
+            Let's see what this looks like: surround this entire call with dd().
+         */
+        $destination = $this->getParameter('kernel.project_dir').'/public/uploads';
+        dd($uploadedFile->move($destination));
+        /*
+            ArticleAdminController.php on line 126:
+            Symfony\Component\HttpFoundation\File\File {#693 ▼
+              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
+              filename: "phplg3v8h2gio9fd3gGH54"
+              basename: "phplg3v8h2gio9fd3gGH54"
+              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/phplg3v8h2gio9fd3gGH54"
+              extension: ""
+              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/phplg3v8h2gio9fd3gGH54"
+              aTime: 2026-05-13 15:18:57
+              mTime: 2026-05-13 15:18:57
+              cTime: 2026-05-13 15:18:57
+              inode: 95770732
+              size: 110234
+              perms: 0100666
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+         */
+
+        /*
+            Alright team!
+            Find your browser, refresh and re-post that upload.
+            I think it worked!
+            The dumped file object tells me that there is a new file in our public/uploads/ directory.
+            Let's go check it out! There it is!
+            Well, I think that's it but sheesh - the filename is terrible.
+            Let's check its file size:
+            ls -la public/uploads/
+            total 224
+            drwxr-xr-x@ 4 khalil.rais  staff     128 13 Mai  17:18 .
+            drwxr-xr-x  8 khalil.rais  staff     256 13 Mai  16:58 ..
+            -rw-r--r--@ 1 khalil.rais  staff    1131 13 Mai  17:02 .gitignore
+            -rw-rw-rw-@ 1 khalil.rais  staff  110234 13 Mai  17:18 phplg3v8h2gio9fd3gGH54
+         */
         /*
             ArticleAdminController.php on line 100:
             Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
