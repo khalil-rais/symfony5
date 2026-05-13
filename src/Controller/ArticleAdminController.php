@@ -123,7 +123,45 @@ class ArticleAdminController extends BaseController
             Let's see what this looks like: surround this entire call with dd().
          */
         $destination = $this->getParameter('kernel.project_dir').'/public/uploads';
-        dd($uploadedFile->move($destination));
+        /*
+            Fortunately, the move() method has a second argument:
+            the name to give to the file.
+            The easiest name to use is: $uploadedFile->getClientOriginalName().
+            This is the name that the file had on my computer:
+            it's one of the pieces of data that is sent up on the request,
+            along with the file contents.
+         */
+        dd($uploadedFile->move(
+            $destination,
+            $uploadedFile->getClientOriginalName()
+        ));
+        /*
+            ArticleAdminController.php on line 134:
+            Symfony\Component\HttpFoundation\File\File {#887 ▼
+              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
+              filename: "image.png"
+              basename: "image.png"
+              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/image.png"
+              extension: "png"
+              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/image.png"
+              aTime: 2026-05-13 15:33:43
+              mTime: 2026-05-13 15:33:43
+              cTime: 2026-05-13 15:33:43
+              inode: 95774142
+              size: 110234
+              perms: 0100666
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+            Move over and resubmit the form again. There it is: astronaut.jpg!
+         */
         /*
             ArticleAdminController.php on line 126:
             Symfony\Component\HttpFoundation\File\File {#693 ▼
