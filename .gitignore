@@ -41,3 +41,20 @@ yarn-error.log
 ###> symfony/phpunit-bridge ###
 .phpunit
 ###< symfony/phpunit-bridge ###
+
+# Next, open up the real .gitignore file - the one at the root of your app -
+# and ignore the entire /public/uploads directory.
+# It's a bit weird, but thanks to this,
+# we will ignore all files in public/uploads except for the .gitignore file we already added.
+/public/uploads/
+# Why did we do this?
+# Well, unfortunately, you can't add a directory to git.
+# So by adding this .gitignore file,
+# it will guarantee that the public/uploads directory will exist when you clone the repository.
+# Honestly, the file could be named anything,
+# it's just sort of a common practice to use an empty .gitignore file for this.
+# Check it out: create a new file in public/uploads called foo.
+# Then, find your terminal and run:
+# git status
+# We see the new public/uploads/.gitignore file but we do not see the foo file.
+# That's perfect. Delete that.
