@@ -15,6 +15,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class ArticleFormType extends AbstractType
 {
@@ -50,6 +51,34 @@ class ArticleFormType extends AbstractType
                 ],
                 'required' => false,
             ])
+            /*
+                The form that handles this page lives at src/Form/ArticleFormType.php.
+                In ArticleAdminController if you scroll up a little bit here is the edit() action
+                and you can see it using this ArticleFormType.
+                Right now, this is a nice traditional form:
+                it handles the request and saves the Article to the database.
+                In ArticleFormType, add a new field with ->add()
+                and call it imageFilename
+                because that's the name of the property inside Article.
+                For the type, use FileType::class.
+                But there's a problem with this.
+                And if you already see it, extra credit points for you!
+                Move over and refresh.
+                “The form's view data is expected to be an instance of class File but it is a string.”
+                The problem is not super obvious
+                but it clearly hates something about our new field.
+                Here's the explanation:
+                we know that when you upload a file,
+                Symfony gives you an UploadedFile object, not a string.
+                But, the imageFilename field here on Article that is a string!
+             */
+            ->add('imageFilename', FileType::class)
+            /*
+                Connecting the form field directly to the string property doesn't make sense.
+                We're missing a layer in the middle:
+                something that can work with the UploadedFile object, move the
+                file, and then set the new filename onto the property.
+             */
         ;
 
         if ($options['include_published_at']) {
