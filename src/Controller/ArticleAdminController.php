@@ -68,29 +68,27 @@ class ArticleAdminController extends BaseController
             /** @var UploadedFile $uploadedFile */
             $uploadedFile = $form['imageFile']->getData();
             /*
-                Moment of truth! Find your browser, roll up your sleeves, and refresh!
-                Um it probably worked?
-                In the uploads/ directory yea!
-                There's our Earth file! Let's see what the database looks like.
-                Find your terminal and run:
-                php bin/console doctrine:query:sql 'SELECT * FROM article WHERE id = 41'
-                Let's see, the id of this article is 1.
-                Yes! the image_filename column is totally set!
-                Fist-pumping time!
+                Of course!
+                We're not uploading a file!
+                So the $uploadedFile variable is null! That's ok!
+                If the user didn't upload a file,
+                we don't need to do any of this logic.
+                In other words, if ($uploadedFile), then do all of that. Otherwise, skip it!
              */
-            $destination = $this->getParameter('kernel.project_dir').'/public/uploads/article_image';
+            if ($uploadedFile) {
+                $destination = $this->getParameter('kernel.project_dir').'/public/uploads/article_image';
+                $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
+                $uploadedFile->move($destination, $newFilename);
+                $article->setImageFilename($newFilename);
+            }
             /*
-                then paste the code.
-                Yep! We'll move the file to public/uploads and give it a unique filename.
-                Take off the dd() around move().
+                Refresh now. Got it!
+                Next: This is looking good! Except
+                that we need this exact same logic in the new() action.
+                To make a truly killer upload system,
+                we need to refactor the upload logic into a reusable service.
              */
-            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
-            $uploadedFile->move($destination, $newFilename);
-            /*
-                Now, call $article->setImageFilename($newFilename)
-             */
-            $article->setImageFilename($newFilename);
             /*
                 and let Doctrine save the entity, just like it already was.
                 Beautiful! I do want to point out that the $newFilename string

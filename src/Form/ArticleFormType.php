@@ -84,9 +84,33 @@ class ArticleFormType extends AbstractType
                 add an option to the field:
                 'mapped' => false.
              */
+            /*
+                Oh, but there is one tiny thing we need to clean up before moving on.
+                What if we just want to, I don't know,
+                edit the article's title,
+                but we don't need to change the image.
+                No problem - hit Update!
+                Oh... That's HTML5 validation.
+                You might remember from the forms tutorial
+                that this required attribute is added to every field
+                unless you're using form field type guessing.
+                It's annoying - fix it by adding 'required' => false.
+             */
             ->add('imageFile', FileType::class, [
-                'mapped' => false
+                'mapped' => false,
+                'required' => false,
             ]);
+            /*
+                Let's try it again.
+                Refresh, change the title, submit and oof.
+                “Call to a member function getClientOriginalName on null”
+                Of course!
+                We're not uploading a file!
+                So the $uploadedFile variable is null! That's ok!
+                If the user didn't upload a file,
+                we don't need to do any of this logic.
+                In other words, if ($uploadedFile), then do all of that. Otherwise, skip it!
+             */
             /*
                 Connecting the form field directly to the string property doesn't make sense.
                 We're missing a layer in the middle:
