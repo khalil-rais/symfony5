@@ -2,6 +2,11 @@
     {{ form_row(articleForm.title, {
         label: 'Article title'
     }) }}
+    {#
+        The Symfony form lives in _form.html.twig. After the title,
+        add {{ form_row(articleForm.imageFile }}.
+    #}
+    {{ form_row(articleForm.imageFile) }}
     {{ form_row(articleForm.author) }}
     {{ form_row(articleForm.location, {
         attr: {

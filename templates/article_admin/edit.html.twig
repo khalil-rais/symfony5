@@ -2,44 +2,13 @@
 
 {% block content_body %}
     <h1>Edit the Article! 🚀</h1>
-    {#
-        Copy the route name,
-        then open the template for the edit page:
-        templates/article_admin/edit.html.twig.
-        The Symfony form lives inside the _form.html.twig template.
-        So, above that form tag, add a new form tag, with method="POST" and action="" set to {{ path('upload_test') }}.
-        Inside, we only need one thing <input type="file">.
-        We need to give this a name so we can reference it on the server:
-        how about name="image".
-        Finally, add <button type="submit"> and I'll add some classes
-        so that this isn't the ugliest button ever.
-        Say: Upload!
-    #}
-    {#
-        Oh! It's... null!?
-        ArticleAdminController.php on line 100:
-        null
-        I did not see that coming.
-        If you're ever uploading a file and it's totally not working,
-        you've probably made the same mistake I just did.
-        Go back to the template and add an attribute to the form enctype="multipart/form-data".
-    #}
-    <form method="POST" action="{{ path('upload_test') }}" enctype="multipart/form-data">
-        <input type="file" name="image">
 
-        <button type="submit" class="btn btn-primary">Upload !</button>
-    </form>
     {#
-        Yep! Mysteriously, you never need this on your forms
-        until you have a file upload field.
-        It basically tells your browser to send the data in a different format.
-        We're going to see exactly what this means soon
-        because we are crushing the magic behind uploads.
-        Fortunately, PHP understand this format
-        and this format supports file uploads.
+        If you've never seen this before, we'll explain it in a minute.
+        Now that we have a new imageFile field, let's go render it!
+        Open edit.html.twig.
+        Remove the HTML form - we're done with that.
     #}
-
-    <hr>
     {#
         That's it! The simplest possible file upload setup: one field, one button.
     #}

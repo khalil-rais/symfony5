@@ -72,14 +72,27 @@ class ArticleFormType extends AbstractType
                 Symfony gives you an UploadedFile object, not a string.
                 But, the imageFilename field here on Article that is a string!
              */
-            ->add('imageFilename', FileType::class)
+            /*
+                How can we do that?
+                Change the field name to just imageFile.
+                There is no property on our entity with this name  so this, on its own, will not work.
+                Pretty commonly, you'll see people create this property on their entity,
+                just to make the form work.
+                They don't persist this property to the database with Doctrine so the idea works,
+                but I don't love it.
+                Instead, we'll use a trick that we talked a lot about in our forms tutorial:
+                add an option to the field:
+                'mapped' => false.
+             */
+            ->add('imageFile', FileType::class, [
+                'mapped' => false
+            ]);
             /*
                 Connecting the form field directly to the string property doesn't make sense.
                 We're missing a layer in the middle:
                 something that can work with the UploadedFile object, move the
                 file, and then set the new filename onto the property.
              */
-        ;
 
         if ($options['include_published_at']) {
             $builder->add('publishedAt', null, [

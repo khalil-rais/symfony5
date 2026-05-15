@@ -54,6 +54,65 @@ class ArticleAdminController extends BaseController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            /*
+                Nothing special here.
+                This submits back to ArticleAdminController::edit().
+                Go inside the $form->isValid() block.
+                When you have an unmapped field, the data will not be put onto your Article object.
+                So, how can we get it? dd($form['imageFile']->getData()).
+             */
+            dd($form['imageFile']->getData());
+            /*
+                Let's try that!
+                Go back to your browser and hit enter on the URL:
+                we need the form to totally rerender.
+                Hey! There's our new field! Select the astronaut again.
+                Um did that work?
+                Cause I don't see the filename on my field.
+                Yes: it did work - we don't see anything because of a display bug
+                if you're using Symfony's Bootstrap 4 form theme.
+                We'll talk about that later.
+                But, the file is attached to the field. Hit Update!
+                Yes! It's our beloved UploadedFile object!
+
+                ArticleAdminController.php on line 64:
+                Symfony\Component\HttpFoundation\File\UploadedFile {#17 ▼
+                  -test: false
+                  -originalName: "img133.jpg"
+                  -mimeType: "image/jpeg"
+                  -error: 0
+                  path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
+                  filename: "phpe22bnhgtivau8Mw54RE"
+                  basename: "phpe22bnhgtivau8Mw54RE"
+                  pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpe22bnhgtivau8Mw54RE"
+                  extension: ""
+                  realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpe22bnhgtivau8Mw54RE"
+                  aTime: 2026-05-15 15:31:40
+                  mTime: 2026-05-15 15:31:40
+                  cTime: 2026-05-15 15:31:40
+                  inode: 96498270
+                  size: 352389
+                  perms: 0100600
+                  owner: 501
+                  group: 20
+                  type: "file"
+                  writable: true
+                  readable: true
+                  executable: false
+                  file: true
+                  dir: false
+                  link: false
+                }
+
+                We totally know how to work with that! Oh,
+                but before we do: I want to point out something cool.
+                Inspect element and find the form tag.
+                Hey! It has the enctype="multipart/form-data" attribute!
+                We get that for free because we use the {{ form_start() }} function to render the <form> tag.
+                As soon as there is even one file upload field in the form,
+                Symfony adds this attribute for you.
+                High-five team!
+             */
             $em->persist($article);
             $em->flush();
 
