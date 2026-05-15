@@ -55,64 +55,53 @@ class ArticleAdminController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             /*
-                Nothing special here.
-                This submits back to ArticleAdminController::edit().
-                Go inside the $form->isValid() block.
-                When you have an unmapped field, the data will not be put onto your Article object.
-                So, how can we get it? dd($form['imageFile']->getData()).
+                Time to finish this.
+                Let's upload a different file - earth.jpeg.
+                And there's the dump.
+                We have two jobs in our controller:
+                move this file to the final location and store the new filename on the $imageFilename property.
+                Back in the controller, scroll down to temporaryUploadAction(),
+                steal all its code, and delete it.
+                Up in edit(), remove the dd() and set this to an $uploadedFile variable.
+                Add the same inline phpdoc as last time
              */
-            dd($form['imageFile']->getData());
+            /** @var UploadedFile $uploadedFile */
+            $uploadedFile = $form['imageFile']->getData();
             /*
-                Let's try that!
-                Go back to your browser and hit enter on the URL:
-                we need the form to totally rerender.
-                Hey! There's our new field! Select the astronaut again.
-                Um did that work?
-                Cause I don't see the filename on my field.
-                Yes: it did work - we don't see anything because of a display bug
-                if you're using Symfony's Bootstrap 4 form theme.
-                We'll talk about that later.
-                But, the file is attached to the field. Hit Update!
-                Yes! It's our beloved UploadedFile object!
-
-                ArticleAdminController.php on line 64:
-                Symfony\Component\HttpFoundation\File\UploadedFile {#17 ▼
-                  -test: false
-                  -originalName: "img133.jpg"
-                  -mimeType: "image/jpeg"
-                  -error: 0
-                  path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
-                  filename: "phpe22bnhgtivau8Mw54RE"
-                  basename: "phpe22bnhgtivau8Mw54RE"
-                  pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpe22bnhgtivau8Mw54RE"
-                  extension: ""
-                  realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpe22bnhgtivau8Mw54RE"
-                  aTime: 2026-05-15 15:31:40
-                  mTime: 2026-05-15 15:31:40
-                  cTime: 2026-05-15 15:31:40
-                  inode: 96498270
-                  size: 352389
-                  perms: 0100600
-                  owner: 501
-                  group: 20
-                  type: "file"
-                  writable: true
-                  readable: true
-                  executable: false
-                  file: true
-                  dir: false
-                  link: false
-                }
-
-                We totally know how to work with that! Oh,
-                but before we do: I want to point out something cool.
-                Inspect element and find the form tag.
-                Hey! It has the enctype="multipart/form-data" attribute!
-                We get that for free because we use the {{ form_start() }} function to render the <form> tag.
-                As soon as there is even one file upload field in the form,
-                Symfony adds this attribute for you.
-                High-five team!
+                Moment of truth! Find your browser, roll up your sleeves, and refresh!
+                Um it probably worked?
+                In the uploads/ directory yea!
+                There's our Earth file! Let's see what the database looks like.
+                Find your terminal and run:
+                php bin/console doctrine:query:sql 'SELECT * FROM article WHERE id = 41'
+                Let's see, the id of this article is 1.
+                Yes! the image_filename column is totally set!
+                Fist-pumping time!
              */
+            $destination = $this->getParameter('kernel.project_dir').'/public/uploads/article_image';
+            /*
+                then paste the code.
+                Yep! We'll move the file to public/uploads and give it a unique filename.
+                Take off the dd() around move().
+             */
+            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
+            $uploadedFile->move($destination, $newFilename);
+            /*
+                Now, call $article->setImageFilename($newFilename)
+             */
+            $article->setImageFilename($newFilename);
+            /*
+                and let Doctrine save the entity, just like it already was.
+                Beautiful! I do want to point out that the $newFilename string
+                that we're storing in the database is just the filename:
+                it doesn't contain the directory or the word uploads:
+                it's the filename.
+                Oh, for my personal sanity, let's upload things into an article_image sub-directory:
+                that'll be cleaner when we start uploading multiple types of things.
+                Remove the old files.
+             */
+
             $em->persist($article);
             $em->flush();
 
@@ -126,402 +115,6 @@ class ArticleAdminController extends BaseController
         return $this->render('article_admin/edit.html.twig', [
             'articleForm' => $form->createView()
         ]);
-    }
-
-    /**
-     * @Route("/admin/upload/test", name="upload_test")
-     */
-    public function temporaryUploadAction(Request $request)
-    {
-        /*
-            Let's get to work inside of our controller to move the file.
-            First, set the uploaded file to a new $uploadedFile variable.
-            And, unfortunately, the phpdoc on this get() method is a bit generic,
-            so it doesn't tell our editor that this will be an UploadedFile object.
-            Because I'm obsessed with auto-completion,
-            let's add inline doc about this:
-            this will be an UploadedFile object - but not the one from Guzzle - the one from HttpFoundation in Symfony.
-         */
-        /** @var UploadedFile $uploadedFile */
-        $uploadedFile = $request->files->get('image');
-
-        /*
-            This page uses a Symfony form.
-            And we will learn how to add a file upload field to a form object.
-            But let's start simpler - with a good old-fashioned HTML form.
-            The controller behind this page live at src/Controller/ArticleAdminController.php,
-            and we're on the edit() action.
-            Create a totally new, temporary endpoint:
-            public function temporaryUploadAction().
-            We're going to create an HTML form in our template,
-            put an input file field inside,
-            and make it submit to this action.
-            Add the @Route() with,
-            how about, /admin/upload/test and name="upload_test".
-            But don't do anything else yet.
-        */
-        /*
-            In some ways, uploading a file is really no different than any other form field:
-            you're always just sending data to the server
-            where each data has a key equal to its name attribute.
-            So, the same as any form, to read the submitted data,
-            we'll need the request object.
-            Add a new argument with a Request type-hint - the one from HttpFoundation - $request.
-            Then say: dd() - that's dump & die - $request->files->get('image').
-            I'm using image because that's the name attribute used on the field.
-         */
-        /*
-            And guess what? This UploadedFile object has a super useful method on it: move()!
-            Give it the destination directory and it'll take care of the rest.
-            To get that directory, say $destination =
-            and we need to get the path to our uploads/ directory.
-            The best way is to read a parameter: $this->getParameter('kernel.project_dir'),
-            to get the absolute path to the root of the app - then /public/uploads.
-            Then add $uploadedFile->move() and pass it $destination.
-            Hold Command or Ctrl and click this method.
-            Ah, it returns a File object that represents the new file.
-            Let's see what this looks like: surround this entire call with dd().
-         */
-        $destination = $this->getParameter('kernel.project_dir').'/public/uploads';
-        /*
-            Fortunately, the move() method has a second argument:
-            the name to give to the file.
-            The easiest name to use is: $uploadedFile->getClientOriginalName().
-            This is the name that the file had on my computer:
-            it's one of the pieces of data that is sent up on the request,
-            along with the file contents.
-         */
-        /*
-            There are a few ways to handle the unique problem,
-            but the easiest one is just to add some sort of unique id to the filename.
-            Set $newFilename to uniqid(),
-            a '-' then $uploadedFile->getClientOriginalName().
-            Below, use $newFilename.
-        */
-        /*
-            The other thing I want to solve
-            is the possibility that someone uploads an image with a totally insane file extension - like .potato.
-            We can fix this really nicely.
-            Create a new variable called $originalFilename set to pathinfo() with $uploadedFile->getClientOriginalName() and the constant PATHINFO_FILENAME.
-            This will give us the original filename - astronaut.jpg - but without the file extension:
-            so, just astronaut.
-            Then, for the filename, use $originalFilename, a dash, the uniqid(), a period, and now the real extension of the file: $uploadedFile->guessExtension().
-            Oh, see how there are two methods: ->guessClientExtension() and ->guessExtension()?
-            The difference is important: the guessExtension() method looks at the file contents,
-            determines the mime type, and returns the file extension for that.
-            But the guessClientExtension() uses the mime type the user sent which can't be trusted.
-        */
-        $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-        /*
-            There's one last thing you might want to do and it's really optional.
-            Go back to the form.
-            One of my files has uppercase letters and spaces inside.
-            Let's try uploading that.
-            It works! There is no problem with storing spaces or most weird characters on a filesystem.
-            But if you want to guarantee cleaner filenames,
-            there's an easy way to do that.
-            I'll use a class called Urlizer: this comes from the gedmo/doctrine-extensions library.
-            It has a nice method called urlize() and we can wrap our $originalFilename in that to make it a bit cleaner.
-         */
-        $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
-        /*
-            Try that out. Nice!
-            ArticleAdminController.php on line 157:
-            Symfony\Component\HttpFoundation\File\File {#847 ▼
-              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
-              filename: "neural-network-6a04a3648225e.png"
-              basename: "neural-network-6a04a3648225e.png"
-              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural-network-6a04a3648225e.png"
-              extension: "png"
-              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural-network-6a04a3648225e.png"
-              aTime: 2026-05-13 16:14:28
-              mTime: 2026-05-13 16:14:28
-              cTime: 2026-05-13 16:14:28
-              inode: 95788058
-              size: 943116
-              perms: 0100666
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
-            So now we have a unique, normalized filename that at least looks a bit like the original filename.
-            Later, we'll see how we can keep the exact original filename in all cases if you care.
-            But unless your users are downloading these files,
-            the exact filenames aren't usually that important.
-            Next: it's time to put this upload field properly into our Symfony form and save the filename to the Article entity.
-         */
-        dd($uploadedFile->move(
-            $destination,
-            $newFilename
-        ));
-        /*
-            So, we're not validating that this is an image file yet,
-            but no matter what they upload,
-            we should now get the correct file extension.
-            Give it a try! Nice! We've got a .jpeg ending.
-            ArticleAdminController.php on line 156:
-            Symfony\Component\HttpFoundation\File\File {#843 ▼
-              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
-              filename: "neural_network-6a04a0d6f1368.png"
-              basename: "neural_network-6a04a0d6f1368.png"
-              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural_network-6a04a0d6f1368.png"
-              extension: "png"
-              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/neural_network-6a04a0d6f1368.png"
-              aTime: 2026-05-13 16:03:34
-              mTime: 2026-05-13 16:03:34
-              cTime: 2026-05-13 16:03:34
-              inode: 95782540
-              size: 943116
-              perms: 0100666
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
-         */
-        /*
-            ArticleAdminController.php on line 142:
-            Symfony\Component\HttpFoundation\File\File {#887 ▼
-              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
-              filename: "6a049e612377f-image.png"
-              basename: "6a049e612377f-image.png"
-              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/6a049e612377f-image.png"
-              extension: "png"
-              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/6a049e612377f-image.png"
-              aTime: 2026-05-13 15:53:05
-              mTime: 2026-05-13 15:53:04
-              cTime: 2026-05-13 15:53:05
-              inode: 95779177
-              size: 110234
-              perms: 0100666
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
-         */
-        /*
-            Let's try that! Better.
-            It's kind of an ugly hash on the beginning of the filename,
-            but it does solve the unique problem.
-            You can also use a shorter hash or,
-            when we actually save this data to our Article object,
-            you could use the Article id instead of the hash.
-            Or, if you really want to keep the original filename exactly as it was,
-            well we'll talk about that later when we upload "references" to our Article.
-         */
-        /*
-            ArticleAdminController.php on line 134:
-            Symfony\Component\HttpFoundation\File\File {#887 ▼
-              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
-              filename: "image.png"
-              basename: "image.png"
-              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/image.png"
-              extension: "png"
-              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/image.png"
-              aTime: 2026-05-13 15:33:43
-              mTime: 2026-05-13 15:33:43
-              cTime: 2026-05-13 15:33:43
-              inode: 95774142
-              size: 110234
-              perms: 0100666
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
-            Move over and resubmit the form again. There it is: astronaut.jpg!
-         */
-        /*
-            ArticleAdminController.php on line 126:
-            Symfony\Component\HttpFoundation\File\File {#693 ▼
-              path: "/Users/khalil.rais/cauldron_overflow/public/uploads"
-              filename: "phplg3v8h2gio9fd3gGH54"
-              basename: "phplg3v8h2gio9fd3gGH54"
-              pathname: "/Users/khalil.rais/cauldron_overflow/public/uploads/phplg3v8h2gio9fd3gGH54"
-              extension: ""
-              realPath: "/Users/khalil.rais/cauldron_overflow/public/uploads/phplg3v8h2gio9fd3gGH54"
-              aTime: 2026-05-13 15:18:57
-              mTime: 2026-05-13 15:18:57
-              cTime: 2026-05-13 15:18:57
-              inode: 95770732
-              size: 110234
-              perms: 0100666
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
-         */
-
-        /*
-            Alright team!
-            Find your browser, refresh and re-post that upload.
-            I think it worked!
-            The dumped file object tells me that there is a new file in our public/uploads/ directory.
-            Let's go check it out! There it is!
-            Well, I think that's it but sheesh - the filename is terrible.
-            Let's check its file size:
-            ls -la public/uploads/
-            total 224
-            drwxr-xr-x@ 4 khalil.rais  staff     128 13 Mai  17:18 .
-            drwxr-xr-x  8 khalil.rais  staff     256 13 Mai  16:58 ..
-            -rw-r--r--@ 1 khalil.rais  staff    1131 13 Mai  17:02 .gitignore
-            -rw-rw-rw-@ 1 khalil.rais  staff  110234 13 Mai  17:18 phplg3v8h2gio9fd3gGH54
-         */
-        /*
-            ArticleAdminController.php on line 100:
-            Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
-              -test: false
-              -originalName: "image (2).png"
-              -mimeType: "image/png"
-              -error: 0
-              path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
-              filename: "php9hokarb4di64a3ZaKFK"
-              basename: "php9hokarb4di64a3ZaKFK"
-              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php9hokarb4di64a3ZaKFK"
-              extension: ""
-              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php9hokarb4di64a3ZaKFK"
-              aTime: 2026-05-13 07:18:49
-              mTime: 2026-05-13 07:18:49
-              cTime: 2026-05-13 07:18:49
-              inode: 95313761
-              size: 120507
-              perms: 0100600
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
-         */
-
-        /*
-            Refresh the form so the new attribute is rendered.
-            Let's choose the astronaut again.
-            And before hitting Upload,
-            open up your developer tools and go to the Network tab:
-            I want to see what this request looks like.
-            Hit upload!
-            Nice! This time we get an UploadedFile object full of useful data.
-            But before we dive into that,
-            look down at the network tools and find the POST request we just made.
-
-            Accept
-            	text/html,application/xhtml+xml,application/xml;q=0.9,*;q=0.8
-            Accept-Encoding
-            	gzip, deflate, br, zstd
-            Accept-Language
-            	en-US,en;q=0.5
-            Cache-Control
-            	no-cache
-            Connection
-            	keep-alive
-            Content-Length
-            	120724
-            Content-Type
-            	multipart/form-data; boundary=----geckoformboundary2461054baf588057a19dfbf058ec8444
-            Cookie
-            	PHPSESSID=d8d3fdd9a91b39ff2ae3e17825e56150
-            Host
-            	127.0.0.1:8000
-            Origin
-            	https://127.0.0.1:8000
-            Pragma
-            	no-cache
-            Priority
-            	u=0, i
-            Referer
-            	https://127.0.0.1:8000/admin/article/41/edit
-            Sec-Fetch-Dest
-            	document
-            Sec-Fetch-Mode
-            	navigate
-            Sec-Fetch-Site
-            	same-origin
-            Sec-Fetch-User
-                ?1
-                TE
-            	trailers
-            Upgrade-Insecure-Requests
-            	1
-            User-Agent
-            	Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
-    
-            If you look at the request headers, here it is:
-            our browser sent a
-            Content-Type: multipart/form-data header.
-            This is because of the enctype attribute.
-            It also added this weird boundary=----WebkitFormBoundary thing.
-            Ok: this stuff is super-nerdy-cool.
-            Normally, when you do not have that enctype attribute,
-            when you submit a form,
-            all of the data is sent in the body of the request in a big string full of
-            what looks like query parameters.
-            That's kind of invisible to us, because PHP parses all of that and makes
-            the data available.
-            But when you add the multipart/form-data attribute,
-            it tells our browser to send the data in a different format.
-            It's actually kind of hard to see what the body of these requests look like - Chrome hides it.
-            No worries! Through the magic of TV boom!
-            This is what the body of that request looks like.
-            Weird, right! Each field is separated by this mysterious WebkitFormBoundary thing,
-            which is the string that we saw in the Content-Type header!
-            Our form only has one field,
-            but if we had multiple, this separator would be between every field.
-            Our browsers invents this string,
-            separates each piece of data with it,
-            then sends this separator up with the request
-            so that the server knows how to parse everything.
-            Why is this cool?
-            Because we can now send up multiple pieces of information about our name="image" field,
-            like the original filename on our system and what type of file it is,
-            which by the way, can be totally faked by the user.
-            More on that later. After all that, we've got the data itself!
-            If you look all the way at the bottom,
-            it has another WebKitFormBoundary line.
-            If there were more fields on this form,
-            you'd see their data below - all separated by another "boundary".
-            So that's it! It literally tells our browser to send the data in a different format,
-            and PHP understands both formats just fine.
-            We need this format when doing file uploads because a file upload is more than just its contents:
-            we also want to send some metadata.
-            And also, due to how the data is encoded,
-            if you were able to send binary data on a normal request,
-            without the multipart/form-data encoding,
-            it would increase the amount of data you need to upload by as much as three times!
-            Not great for uploads!
-         */
     }
 
     /**
