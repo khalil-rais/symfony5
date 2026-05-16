@@ -21,7 +21,7 @@ class ArticleAdminController extends BaseController
      * @Route("/admin/article/new", name="admin_article_new")
      * @IsGranted("ROLE_ADMIN_ARTICLE")
      */
-    public function new(EntityManagerInterface $em, Request $request)
+    public function new(EntityManagerInterface $em, Request $request, UploaderHelper $uploaderHelper)
     {
         $form = $this->createForm(ArticleFormType::class);
 
@@ -29,7 +29,23 @@ class ArticleAdminController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Article $article */
             $article = $form->getData();
-
+            /*
+                Now that all of our logic is isolated,
+                we can easily repeat this in the new() action.
+                We do need to copy these 5 lines or so, but I'm happy with that.
+                Up in new(), add the argument - UploaderHelper $uploaderHelper -
+                and inside the isValid() block, paste!
+            */
+            /** @var UploadedFile $uploadedFile */
+            $uploadedFile = $form['imageFile']->getData();
+            if ($uploadedFile) {
+                $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile);
+                $article->setImageFilename($newFilename);
+            }
+            /*
+                This uses the same form, with the same unmapped field, so it'll all just work.
+                Next: let's talk about validation.
+             */
             $em->persist($article);
             $em->flush();
 
