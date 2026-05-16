@@ -20,6 +20,27 @@ services:
         bind:
             $markdownLogger: '@monolog.logger.markdown'
             $isDebug: '%kernel.debug%'
+            # Let's take it for a test drive! Go back, refresh the form and it works!
+            # Naw, I'm kidding - we knew this error was coming but isn't it beautiful?
+            # “Cannot resolve argument $uploadHelper of the edit() method:
+            # Cannot autowire service UploadHelper:
+            # argument $uploadsPath of method __construct() is type-hinted string,
+            # you should configure its value explicitly.
+            # ”
+            # That's programming poetry people!
+            # And it makes sense: autowiring doesn't work for scalar arguments.
+            # We got this: open config/services.yaml.
+            # We could configure the specific argument for this specific service.
+            # But if you've watched our Symfony series,
+            # you know that I like to use the bind feature.
+            # The argument name is $uploadsPath.
+            # So, below _defaults and bind,
+            # add $uploadsPath set to %kernel.project_dir%/public/uploads.
+            $uploadsPath: '%kernel.project_dir%/public/uploads'
+            # This means: anywhere that $uploadsPath is used as an argument for a method
+            # that's autowired - usually a controller action or the constructor of a service -
+            # pass in this value.
+
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'
