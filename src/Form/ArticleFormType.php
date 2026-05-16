@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\Image;
 
 class ArticleFormType extends AbstractType
 {
@@ -96,9 +97,25 @@ class ArticleFormType extends AbstractType
                 unless you're using form field type guessing.
                 It's annoying - fix it by adding 'required' => false.
              */
+            /*
+                Normally we add validation to the entity class:
+                we would go into the Article class,
+                find the property, and add some annotations.
+                But the field we want to validate is an unmapped form field:
+                there is no imageFile property in Article.
+                No worries: for unmapped fields,
+                you can add validation directly to the form with the constraints option.
+                And when it comes to file uploads,
+                there are two really important constraints:
+                one called File and an even stronger one called Image.
+                Add new Image() - the one from the Validator\Constraints.
+            */
             ->add('imageFile', FileType::class, [
                 'mapped' => false,
                 'required' => false,
+                'constraints' => [
+                    new Image()
+                ]
             ]);
             /*
                 Let's try it again.
