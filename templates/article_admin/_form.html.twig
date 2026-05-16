@@ -6,7 +6,29 @@
         The Symfony form lives in _form.html.twig. After the title,
         add {{ form_row(articleForm.imageFile }}.
     #}
-    {{ form_row(articleForm.imageFile) }}
+    {#
+        Before we do that, we can also put a message in the main part of the file field by putting some content in the label element.
+        But it doesn't work like a normal label.
+        In the templates/ directory, open article_admin/_form.html.twig.
+        Here's our imageFile field.
+        The second argument to form_row is an array of variables you can use to customize... basically anything.
+        One of the most important ones is called attr:
+        it's how you attach custom HTML attributes to the input field.
+        Pass an attribute called placeholder set to Select an article image.
+    #}
+    {{ form_row(articleForm.imageFile, {
+        attr: {
+            'placeholder': 'Select an article image'
+        }
+    }) }}
+    {#
+        This would normally add a placeholder attribute to the input
+        so you can have some text on the field if it's empty.
+        But when you're dealing with a file upload field with the Bootstrap theme,
+        this is used in a different way...
+        but it accomplishes the same thing.
+        Refresh! Cool! The empty part of the file field now gets this text.
+    #}
     {{ form_row(articleForm.author) }}
     {{ form_row(articleForm.location, {
         attr: {
