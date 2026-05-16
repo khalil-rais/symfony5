@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\Image;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class ArticleFormType extends AbstractType
 {
@@ -32,7 +33,65 @@ class ArticleFormType extends AbstractType
         /** @var Article|null $article */
         $article = $options['data'] ?? null;
         $isEdit = $article && $article->getId();
-
+        /*
+            And... that's it!
+            Sure, there are a more options and you can control all the messages -
+            but that's easy enough.
+            Except... there is one tricky thing:
+            how can we make the upload field required?
+            Like, when someone creates an article,
+            they should be required to upload an image before saving it.
+            Simple, right?
+            Just add a new NotNull() constraint to the imageFile field.
+            Wait, no, that won't work.
+            If we did that, we would need to upload a file
+            even if we were just editing a field on the article:
+            we would literally need to upload an image every time we changed anything.
+            Okay: so we want the imageFile to be required
+            but only if the Article doesn't already have an imageFilename.
+            Start by breaking this onto multiple lines.
+            Then say $imageConstraints =, copy the new Image() stuff and paste it here.
+        */
+        $imageConstraints = [
+            new Image([
+                'maxSize' => '5M'
+            ])
+        ];
+        /*
+            Now we can conditionally add the NotNull() constraint exactly when we need it.
+            Scroll up a little.
+            In our forms tutorial,
+            we used the data option to get the Article object that this form is bound to.
+            If this is a "new" form,
+            there may or may not be an Article object -
+            so this will be an Article object or null.
+            I also used that to create an $isEdit variable to figure out if we're on the edit screen or not.
+            We can leverage that by saying if this is not the edit page
+            or if the article doesn't have an image filename,
+            then take $imageConstraints and add new NotNull().
+            We'll even get fancy and customize the message:
+            Please upload an image.
+         */
+        if (!$isEdit || !$article->getImageFilename()) {
+            $imageConstraints[] = new NotNull([
+                'message' => 'Please upload an image',
+            ]);
+        }
+        /*
+            Just saying if !$isEdit is probably enough... but just in case,
+            I'm checking to see if, somehow, we're on the edit page,
+            but the imageFilename is missing, let's require it.
+            Cool: testing time!
+            Refresh the entire form, but don't select an upload:
+            we know that this Article does have an image already attached.
+            Hit update and... works fine!
+            Now try creating a new Article,
+            fill in a few of the required fields,
+            hit create and... boom! Please upload an image!
+            Validation, check!
+            Next, let's fix how this renders:
+            we've gotta see the filename after selecting a file - seeing nothing is bummin' me out.
+         */
         $builder
             ->add('title', TextType::class, [
                 'help' => 'Choose something catchy!'
@@ -115,14 +174,14 @@ class ArticleFormType extends AbstractType
                 The other most common option is maxSize.
                 To see what that looks like, set it to something tiny, like 5k.
              */
+            /*
+                Down below, set 'constraints' => $imageConstraints.
+                Oh and let's spell that correctly.
+            */
             ->add('imageFile', FileType::class, [
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new Image([
-                        'maxSize' => '5M'
-                    ])
-                ]
+                'constraints' => $imageConstraints
             ]);
             /*
                 Ok: browse and select any of the files.
