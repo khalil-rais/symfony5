@@ -110,13 +110,26 @@ class ArticleFormType extends AbstractType
                 one called File and an even stronger one called Image.
                 Add new Image() - the one from the Validator\Constraints.
             */
+            /*
+                Go back to the docs and click to see the File constraint.
+                The other most common option is maxSize.
+                To see what that looks like, set it to something tiny, like 5k.
+             */
             ->add('imageFile', FileType::class, [
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
-                    new Image()
+                    new Image([
+                        'maxSize' => '5000k'
+                    ])
                 ]
             ]);
+            /*
+                Ok: browse and select any of the files.
+                Hit update and... perfect:
+                the file is too large.
+                Change that back to 5M, or whatever makes sense for you.
+             */
             /*
                 Let's try it again.
                 Refresh, change the title, submit and oof.
