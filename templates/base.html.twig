@@ -86,6 +86,47 @@
             <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
             <script>
                 $('.dropdown-toggle').dropdown();
+                {#
+                    But if you select a file...
+                    the filename still doesn't show. Let's fix that already.
+                    Look at the structure again:
+                    Symfony's form theme is using this custom-file-input class on the input.
+                    Ok, so what we need to do is this: on change of that field,
+                    we need to set the HTML of the label to the filename,
+                    which is something we have access to in JavaScript.
+                    To keep things simple, open base.html.twig:
+                    we'll write some JavaScript that will work across the entire site.
+                    I'd recommend using Webpack Encore,
+                    and putting this code in your main entry file if you want it to be global.
+                    But, without Encore, down here works fine.
+                    Use $('.custom-file-input') - that's the class that's on the input field itself,
+                    .on('change') and pass this a callback with an event argument.
+                    Inside, we need to find the label element:
+                    I'll do that by finding the parent of the input and then looking for the custom-file-label class so we can set its HTML
+                #}
+                $('.custom-file-input').on('change', function(event) {
+                    {#
+                        In the callback, set var inputFile = event.currentTarget -
+                        that's the DOM node for the input type="file" element.
+                        Next, $(inputFile).parent().find('.custom-file-label').html()
+                        and pass this the filename that was just selected: inputFile.files[0].name.
+                        The 0 part looks a bit weird, but technically a file upload field can upload multiple files.
+                        We're not doing that, so we get to take this shortcut.
+                    #}
+                    var inputFile = event.currentTarget;
+                    $(inputFile).parent()
+                        .find('.custom-file-label')
+                        .html(inputFile.files[0].name);
+                    {#
+                        Give it a try! Refresh... browse... select rocket.jpg and... yea!
+                        Our placeholder gets replaced by the filename.
+                        That's what we expect and the field is easier to style thanks to this.
+                        Next: the upload side of things is looking good.
+                        It's time to start rendering the URL to the upload files...
+                        but without letting things get crazy-disorganized.
+                        I want to love our setup.
+                    #}
+                });
             </script>
         {% endblock %}
     </body>
