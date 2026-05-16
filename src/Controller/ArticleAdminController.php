@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Behat\Transliterator\Transliterator;
+use App\Service\UploaderHelper;
 
 class ArticleAdminController extends BaseController
 {
@@ -46,7 +47,7 @@ class ArticleAdminController extends BaseController
      * @Route("/admin/article/{id}/edit", name="admin_article_edit")
      * @IsGranted("MANAGE", subject="article")
      */
-    public function edit(Article $article, Request $request, EntityManagerInterface $em)
+    public function edit(Article $article, Request $request, EntityManagerInterface $em, UploaderHelper $uploaderHelper)
     {
         $form = $this->createForm(ArticleFormType::class, $article, [
             'include_published_at' => true
@@ -76,11 +77,26 @@ class ArticleAdminController extends BaseController
                 In other words, if ($uploadedFile), then do all of that. Otherwise, skip it!
              */
             if ($uploadedFile) {
-                $destination = $this->getParameter('kernel.project_dir').'/public/uploads/article_image';
-                $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
-                $uploadedFile->move($destination, $newFilename);
+                /*
+                    Cool! Let's worry about configuring the $uploadsPath argument to our service in a minute.
+                    After all, Symfony's service system is so awesome,
+                    it'll tell me exactly what I need to configure once we try this.
+                    For now, go back into ArticleAdminController and use this.
+                    Start by adding another argument: UploaderHelper $uploaderHelper.
+                    And celebrate by removing all of the logic below and replacing it with
+                    $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile).
+                */
+                $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile);
                 $article->setImageFilename($newFilename);
+                /*
+                    Dang - that is nice!
+                    There is still a little bit of logic here:
+                    the form logic and the logic that sets the filename on the Article -
+                    but I'm comfortable with that.
+                    And we now have this great new method:
+                    pass it an UploadedFile object,
+                    and it'll move it into the correct directory and give it a unique filename.
+                 */
             }
             /*
                 Refresh now. Got it!
