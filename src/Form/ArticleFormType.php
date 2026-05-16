@@ -120,7 +120,7 @@ class ArticleFormType extends AbstractType
                 'required' => false,
                 'constraints' => [
                     new Image([
-                        'maxSize' => '5000k'
+                        'maxSize' => '5M'
                     ])
                 ]
             ]);
