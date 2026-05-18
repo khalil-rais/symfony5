@@ -184,7 +184,17 @@ class Article
 
     public function getImagePath()
     {
-        return 'images/'.$this->getImageFilename();
+        /*
+            Now that the true uploaded assets are stored in a different directory,
+            we can just update this path!
+            In Article, change this to uploads/article_image/ and then $this->getImageFilename().
+         */
+        return 'uploads/article_image/' . $this->getImageFilename();
+        /*
+            Cool! Try it out! It works!
+            We don't care about the broken images from the fixtures: we'll fix them soon.
+            But the actual uploaded image does render.
+         */
     }
 
     /**
