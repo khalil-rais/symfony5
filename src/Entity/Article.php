@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-
+use App\Service\UploaderHelper;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ArticleRepository")
  */
@@ -189,7 +189,13 @@ class Article
             we can just update this path!
             In Article, change this to uploads/article_image/ and then $this->getImageFilename().
          */
-        return 'uploads/article_image/' . $this->getImageFilename();
+        /*
+            And in Article, do the same thing: UploaderHelper::ARTICLE_IMAGE.
+         */
+        return 'uploads/'.UploaderHelper::ARTICLE_IMAGE.'/'.$this->getImageFilename();
+        /*
+            Small step, and when we refresh, it works fine.
+         */
         /*
             Cool! Try it out! It works!
             We don't care about the broken images from the fixtures: we'll fix them soon.

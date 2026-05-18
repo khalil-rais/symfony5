@@ -14,6 +14,16 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class UploaderHelper
 {
     /*
+        Great first step.
+        Now, let's get organized!
+        One problem is that we have the directory name -article_image - in Article and also in UploaderHelper where we move the file around.
+        That's not too bad - but as we start adding more file uploads to the system, we're going to have more duplication.
+        I don't like having these important strings in multiple places.
+        So, in UploaderHelper, why not create a constant for this? Call it ARTICLE_IMAGE and set it to the directory name: article_image.
+     */
+    const ARTICLE_IMAGE = 'article_image';
+
+    /*
         Perfect! Well... not perfect, because the $this->getParameter() method is a shortcut
         that only works in the controller.
         If you need a parameter - or any configuration - from inside a service,
@@ -48,7 +58,10 @@ class UploaderHelper
             hit Alt + Enter and select initialize fields to create that property and set it.
             Now, below, we can say $this->uploadsPath and then /article_image.
         */
-        $destination = $this->uploadsPath.'/article_image';;
+        /*
+            Down below, use that: self::ARTICLE_IMAGE.
+         */
+        $destination = $this->uploadsPath.'/'.self::ARTICLE_IMAGE;
         $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
         $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
         $uploadedFile->move(
