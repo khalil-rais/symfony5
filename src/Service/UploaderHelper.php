@@ -73,4 +73,21 @@ class UploaderHelper
          */
         return $newFilename;
     }
+    /*
+        Now getImagePath() returns the path to the image relative to wherever our app decides to store uploads.
+        In UploaderHelper, add a new public function getPublicPath().
+        This will take a string $path - that will be something like article_image/astronaut.jpeg -
+        and it will return a string, which will be the actual public path to the file.
+        Inside, return 'uploads/'.$path;.
+     */
+    public function getPublicPath(string $path): string
+    {
+        return 'uploads/'.$path;
+    }
+    /*
+        That may feel like a micro improvement, but it's awesome! Thanks to this,
+        we can call getPublicPath() from anywhere in our app to get the URL to an uploaded asset.
+        If we move to the cloud, we only need to change the URL here! Awesome!
+     */
+
 }

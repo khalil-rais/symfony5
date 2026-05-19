@@ -192,7 +192,19 @@ class Article
         /*
             And in Article, do the same thing: UploaderHelper::ARTICLE_IMAGE.
          */
-        return 'uploads/'.UploaderHelper::ARTICLE_IMAGE.'/'.$this->getImageFilename();
+        /*
+            Let's keep going!
+            Back in Article, the path starts with uploads because that's part of the public path to the asset.
+            That's not a huge problem, but I actually don't want that uploads string to live here.
+            Why? Well, I kinda don't want my entity to really care where or how we're storing our uploads.
+            Like, if our site grows and we move our uploads to the cloud,
+            we would need to change this uploads string to a full CDN URL in all entities with an upload field.
+            And, that URL might even need to be dynamic,
+            we might use a different CDN locally versus on production!
+            Nope, I don't want my entity to worry about any of these details.
+            Remove the uploads/ part from the path.
+        */
+        return UploaderHelper::ARTICLE_IMAGE.'/'.$this->getImageFilename();
         /*
             Small step, and when we refresh, it works fine.
          */
