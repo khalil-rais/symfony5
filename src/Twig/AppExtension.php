@@ -38,4 +38,25 @@ class AppExtension extends AbstractExtension implements ServiceSubscriberInterfa
             MarkdownHelper::class,
         ];
     }
+
+    /*
+        In AppExtension, copy getFilters(), paste and rename it to getFunctions().
+        Return an array, and, inside, add a new TwigFunction() with uploaded_asset and [$this, 'getUploadedAssetPath'].
+    */
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('uploaded_asset', [$this,'getUploadedAssetPath'])
+        ];
+    }
+
+    /*
+        Copy that new method name, scroll down and add it:
+        public function getUploadedAssetPath() with a string $path argument.
+        It will also return a string.
+    */
+    public function getUploadedAssetPath(string $path): string
+    {
+
+    }
 }
