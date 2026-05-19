@@ -64,3 +64,54 @@ services:
         tags:
             - { name: form.type_extension,
                 extended_type: Symfony\Component\Form\Extension\Core\Type\TextareaType }
+    # Try it! Oh... wow - huge error!
+    # This RequestStackContext service is such a low-level service,
+    # that Symfony doesn't make it available to be used for autowiring.
+    # Check out the error, it says: “Yo! You can't autowire the $requestStackContext argument:
+    # it's type-hinted with a class called RequestStackContext,
+    # but there isn't a service with this id.
+    # Maybe you can create a service alias for this class that points to the assets.context service.”
+    # This is a bit technical and we talk about this in our Symfony Fundamentals course.
+    # Symfony sees that the RequestStackContext type-hint is not autowireable,
+    # but it also sees that there is a service in the container - called assets.context -
+    # that is an instance of this class!
+    # Check it out: copy the full class name and then go into config/services.yaml.
+    # At the bottom, paste the full class name, go copy the service id they suggested, and say @assets.context.
+    Symfony\Component\Asset\Context\RequestStackContext: '@assets.context'
+    # This creates a service alias.
+    # Basically, there is now a new service that lives in the container called Symfony\Component\Asset\Context\RequestStackContext.
+    # And if you fetch it, it'll really just give you the assets.context service.
+    # The key thing is that this makes the class autowireable.
+    # To prove it, find your terminal and run to search for all autowireable classes that contain that string. :
+    #
+    # php bin/console debug:autowiring request
+    # Autowirable Types
+    # =================
+    #
+    # The following classes & interfaces can be used as type-hints when autowiring:
+    # (only showing classes/interfaces matching request)
+    #
+    # Factory for PSR-7 Request.
+    # Http\Message\RequestFactory (httplug.message_factory.default)
+    #
+    # Psr\Log\LoggerInterface $requestLogger (monolog.logger.request)
+    #
+    # Uses a RequestStack to populate the context.
+    # Symfony\Component\Asset\Context\RequestStackContext (assets.context)
+    #
+    # Request stack that controls the lifecycle of requests.
+    # Symfony\Component\HttpFoundation\RequestStack (request_stack)
+    #
+    # Holds information about the current request.
+    # Symfony\Component\Routing\RequestContext (router.request_context)
+    #
+    # Symfony\Component\Routing\RequestContextAwareInterface (router.default)
+    #
+    # Hey! There is our RequestStackContext!
+    # If we had run this a minute ago, it would not have been there.
+    # Refresh the page now. Got it! And if you look at the path, yep!
+    # It's /uploads/article_image/astronaut.jpeg.
+    # If we lived under a subdirectory,
+    # that subdirectory would be there.
+    # Small detail, but our site is still super portable.
+    # Next, let's create thumbnails of our image so the user doesn't need to download the full size.

@@ -10,6 +10,7 @@ namespace App\Service;
 
 use Behat\Transliterator\Transliterator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Asset\Context\RequestStackContext;
 
 class UploaderHelper
 {
@@ -33,10 +34,18 @@ class UploaderHelper
         we'll pass in the whole string to where uploads should be stored.
      */
     private $uploadsPath;
+    private $requestStackContext;
 
-    public function __construct(string $uploadsPath)
+    /*
+        To do this, we're going to work with a service that you don't see very often in Symfony:
+        it's the service that's used internally by the asset() function to determine the subdirectory.
+        In the constructor, add another argument: RequestStackContext $requestStackContext.
+        I'll hit Alt + Enter and select initialize fields to create that property and set it.
+     */
+    public function __construct(string $uploadsPath, RequestStackContext $requestStackContext)
     {
         $this->uploadsPath = $uploadsPath;
+        $this->requestStackContext = $requestStackContext;
     }
     /*
         This class will handle all things related to uploading files.
@@ -80,10 +89,19 @@ class UploaderHelper
         and it will return a string, which will be the actual public path to the file.
         Inside, return 'uploads/'.$path;.
      */
+    /*
+        Down in getPublicPath(), return $this->requestStackContext->getBasePath() and then '/uploads/'.$path.
+    */
     public function getPublicPath(string $path): string
     {
-        return 'uploads/'.$path;
+        return $this->requestStackContext
+                ->getBasePath().'/uploads/'.$path;
     }
+    /*
+        If our app lives at the root of the domain - like it does right now -
+        this will just return and empty string.
+        But if it lives at a subdirectory like thespacebar, it'll return /thespacebar.
+     */
     /*
         That may feel like a micro improvement, but it's awesome! Thanks to this,
         we can call getPublicPath() from anywhere in our app to get the URL to an uploaded asset.
