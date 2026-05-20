@@ -2,3 +2,26 @@
 liip_imagine:
     # valid drivers options include "gd" or "gmagick" or "imagick"
     driver: "gd"
+
+    # Let's go check on the install.
+    # Excellent! It's done.
+    # And the message is right on: it says we need to get to work in the new config file: liip_imagine.yaml.
+    # Go open that: config/packages/liip_imagine.yaml.
+    # Uncomment the root key to activate the bundle,
+    # leave the driver alone - it defaults to gd -
+    # and uncomment filter_sets.
+    filter_sets:
+        cache: ~
+        # Let's create our first filter set called squared_thumbnail_small.
+        # We'll use this on the homepage to reduce the images down to 100 by 100.
+        # To do that, uncomment the filters key
+        # and I'll copy the thumbnail example from below,
+        # move it up here, and uncomment it.
+        squared_thumbnail_small:
+            filters:
+                thumbnail:
+                    # Set the size to 200 by 200 so it looks good on Retina displays.
+                    # The mode: outbound is how the thumbnail is applied - you can also use inbound.
+                    size: [200, 200]
+                    mode: outbound
+                    allow_upscale: true

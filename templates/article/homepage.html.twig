@@ -33,7 +33,13 @@
                             We'll pass it article.imagePath
                             and it will ultimately call getPublicPath().
                         #}
-                        <img class="article-img" src="{{ uploaded_asset(article.imagePath) }}">
+                        {#
+                            And... I think we're ready to go!
+                            Copy the squared_thumbnail_small name
+                            and go into homepage.html.twig.
+                            To use this, it's so nice: |imagine_filter() and then the name.
+                        #}
+                        <img class="article-img" src="{{ uploaded_asset(article.imagePath)|imagine_filter('squared_thumbnail_small') }}">
                         <div class="article-title d-inline-block pl-3 align-middle">
                             <span>{{ article.title }}</span>
                             <small>({{ article.nonDeletedComments|length }} comments)</small>
