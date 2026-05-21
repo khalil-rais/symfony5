@@ -9,6 +9,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use App\Service\UploaderHelper;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Filesystem\Filesystem;
 
 class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
 {
@@ -78,6 +79,37 @@ EOF
              */
             $randomImage = $this->faker->randomElement(self::$articleImages);
             /*
+                Woh! The file src/DataFixtures/images/asteroid.jpeg does not exist? Hmm.
+                Check this out: it did upload two files before going all "explody" on us.
+                Oh, but those original files are missing! Of course!
+                We're using $file->move().
+                So it is working, but instead of copying the files, it's moving them,
+                and the originals are disappearing.
+                Let's get those files back. Run:
+
+                git status
+
+                And undelete them with:
+                git checkout src/DataFixtures/images
+                2 Pfade vom Index aktualisiert
+
+                Much better. Let's clean out the uploads directory again.
+
+                We do want to use $file->move() because we do want to move the uploaded file in normal circumstances.
+                So, to get around this, in the fixtures,
+                let's copy the original file to a temporary spot.
+                Start with $fs = new Filesystem() -
+                that's a handy object for doing filesystem operations.
+             */
+            $fs = new Filesystem();
+            /*
+                Next, $targetPath = sys_get_temp_dir().'/'.$randomImage.
+                And then use $fs->copy().
+                We want to copy the original file path into $targetPath
+             */
+            $targetPath = sys_get_temp_dir().'/'.$randomImage;
+            $fs->copy(__DIR__.'/images/'.$randomImage, $targetPath, true);
+            /*
                 That's ok! It just means we need to dig deeper!
                 Go back into UploaderHelper.
                 Hold Command or Ctrl and click to open the UploadedFile class.
@@ -92,8 +124,28 @@ EOF
                 Pass this the path to the random image: __DIR__.'/images/' and then $randomImage,
                 which will be one of these image filenames.
              */
-            $imageFilename = $this->uploaderHelper->uploadArticleImage(new
-            File(__DIR__.'/images/'.$randomImage));
+            /*
+                Inside File, pass the temporary path.
+             */
+            $imageFilename = $this->uploaderHelper->uploadArticleImage(new File($targetPath));
+            /*
+                Ok, let's try it again!
+                php bin/console doctrine:fixtures:load
+                 Careful, database "main" will be purged. Do you want to continue? (yes/no) [no]:
+                 > yes
+
+                   > purging database
+                   > loading App\DataFixtures\TagFixture
+                   > loading App\DataFixtures\UserFixture
+                   > loading App\DataFixtures\ArticleFixtures
+                   > loading App\DataFixtures\CommentFixture
+
+                No error, our original files still exist
+                and we have a directory full of, fake uploaded files.
+                Now try the homepage. Beautiful.
+                What I really love about this is that we're not doing anything fancy or tricky in our fixtures:
+                we're literally using our upload system.
+             */
             /*
                 Now, take $imageFilename - that'll be whatever the final filename is on the system after moving it,
                 and set that onto the entity.
