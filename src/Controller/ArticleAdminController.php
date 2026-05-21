@@ -54,6 +54,16 @@ class ArticleAdminController extends BaseController
             return $this->redirectToRoute('admin_article_list');
         }
 
+        /*
+            To do that, we need the Article object.
+            Copy the image path logic from the homepage
+            and then go find the controller for the admin section: ArticleAdminController.
+            When we render the template - this is in the new() action -
+            we're only passing the form variable.
+            In edit(), we're doing the same thing.
+            We could add an article variable here - that's a fine option.
+            But, we don't need to.
+         */
         return $this->render('article_admin/new.html.twig', [
             'articleForm' => $form->createView()
         ]);
