@@ -7,6 +7,7 @@ use App\Entity\Comment;
 use App\Entity\Tag;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use App\Service\UploaderHelper;
 
 class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
 {
@@ -21,6 +22,22 @@ class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
         'mercury.jpeg',
         'lightspeed.png',
     ];
+
+    /*
+        How? By faking the file upload inside the fixtures.
+        It's kinda beautiful!
+        Our UploaderHelper service is already really good at moving things into the right spot
+        - why not reuse it here?
+        Inside ArticleFixtures, create a public function __construct().
+        Add an UploaderHelper $uploaderHelper argument and I'll hit ALT + Enter
+        and select initialize fields to create that property and set it.
+     */
+    private $uploaderHelper;
+
+    public function __construct(UploaderHelper $uploaderHelper)
+    {
+        $this->uploaderHelper = $uploaderHelper;
+    }
 
     protected function loadData(ObjectManager $manager): void
     {
@@ -51,6 +68,27 @@ EOF
             if ($this->faker->boolean(70)) {
                 $article->setPublishedAt($this->faker->dateTimeBetween('-100 days', '-1 days'));
             }
+            /*
+                Here's the idea: we'll use the UploaderHelper down here,
+                point it at one of these 3 files,
+                and have it, sort of, "fake" upload it.
+                Start with $randomImage =, copy the faker code, and paste.
+                This is now one of the three random image filenames.
+             */
+            $randomImage = $this->faker->randomElement(self::$articleImages);
+            /*
+                Next, in UploaderHelper, what I'd like to do is call uploadArticleImage()
+                and basically say:
+                “Hey! Pretend like asteroid.jpeg is a file that was just uploaded.
+                And... ya know... do all your normal stuff and move it into the uploads/ directory.”
+                This is easier than you think:
+                in the fixtures class, set $imageFilename to $this->uploaderHelper->uploadArticleImage().
+                What I want to do is now say new UploadedFile()
+                and point it at one of the images.
+                The problem is that you can't really create a fake UploadedFile object.
+                Internally, it's bound to the PHP uploading process
+                - weird stuff will happen if you try to create one outside of that context.
+             */
 
             $article->setAuthor($this->getRandomReference('main_users'))
                 ->setHeartCount($this->faker->numberBetween(5, 100))
