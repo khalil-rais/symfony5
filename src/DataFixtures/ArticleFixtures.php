@@ -8,6 +8,7 @@ use App\Entity\Tag;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use App\Service\UploaderHelper;
+use Symfony\Component\HttpFoundation\File\File;
 
 class ArticleFixtures extends BaseFixture implements DependentFixtureInterface
 {
@@ -76,6 +77,27 @@ EOF
                 This is now one of the three random image filenames.
              */
             $randomImage = $this->faker->randomElement(self::$articleImages);
+            /*
+                That's ok! It just means we need to dig deeper!
+                Go back into UploaderHelper.
+                Hold Command or Ctrl and click to open the UploadedFile class.
+                This lives in the Symfony\HttpFoundation\File namespace
+                and extends a class called File that lives in the same directory.
+                The File class is awesome: it simply represents any file on your filesystem,
+                regardless of whether it's an uploaded file or just a normal file.
+                And, if you look closely, the vast majority of the methods we've been using come from this class - not from UploadedFile.
+                And we can create a File object outside of an upload context.
+                So back in ArticleFixtures, instead of creating a new UploadedFile(),
+                say new File() - the one from HttpFoundation.
+                Pass this the path to the random image: __DIR__.'/images/' and then $randomImage,
+                which will be one of these image filenames.
+             */
+            $imageFilename = $this->uploaderHelper->uploadArticleImage(new
+            File(__DIR__.'/images/'.$randomImage));
+            /*
+                Now, take $imageFilename - that'll be whatever the final filename is on the system after moving it,
+                and set that onto the entity.
+             */
             /*
                 Next, in UploaderHelper, what I'd like to do is call uploadArticleImage()
                 and basically say:

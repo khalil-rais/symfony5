@@ -11,6 +11,7 @@ namespace App\Service;
 use Behat\Transliterator\Transliterator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Asset\Context\RequestStackContext;
+use Symfony\Component\HttpFoundation\File\File;
 
 class UploaderHelper
 {
@@ -54,7 +55,13 @@ class UploaderHelper
         remember the one from HttpFoundation - and return a string.
         That will be the string filename that was ultimately saved.
      */
-    public function uploadArticleImage(UploadedFile $uploadedFile): string
+    /*
+        That's beautiful! In UploaderHelper, we need to make this work not with an UploadedFile object, but with the parent File.
+        Change the type-hint to File - again, make sure you get the one from HttpFoundation
+        or you will have no fun.
+        To keep things clear, I'll Refactor -> Rename this variable to $file.
+     */
+    public function uploadArticleImage(File $file): string
     {
         /*
             Ok! Let's go steal some code for this.
@@ -71,9 +78,53 @@ class UploaderHelper
             Down below, use that: self::ARTICLE_IMAGE.
          */
         $destination = $this->uploadsPath.'/'.self::ARTICLE_IMAGE;
-        $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-        $newFilename = Transliterator::urlize($originalFilename).'-' .uniqid().'.'.$uploadedFile->guessExtension();
-        $uploadedFile->move(
+        /*
+            Let's see: everything looks happy, ah - except for getClientOriginalName():
+            that method does not exist in File - it only exists in UploadedFile.
+            Ok, let's get fancy then:
+            if $file is an instanceof UploadedFile,
+            we can say $originalFilename = $file->getClientOriginalName().
+            Else, set $originalFilename to $file->getFilename() -
+            that's just the name of the file on the filesytem.
+         */
+        if ($file instanceof UploadedFile) {
+            $originalFilename = $file->getClientOriginalName();
+        } else {
+            $originalFilename = $file->getFilename();
+        }
+        /*
+            After this, delete the pathinfo() stuff -
+            we can move that to the next line.
+            Inside urlize(), re-add the pathinfo()
+            and pass the same second argument: PATHINFO_FILENAME.
+         */
+        $newFilename = Transliterator::urlize(pathinfo($originalFilename,
+                PATHINFO_FILENAME)).'-'
+            .uniqid().'.'.$file->guessExtension();
+        /*
+            I think that's all we need!
+            Let's completely clear out the uploads/ directory.
+            Now, find your terminal and run:
+            php bin/console doctrine:fixtures:load
+             Careful, database "main" will be purged. Do you want to continue? (yes/no) [no]:
+             > yes
+
+               > purging database
+               > loading App\DataFixtures\TagFixture
+               > loading App\DataFixtures\UserFixture
+               > loading App\DataFixtures\ArticleFixtures
+
+            In File.php line 36:
+
+              The file "/Users/khalil.rais/cauldron_overflow/src/DataFixtures/images/asteroid.jpeg" does not exist
+         */
+        /*
+            That's beautiful! In UploaderHelper, we need to make this work not with an UploadedFile object, but with the parent File.
+            Change the type-hint to File - again, make sure you get the one from HttpFoundation
+            or you will have no fun.
+            To keep things clear, I'll Refactor -> Rename this variable to $file.
+         */
+        $file->move(
             $destination,
             $newFilename
         );
