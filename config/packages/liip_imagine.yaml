@@ -25,3 +25,14 @@ liip_imagine:
                     size: [200, 200]
                     mode: outbound
                     allow_upscale: true
+        # Let's render a thumbnail on the show page too.
+        # The size here is restricted to a width of 250.
+        # Copy the first filter, paste,
+        # and call this one, how about, squared_thumbnail_medium.
+        # Set the size to 500 by 500.
+        squared_thumbnail_medium:
+            filters:
+                thumbnail:
+                    size: [500, 500]
+                    mode: outbound
+                    allow_upscale: true
