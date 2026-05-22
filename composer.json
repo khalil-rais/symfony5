@@ -14,6 +14,7 @@
         "knplabs/knp-time-bundle": "^1.8",
         "liip/imagine-bundle": "^2.1",
         "nexylan/slack-bundle": "^2.3",
+        "oneup/flysystem-bundle": "^3",
         "php-http/guzzle7-adapter": "^1.1",
         "phpdocumentor/reflection-docblock": "^6.0",
         "phpstan/phpdoc-parser": "^2.3",
