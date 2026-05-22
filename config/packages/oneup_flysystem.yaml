@@ -36,15 +36,120 @@ oneup_flysystem:
         public_uploads_adapter:
             local:
                 directory: '%kernel.project_dir%/public/uploads'
-        default_adapter:
-            local:
-                directory: '%kernel.cache_dir%/flysystem'
     # That is the root of this filesystem:
     # everything will be stored relative to this.
     # Give the filesystem a similar name - public_uploads_filesystem - and set adapter: to public_uploads_adapter.
+    # What about this alias key?
+    # Let's see what that does.
+    # First, when you configure a filesystem here, it creates a service.
+    # Find your terminal and run:
+    # php bin/console debug:container flysystem
+    # Select one of the following services to display its information:
+    #     [0 ] liip_imagine.binary.loader.prototype.flysystem
+    #     [1 ] liip_imagine.binary.loader.prototype.flysystem2
+    #     [2 ] liip_imagine.cache.resolver.prototype.flysystem
+    #     [3 ] liip_imagine.cache.resolver.prototype.flysystem2
+    #     [4 ] oneup_flysystem.adapter_factory.local
+    #     [5 ] oneup_flysystem.adapter_factory.nulladapter
+    #     [6 ] oneup_flysystem.adapter_factory.zip
+    #     [7 ] oneup_flysystem.adapter_factory.async_aws_s3
+    #     [8 ] oneup_flysystem.adapter_factory.awss3v2
+    #     [9 ] oneup_flysystem.adapter_factory.awss3v3
+    #     [10] oneup_flysystem.adapter_factory.azureblob
+    #     [11] oneup_flysystem.adapter_factory.dropbox
+    #     [12] oneup_flysystem.adapter_factory.googlecloudstorage
+    #     [13] oneup_flysystem.adapter_factory.rackspace
+    #     [14] oneup_flysystem.adapter_factory.webdav
+    #     [15] oneup_flysystem.adapter_factory.ftp
+    #     [16] oneup_flysystem.adapter_factory.sftp
+    #     [17] oneup_flysystem.adapter_factory.gridfs
+    #     [18] oneup_flysystem.adapter_factory.customadapter
+    #     [19] oneup_flysystem.adapter_factory.memory
+    #     [20] oneup_flysystem.adapter_factory.fallback
+    #     [21] oneup_flysystem.adapter_factory.gaufrette
+    #     [22] oneup_flysystem.adapter_factory.replicate
+    #     [23] oneup_flysystem.cache_factory.adapter
+    #     [24] oneup_flysystem.cache_factory.memory
+    #     [25] oneup_flysystem.cache_factory.noop
+    #     [26] oneup_flysystem.cache_factory.memcached
+    #     [27] oneup_flysystem.cache_factory.php_redis
+    #     [28] oneup_flysystem.cache_factory.predis
+    #     [29] oneup_flysystem.cache_factory.stash
+    #     [30] oneup_flysystem.cache_factory.psr6
+    #     [31] oneup_flysystem.adapter.local
+    #     [32] oneup_flysystem.adapter.cached
+    #     [33] oneup_flysystem.adapter.nulladapter
+    #     [34] oneup_flysystem.adapter.memory
+    #     [35] oneup_flysystem.adapter.zip
+    #     [36] oneup_flysystem.adapter.async_aws_s3
+    #     [37] oneup_flysystem.adapter.awss3v2
+    #     [38] oneup_flysystem.adapter.awss3v3
+    #     [39] oneup_flysystem.adapter.azureblob
+    #     [40] oneup_flysystem.adapter.dropbox
+    #     [41] oneup_flysystem.adapter.googlecloudstorage
+    #     [42] oneup_flysystem.adapter.rackspace
+    #     [43] oneup_flysystem.adapter.webdav
+    #     [44] oneup_flysystem.adapter.ftp
+    #     [45] oneup_flysystem.adapter.sftp
+    #     [46] oneup_flysystem.adapter.gridfs
+    #     [47] oneup_flysystem.adapter.fallback
+    #     [48] oneup_flysystem.adapter.gaufrette
+    #     [49] oneup_flysystem.adapter.replicate
+    #     [50] oneup_flysystem.mount_manager
+    #     [51] oneup_flysystem.filesystem
+    #     [52] oneup_flysystem.cache.adapter
+    #     [53] oneup_flysystem.cache.memory
+    #     [54] oneup_flysystem.cache.noop
+    #     [55] oneup_flysystem.cache.memcached
+    #     [56] oneup_flysystem.cache.predis
+    #     [57] oneup_flysystem.cache.php_redis
+    #     [58] oneup_flysystem.cache.stash
+    #     [59] oneup_flysystem.cache.psr6
+    #     [60] oneup_flysystem.plugin.empty_dir
+    #     [61] oneup_flysystem.plugin.get_with_metadata
+    #     [62] oneup_flysystem.plugin.list_files
+    #     [63] oneup_flysystem.plugin.list_paths
+    #     [64] oneup_flysystem.plugin.list_with
+    #     [65] oneup_flysystem.public_uploads_adapter_adapter
+    #     [66] oneup_flysystem.public_uploads_filesystem_filesystem
+    #     [67] League\Flysystem\Filesystem
+    #     [68] League\Flysystem\FilesystemInterface $publicUploadsFilesystem
+    #     > 67
+    #
+    #
+    #     // This service is a public alias for the service
+    #     // oneup_flysystem.public_uploads_filesystem_filesystem
+    #
+    #     Information for Service "oneup_flysystem.public_uploads_filesystem_filesystem"
+    #     ==============================================================================
+    #
+    #     ---------------- -------------------------------------------------------------
+    #     Option           Value
+    #     ---------------- -------------------------------------------------------------
+    #     Service ID       oneup_flysystem.public_uploads_filesystem_filesystem
+    #     Class            League\Flysystem\Filesystem
+    #     Tags             oneup_flysystem.filesystem (key: public_uploads_filesystem)
+    #     Public           no
+    #     Synthetic        no
+    #     Lazy             no
+    #     Shared           yes
+    #     Abstract         no
+    #     Autowired        no
+    #     Autoconfigured   no
+    #     ---------------- -------------------------------------------------------------
+    #     There it is: oneup_flysystem.public_uploads_filesystem_filesystem. T
+    #     That service was created thanks to our config and we'll use it soon in UploaderHelper.
+    #     The bundle also created another service called: League\Flysystem\Filesystem.
+    #     Well, actually, it's an alias:
+    #     I'll type 61 to view more info about it.
+    #     Yep! This points to our public_uploads_filesystem service.
+    #     The purpose of this is that it allows us to type-hint League\Flysystem\Filesystem and Symfony will autowire our filesystem service.
+    #     If you only have 1 filesystem, having this alias is great.
+    #     But if you have multiple, well, you can only autowire one of them.
+    #     I'm going to remove the alias -
+    #     I'll show you another way to access the filesystem service.
+    #     Ok, config done!
+    #     Next, let's start using this shiny new Filesystem service.
     filesystems:
         public_uploads_filesystem:
             adapter: public_uploads_adapter
-        default_filesystem:
-            adapter: default_adapter
-            alias: League\Flysystem\Filesystem
