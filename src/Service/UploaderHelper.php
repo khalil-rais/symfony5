@@ -12,6 +12,7 @@ use Behat\Transliterator\Transliterator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Asset\Context\RequestStackContext;
 use Symfony\Component\HttpFoundation\File\File;
+use League\Flysystem\FilesystemInterface;
 
 class UploaderHelper
 {
@@ -34,18 +35,21 @@ class UploaderHelper
         Instead of just injecting the kernel.project_dir parameter,
         we'll pass in the whole string to where uploads should be stored.
      */
-    private $uploadsPath;
     private $requestStackContext;
+    private $filesystem;
 
     /*
-        To do this, we're going to work with a service that you don't see very often in Symfony:
-        it's the service that's used internally by the asset() function to determine the subdirectory.
-        In the constructor, add another argument: RequestStackContext $requestStackContext.
-        I'll hit Alt + Enter and select initialize fields to create that property and set it.
+        Config done!
+        Let's get to work in UploaderHelper.
+        Instead of passing the $uploadsPath, which we were using to store things,
+        change this to FilesystemInterface - the one from Flysystem - $filesystem.
+        Use that below, and rename the property to $filesystem.
+        Tip: If you're using version 4 of oneup/flysystem-bundle (so, flysystem v2),
+        autowire Filesystem instead of FilesystemInterface from League\Flysystem.
      */
-    public function __construct(string $uploadsPath, RequestStackContext $requestStackContext)
+    public function __construct(FilesystemInterface $filesystem, RequestStackContext $requestStackContext)
     {
-        $this->uploadsPath = $uploadsPath;
+        $this->filesystem = $filesystem;
         $this->requestStackContext = $requestStackContext;
     }
     /*
@@ -124,10 +128,33 @@ class UploaderHelper
             or you will have no fun.
             To keep things clear, I'll Refactor -> Rename this variable to $file.
          */
-        $file->move(
-            $destination,
-            $newFilename
+        /*
+            Now, in the method, instead of $file->move(), we can say
+            $this->filesystem->write(), which is used to create new files. Pass this
+            self::ARTICLE_IMAGE.'/'.$newFilename and then the contents of the file:
+            file_get_contents() with $file->getPathname().
+         */
+        $this->filesystem->write(
+            self::ARTICLE_IMAGE.'/'.$newFilename,
+            file_get_contents($file->getPathname())
         );
+        /*
+            That's it!
+            This File object has a ton of different methods for getting the filename, the full path,
+            the file without the extension and more.
+            Honestly, I get them all confused and have to Google them.
+            getPathname() gives us the absolute file path on the filesystem.
+            Above, we can get rid of the unused $destination variable.
+            Because the filesystem's root is public/uploads/,
+            the only thing we need to pass to write() is the path relative to that:
+            article_image/ and then $newFilename.
+            I think we're ready! Let's clear out the uploads/ directory again.
+            And then try our fixtures:
+            php bin/console doctrine:fixtures:load
+            In DefinitionErrorExceptionPass.php line 49:
+            Cannot autowire service "App\Service\UploaderHelper": argument "$filesystem" of method "__construct()" references interface "League\Flysystem\FilesystemInterface" but no such service exists. Available autowiring aliases for this interface are: "$publicUploadsFilesystem".
+            Oh! It does not work!
+         */
         /*
             And at the bottom, return $newFilename.
          */
