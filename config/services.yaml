@@ -36,11 +36,36 @@ services:
             # The argument name is $uploadsPath.
             # So, below _defaults and bind,
             # add $uploadsPath set to %kernel.project_dir%/public/uploads.
-            $uploadsPath: '%kernel.project_dir%/public/uploads'
-            # This means: anywhere that $uploadsPath is used as an argument for a method
-            # that's autowired - usually a controller action or the constructor of a service -
-            # pass in this value.
+            # “Unused binding $uploadsPath in service UniqueUserValidator.”
+            # This is a bad error message from Symfony, at least the second half of the message.
+            # A minute ago, we had an argument here called $uploadsPath.
+            # Open up config/services.yaml.
+            # Ah, that worked because we have $uploadsPath configured as a global bind.
+            # And when you configure a bind, it must be used in at least one place in your app.
+            # If it's not used anywhere, you get this error.
+            # It's kinda nice: Symfony is saying:
+            # “Hey! You configured this bind but you're not using it - are you maybe messing something up on accident?”
+            # The UniqueUserValidator part of the message is really a bug in the error message,
+            # which makes this a bit confusing.
 
+            # Then, under bind, set $publicUploadFilesystem to the filesystem service id -
+            # you can see it in the error.
+            # It suggests two services that implement the FilesystemInterface type-hint -
+            # we want the second one. Type @ then paste.
+            $publicUploadsFilesystem: '@oneup_flysystem.public_uploads_filesystem_filesystem'
+            # One more time for the fixtures!
+            # php bin/console doctrine:fixtures:load
+            # > yes
+            #
+            # > purging database
+            # > loading App\DataFixtures\TagFixture
+            # > loading App\DataFixtures\UserFixture
+            # > loading App\DataFixtures\ArticleFixtures
+            # > loading App\DataFixtures\CommentFixture
+            # Ok, no error! Check out the public/uploads/ directory.
+            # Yes! We have files! Refresh the homepage.
+            # We are good! We still need to tweak a few more details,
+            # but our app is now way more ready to work locally or in the cloud.
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'

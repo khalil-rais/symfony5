@@ -36,7 +36,7 @@ class UploaderHelper
         we'll pass in the whole string to where uploads should be stored.
      */
     private $requestStackContext;
-    private $filesystem;
+    private $publicUploadsFilesystem;
 
     /*
         Config done!
@@ -47,9 +47,12 @@ class UploaderHelper
         Tip: If you're using version 4 of oneup/flysystem-bundle (so, flysystem v2),
         autowire Filesystem instead of FilesystemInterface from League\Flysystem.
      */
-    public function __construct(FilesystemInterface $filesystem, RequestStackContext $requestStackContext)
+    /*
+        First, rename the argument to be more descriptive, how about $publicUploadFilesystem:
+     */
+    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext)
     {
-        $this->filesystem = $filesystem;
+        $this->publicUploadsFilesystem = $publicUploadsFilesystem;
         $this->requestStackContext = $requestStackContext;
     }
     /*
@@ -78,10 +81,6 @@ class UploaderHelper
             hit Alt + Enter and select initialize fields to create that property and set it.
             Now, below, we can say $this->uploadsPath and then /article_image.
         */
-        /*
-            Down below, use that: self::ARTICLE_IMAGE.
-         */
-        $destination = $this->uploadsPath.'/'.self::ARTICLE_IMAGE;
         /*
             Let's see: everything looks happy, ah - except for getClientOriginalName():
             that method does not exist in File - it only exists in UploadedFile.
@@ -134,7 +133,7 @@ class UploaderHelper
             self::ARTICLE_IMAGE.'/'.$newFilename and then the contents of the file:
             file_get_contents() with $file->getPathname().
          */
-        $this->filesystem->write(
+        $this->publicUploadsFilesystem->write(
             self::ARTICLE_IMAGE.'/'.$newFilename,
             file_get_contents($file->getPathname())
         );

@@ -150,6 +150,15 @@ oneup_flysystem:
     #     I'll show you another way to access the filesystem service.
     #     Ok, config done!
     #     Next, let's start using this shiny new Filesystem service.
+    # Anyways, remove that bind and try the fixtures again:
+    # php bin/console doctrine:fixtures:load
+    # This is the error I was waiting for.
+    # “Cannot autowire service UploaderHelper argument $filesystem of __construct() references FilesystemInterface but no such service exists.”
+    # There are two ways to fix this.
+    # First, we could re-add the alias option and point it at this FilesystemInterface:
     filesystems:
         public_uploads_filesystem:
             adapter: public_uploads_adapter
+            # alias: League\Flysystem\Filesystem
+            # Or, we can create a new bind.
+            # I'll do the second, because it works better if you have multiple filesystem services, which we will soon.
