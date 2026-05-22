@@ -1,4 +1,27 @@
 # Read the documentation: https://github.com/1up-lab/OneupFlysystemBundle/blob/release/3.x/Resources/doc/index.md
+# While Jordi is preparing our packages, go back to their docs.
+# Flysystem has two important concepts,
+# which you can see here in the config example.
+# First, we need to set up an "adapter",
+# which is a lower-level object.
+# Give it any name - like my_adapter.
+# Then, this key - local - is the critical part:
+# this says that you want to use the local adapter -
+# an adapter that stores things on the local filesystem.
+# Click the AwsS3 adapter link.
+# If you want to use this adapter and store your files in S3,
+# you'll use the key awss3v3.
+# Every adapter also has different options.
+# We're going to start with the local adapter,
+# but move to s3 later.
+# But the real star, is the filesystem.
+# Same thing: you give it any nickname, like my_filesystem
+# and then say: this filesystem uses the my_adapter adapter.
+# We'll talk about visibility later.
+# The filesystem is the object that we'll work with directly to read, write & delete files.
+# Ok, go check on Composer.
+# It's done and thanks to the recipe,
+# we have a new config/packages/oneup_flysystem.yaml file with the same config we just saw in the docs.
 oneup_flysystem:
     adapters:
         default_adapter:
