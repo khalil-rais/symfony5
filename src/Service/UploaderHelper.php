@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Asset\Context\RequestStackContext;
 use Symfony\Component\HttpFoundation\File\File;
 use League\Flysystem\FilesystemInterface;
+use League\Flysystem\FileNotFoundException;
 
 class UploaderHelper
 {
@@ -203,8 +204,40 @@ class UploaderHelper
             and pass that the full path,
             which will be self::ARTICLE_IMAGE.'/'.$existingFilename.
          */
+        /*
+            In a perfect system, the existing file will always exist, right?
+            I mean, how could a filename get set on the entity without being uploaded?
+            Well, what if we're developing locally and maybe
+            we clear out the uploads directory to test something -
+            or we clear out the uploads directory in our automated tests.
+            What would happen?
+            Let's find it!
+            Empty uploads/.
+            Back in our browser, the image preview still shows up because
+            this is rendering a thumbnail file -
+            which we didn't delete -
+            but the original image is totally gone.
+            Select earth.jpeg, update and it fails!
+            It fails on $this->filesystem->delete().
+            This may be the behavior you want:
+            if something weird happens and the old file is gone,
+            please explode so that I know.
+            But, I'm going to propose something slightly less hardcore.
+            If the old file doesn't exist for some reason,
+            I don't want the entire process to fail, it really doesn't need to.
+            The error from Flysystem is a FileNotFoundException from League\Flysystem.
+            In UploaderHelper wrap that line in a try-catch.
+            Let's catch that FileNotFoundException -
+            the one from League\Flysystem
+         */
         if ($existingFilename) {
-            $this->publicUploadsFilesystem->delete(self::ARTICLE_IMAGE.'/'.$existingFilename);
+            try {
+                $this->publicUploadsFilesystem->delete(self::ARTICLE_IMAGE.'/'.$existingFilename);
+            }
+            catch (FileNotFoundException $e) {
+
+            }
+
         }
         return $newFilename;
     }
