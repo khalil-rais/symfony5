@@ -14,6 +14,7 @@ use Symfony\Component\Asset\Context\RequestStackContext;
 use Symfony\Component\HttpFoundation\File\File;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\FileNotFoundException;
+use Psr\Log\LoggerInterface;
 
 class UploaderHelper
 {
@@ -38,6 +39,7 @@ class UploaderHelper
      */
     private $requestStackContext;
     private $publicUploadsFilesystem;
+    private $logger;
 
     /*
         Config done!
@@ -51,10 +53,23 @@ class UploaderHelper
     /*
         First, rename the argument to be more descriptive, how about $publicUploadFilesystem:
      */
-    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext)
+    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger)
     {
+        /*
+            That'll fix that problem but I don't love doing this.
+            Honestly, I hate silencing errors.
+            One of the benefits of throwing an exception is that we can configure Symfony
+            to notify us of errors via the logger.
+            At SymfonyCasts, we send all errors to a Slack channel so we know
+            if something weird is going on not that we ever have bugs.
+            Here's what I propose: a soft failure:
+            we don't fail, but we do log that an error happened.
+            Back on the constructor, autowire a new argument: LoggerInterface $logger. I'll hit Alt + Enter
+            and select initialize fields to create that property and set it.
+         */
         $this->publicUploadsFilesystem = $publicUploadsFilesystem;
         $this->requestStackContext = $requestStackContext;
+        $this->logger = $logger;
     }
     /*
         This class will handle all things related to uploading files.
@@ -235,7 +250,24 @@ class UploaderHelper
                 $this->publicUploadsFilesystem->delete(self::ARTICLE_IMAGE.'/'.$existingFilename);
             }
             catch (FileNotFoundException $e) {
-
+                /*
+                    Now, down in the catch, say $this->logger->alert() -
+                    alert is one of the highest log levels
+                    and I usually send all logs that are this level or higher to a Slack channel.
+                    Inside, how about: "Old uploaded file %s was missing when trying to delete" -
+                    and pass $existingFilename.
+                 */
+                $this->logger->alert(sprintf('Old uploaded file "%s" was missing when trying to delete', $existingFilename));
+                /*
+                    Thanks to this, the user gets a smooth experience,
+                    but we get notified so we can figure out how the heck the old file disappeared.
+                    Move over and re-POST the form.
+                    Now it works. And to prove the log worked, check out the terminal tab
+                    where we're running the Symfony web server:
+                    it's streaming all of our logs here.
+                    Scroll up and there it is!
+                    “Old uploaded file "rocket..." was missing when trying to delete”
+                 */
             }
 
         }
