@@ -68,7 +68,22 @@ class UploaderHelper
         or you will have no fun.
         To keep things clear, I'll Refactor -> Rename this variable to $file.
      */
-    public function uploadArticleImage(File $file): string
+    /*
+        Ok, for problem number two, go back to /admin/article.
+        Log back in with password engage,
+        edit an article, and go select an image - how about astronaut.jpg.
+        Hit update and it works!
+        So what's the problem?
+        Well, we just replaced an existing image with this new one.
+        Does the old file still exist in our uploads directory?
+        Absolutely! But it probably shouldn't.
+        When an article image is updated, let's delete the old file.
+        In UploaderHelper, add a second argument - a nullable string argument called $existingFilename.
+     */
+    /*
+        This is nullable because sometimes there may not be an existing file to delete.
+     */
+    public function uploadArticleImage(File $file, ?string $existingFilename): string
     {
         /*
             Ok! Let's go steal some code for this.
@@ -182,6 +197,15 @@ class UploaderHelper
         /*
             And at the bottom, return $newFilename.
          */
+        /*
+            At the bottom, it's beautifully simple:
+            if an $existingFilename was passed, then $this->filesystem->delete()
+            and pass that the full path,
+            which will be self::ARTICLE_IMAGE.'/'.$existingFilename.
+         */
+        if ($existingFilename) {
+            $this->publicUploadsFilesystem->delete(self::ARTICLE_IMAGE.'/'.$existingFilename);
+        }
         return $newFilename;
     }
     /*

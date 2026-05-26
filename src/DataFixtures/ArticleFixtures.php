@@ -132,6 +132,15 @@ EOF
         $targetPath = sys_get_temp_dir().'/'.$randomImage;
         $fs->copy(__DIR__.'/images/'.$randomImage, $targetPath, true);
         return $this->uploaderHelper
-            ->uploadArticleImage(new File($targetPath));
+            /*
+                Oh, and there's one other place we need update: ArticleFixtures.
+                Down here, just pass null: we are never updating.
+             */
+            ->uploadArticleImage(new File($targetPath), null);
+            /*
+                Try it! Here is the current astronaut image.
+                Now, move over, upload rocket.jpg this time and update!
+                Back in the directory there's rocket and astronaut is gone! Love it!
+             */
     }
 }

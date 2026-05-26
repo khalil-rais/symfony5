@@ -39,7 +39,11 @@ class ArticleAdminController extends BaseController
             /** @var UploadedFile $uploadedFile */
             $uploadedFile = $form['imageFile']->getData();
             if ($uploadedFile) {
-                $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile);
+                /*
+                    In new(), you can really just pass null - there will not be an article image. But I'll pass
+                    getImageFilename() to be consistent.
+                 */
+                $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile, $article->getImageFilename());
                 $article->setImageFilename($newFilename);
             }
             /*
@@ -112,7 +116,13 @@ class ArticleAdminController extends BaseController
                     And celebrate by removing all of the logic below and replacing it with
                     $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile).
                 */
-                $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile);
+                /*
+                    Done! You can see the astronaut file that we're using right now.
+                    Oh, but first, head over to ArticleAdminController:
+                    we need to pass this new argument.
+                    Let's see - this is the edit() action - so pass $article->getImageFilename().
+                 */
+                $newFilename = $uploaderHelper->uploadArticleImage($uploadedFile, $article->getImageFilename());
                 $article->setImageFilename($newFilename);
                 /*
                     Dang - that is nice!
