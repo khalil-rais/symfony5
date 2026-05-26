@@ -180,10 +180,38 @@ class UploaderHelper
             Now, pass stream instead of the contents.
          */
         $stream = fopen($file->getPathname(), 'r');
-        $this->publicUploadsFilesystem->writeStream(
+        /*
+            Ok, there's one more thing I want to tighten up.
+            If one of the calls to the Filesystem object fails,
+            what do you think will happen? An exception?
+            Hold Command or Ctrl and click on writeStream().
+            Check out the docs:
+            we will get an exception if we pass an invalid stream
+            or if the file already exists.
+            But for any other type of failure, maybe a network error instead of an exception,
+            the method just returns false!
+            Actually, that's not completely true -
+            it depends on your adapter.
+            For example, if you're using the S3 adapter and there's a network error,
+            it may throw its own type of exception.
+            But the point is this: if any of the Filesystem methods fail,
+            you might not get an exception:
+            it might just return false.
+            For that reason, I like to code defensively.
+            Assign this to a $result variable.
+         */
+        $result = $this->publicUploadsFilesystem->writeStream(
             self::ARTICLE_IMAGE.'/'.$newFilename,
             $stream
         );
+        /*
+            Then say: if ($result === false),
+            let's throw our own exception - I do want to know that something failed:
+            “Could not write uploaded file "%s"” and pass $newFilename.
+         */
+        if ($result === false) {
+            throw new \Exception(sprintf('Could not write uploaded file "%s"', $newFilename));
+        }
         /*
             Yea... that's it! Same thing, but no memory issues.
             But we do need to add one more detail after:
@@ -247,7 +275,28 @@ class UploaderHelper
          */
         if ($existingFilename) {
             try {
-                $this->publicUploadsFilesystem->delete(self::ARTICLE_IMAGE.'/'.$existingFilename);
+                $result = $this->publicUploadsFilesystem->delete(self::ARTICLE_IMAGE.'/'.$existingFilename);
+                /*
+                    Copy that and do the same for delete:
+                    “Could not delete old uploaded file "%s"” with $existingFilename.
+                 */
+                if ($result === false) {
+                    throw new \Exception(sprintf('Could not delete old uploaded file "%s"', $existingFilename));
+                }
+                /*
+                    I'm throwing this error instead of just logging something because
+                    this would truly be an exceptional case -
+                    we shouldn't let things continue.
+                    But, it's your call.
+                    Let's make sure this all works:
+                    move over and select the stars file -
+                    or actually the "Earth from Moon" photo.
+                    Update and got it!
+                    Next: let's teach LiipImagineBundle to play nice with Flysytem.
+                    After all, if we move Flysystem to S3,
+                    but LiipImagineBundle is still looking for the source files locally,
+                    well we're not going to have a great time.
+                 */
             }
             catch (FileNotFoundException $e) {
                 /*
