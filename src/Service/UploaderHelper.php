@@ -133,10 +133,35 @@ class UploaderHelper
             self::ARTICLE_IMAGE.'/'.$newFilename and then the contents of the file:
             file_get_contents() with $file->getPathname().
          */
-        $this->publicUploadsFilesystem->write(
+        /*
+            The first is that using file_get_contents() eats memory:
+            it reads the entire contents of the file into PHP's memory.
+            That's not a huge deal for tiny files,
+            but it could be a big deal if you start uploading bigger stuff.
+            And, it's just not necessary.
+            For that reason, in general, when you use Flysystem, instead of using methods like ->write() or ->update(), you should use ->writeStream() or ->updateStream().
+         */
+        /*
+            It works the same, except that we need to pass a stream instead of the contents.
+
+            Create the stream with $stream = fopen($file->getPathname()) and,
+            because we just need to read the file, use the r flag.
+            Now, pass stream instead of the contents.
+         */
+        $stream = fopen($file->getPathname(), 'r');
+        $this->publicUploadsFilesystem->writeStream(
             self::ARTICLE_IMAGE.'/'.$newFilename,
-            file_get_contents($file->getPathname())
+            $stream
         );
+        /*
+            Yea... that's it! Same thing, but no memory issues.
+            But we do need to add one more detail after:
+            if is_resource($stream), then fclose($stream).
+            The "if" is needed because some Flysystem adapters close the stream by themselves.
+         */
+        if (is_resource($stream)) {
+            fclose($stream);
+        }
         /*
             That's it!
             This File object has a ton of different methods for getting the filename, the full path,
