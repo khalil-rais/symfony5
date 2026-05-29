@@ -334,6 +334,13 @@ class UploaderHelper
     */
     public function getPublicPath(string $path): string
     {
+        /*
+            One of the things I've noticed is that this word uploads -
+            the directory where uploads are being stored -
+            is starting to show up in a few places.
+            We have it here in our liip_imagine config file, the oneup_flysystem.yaml file and in UploaderHelper:
+            it's used in getPublicPath().
+         */
         return $this->requestStackContext
                 ->getBasePath().'/uploads/'.$path;
     }
