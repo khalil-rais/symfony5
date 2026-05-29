@@ -36,3 +36,37 @@ liip_imagine:
                     size: [500, 500]
                     mode: outbound
                     allow_upscale: true
+    # Let's go to back to the LiipImagineBundle documentation:
+    # find their GitHub page and then click down here on the "Download the Bundle"
+    # link as an easy way to get into their full docs.
+    # Now, go back to the main page and down here near the bottom,
+    # it talks about different "data loaders".
+    # The default is "File System", we want Flysystem.
+    # Let's see, we've already installed the bundle.
+    # Copy this loaders section - we already have our Flysystem config all set up.
+    # Then, open our liip_imagine.yaml file and, really, anywhere, paste!
+    # This creates a loader called profile_photos - that name can be anything.
+    # Let's use flysystem_loader.
+    # The critical part is the key flysystem:
+    # that says to use the "Flysystem" loader that comes with the bundle.
+    # The only thing it needs to know, is the service id of the filesystem that we want to use.
+    loaders:
+        flysystem_loader:
+            # For that, go back to config/services.yaml and copy the long service id from the bind section.
+            # Back in liip_imagine.yaml, paste!
+            flysystem:
+                filesystem_service: oneup_flysystem.public_uploads_filesystem_filesystem
+    # We now have a "loader" called flysystem_loader,
+    # and a "loader's" job is to "load" the source file.
+    # You can technically have multiple loaders, though I've never had to do that.
+    # To always have LiipImagineBundle load the files via Flysystem,
+    # below, add data_loader set to the loader's name: flysystem_loader.
+    # I'll add a comment: “default loader to use for all filter sets”
+    # default loader to use for all filter sets
+    data_loader: flysystem_loader
+    # Because, you can technically specify which loader you want to use on each filterset.
+    # Again, I've never had to do that: we always want to use flysystem.
+    # Cool! Let's try it! Go into the public/ directory and delete all the existing thumbnails -
+    # let's delete media/cache/ entirely.
+    # By doing this, the bundle will use the data loader to get the contents of each image
+    # so that it can recreate the thumbnails.
