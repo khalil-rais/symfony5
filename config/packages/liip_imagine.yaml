@@ -70,3 +70,50 @@ liip_imagine:
     # let's delete media/cache/ entirely.
     # By doing this, the bundle will use the data loader to get the contents of each image
     # so that it can recreate the thumbnails.
+    # So, the "data loader" is responsible for reading the original image.
+    # But, there's another important concept from LiipImagineBundle called "resolvers".
+    # Click down on the "Flysystem Resolver" in their docs.
+    # The resolver is responsible for saving the thumbnail image back to the filesystem after all of the transformations.
+    # By default, no surprise, LiipImagineBundle writes things directly to the filesystem.
+    # So even if we moved Flysystem to s3,
+    # LiipImagineBundle would still be writing the thumbnail files back to our server - into the public/media directory.
+    # Tip: You can also completely offload the processing and storage of your files to a cloud service like rokka.io by leveraging LiipRokkaImagineBundle.
+    # Let's change that! In the docs, copy the resolvers section.
+    # Back in our liip_imagine.yaml file, paste that.
+    # It's pretty much the same as before:
+    # we'll call it flysystem_resolver
+    # and tell it to save the images using the same filesystem service.
+    # Remove visibility - that sets the Flysystem visibility,
+    # which is a concept we'll talk about soon.
+    # True is the default value anyways,
+    # which basically means these files will be publicly accessible.
+    resolvers:
+        flysystem_resolver:
+            flysystem:
+                filesystem_service: oneup_flysystem.public_uploads_filesystem_filesystem
+                # cache_prefix is the subdirectory within the filesystem
+                # where the files should be stored and root_url is the URL
+                # that all the paths will be prefixed with when the image paths are rendered.
+                # Right now, it needs to be /uploads.
+                # For example, if LiipImagineBundle stores a file called media/cache/foo.jpg into Flysystem,
+                # we know that the public path to this will be /uploads/media/cache/foo.jpg.
+                # We'll talk more about this setting later when we move to s3.
+                cache_prefix: media/cache
+                root_url: /uploads
+    # Ok, delete the media/ directory entirely.
+    # Oh, and I almost forgot the last step:
+    # add cache set to flysystem_resolver - let's put an "r" on that.
+    # default cache resolver for saving thumbnails
+    cache: flysystem_resolver
+    # This tells the bundle to always use this resolver.
+    # I'm not sure why it's called "cache" - the bundle seems to use "resolver" and "cache" to describe this one concept.
+    # Ok! Moment of truth! Refresh. Ha! It works! Go check out where the thumbnails are stored: there
+    # is no media/ directory anymore! The Flysystem filesystem points to the public/uploads
+    # directory, so the media/cache directory lives there. And thanks to the /uploads root_url,
+    # when it renders the path, it knows to start with /uploads and then the path in Flysystem.
+    # I love this! It's a bit tricky to get these two libraries to play together perfectly. But now we are much
+    # more prepared to switch between local uploads and S3.
+    # Next: we can generate public URLs to thumbnailed files or the original files. But, what if you need
+    # to force all the URLs to include the domain name? This is something you don't think about until
+    # you need to generate a PDF or send an email from a console command or worker. Then... it can
+    # be a nightmare. Let's add this to our asset system in a way that we love.
