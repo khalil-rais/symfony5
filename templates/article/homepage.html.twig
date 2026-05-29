@@ -40,103 +40,43 @@
                             To use this, it's so nice: |imagine_filter() and then the name.
                         #}
                         {#
-                        The problem is LiipImagineBundle.
-                        Open up templates/article/homepage.html.twig:
-                        we call uploaded_asset(),
-                        pass that article.imagePath and that value is passed into imagine_filter.
-                        So basically, a string like uploads/article_image/something.jpg is passed to the filter.
-                        The problem? By default, LiipImagineBundle reads the source image file from the filesystem.
-                        If we refactored to use S3, it would be looking in the wrong place!
-                        You can see this by running:
-
-                        php bin/console debug:config liip_imagine
-                        Current configuration for extension with alias "liip_imagine"
-                        =============================================================
-
-                        liip_imagine:
-                            driver: gd
-                            filter_sets:
-                                cache:
-                                    filters: {  }
-                                    post_processors: {  }
-                                squared_thumbnail_small:
-                                    filters:
-                                        thumbnail:
-                                            size:
-                                                - 200
-                                                - 200
-                                            mode: outbound
-                                            allow_upscale: true
-                                    post_processors: {  }
-                                squared_thumbnail_medium:
-                                    filters:
-                                        thumbnail:
-                                            size:
-                                                - 500
-                                                - 500
-                                            mode: outbound
-                                            allow_upscale: true
-                                    post_processors: {  }
-                            loaders:
-                                default:
-                                    filesystem:
-                                        locator: filesystem
-                                        data_root:
-                                            - /Users/khalil.rais/cauldron_overflow/public
-                                        allow_unresolvable_data_roots: false
-                                        bundle_resources:
-                                            enabled: false
-                                            access_control_type: blacklist
-                                            access_control_list: {  }
-                            resolvers:
-                                default:
-                                    web_path:
-                                        web_root: /Users/khalil.rais/cauldron_overflow/public
-                                        cache_prefix: media/cache
-                            cache: default
-                            cache_base_path: ''
-                            data_loader: default
-                            default_image: null
-                            default_filter_set_settings:
-                                quality: 100
-                                jpeg_quality: null
-                                png_compression_level: null
-                                png_compression_filter: null
-                                format: null
-                                animated: false
-                                cache: null
-                                data_loader: null
-                                default_image: null
-                                filters: {  }
-                                post_processors: {  }
-                            controller:
-                                filter_action: 'Liip\ImagineBundle\Controller\ImagineController::filterAction'
-                                filter_runtime_action: 'Liip\ImagineBundle\Controller\ImagineController::filterRuntimeAction'
-                                redirect_response_code: 302
-                            twig:
-                                mode: legacy
-                                assets_version: null
-                            enqueue: false
-                            messenger:
-                                enabled: false
-                            templating: true
-                            webp:
-                                generate: false
-                                quality: 100
-                                cache: null
-                                data_loader: null
-                                post_processors: {  }
-
-                        This is the current config for this bundle,
-                        which includes all of its default values.
-                        Near the bottom, see that "loaders" section?
-                        The "loader" is the piece that's responsible for reading the source image.
-                        It defaults to using the filesystem and it knows to look in the public/ directory!
-                        So when we pass it upload/article_image/ some filename, it finds it perfectly.
-                        Well it works until our files don't live on the server anymore.
-                        The solution? We need this to use Flysystem.
+                            Testing time! Let's go back to, how about, the homepage.
+                            And it doesn't work.
+                            Drat! Inspectnelement.
+                            Hmm, it does start with the media/cache/resolve part.
+                            Then, the path at the end is uploads/article_image/lightspeed...png.
+                            That's the path that we're passing to the filter.
+                            Go back to the homepage template.
+                            The problem now - and it's really cool - is that
+                            we told LiipImagineBundle to use Flysystem to load files but the root of our filesystem is the public/uploads directory.
+                            In other words, if you want to read a file from our filesystem, the path needs to be relative to this directory.
+                            In other words, it should not contain the uploads/ part
+                            The fix? Remove the uploaded_asset() function:
+                            we can just pass article.imagePath, which will be article_image/ the filename.
                         #}
-                        <img class="article-img" src="{{ uploaded_asset(article.imagePath)|imagine_filter('squared_thumbnail_small') }}">
+                        <img class="article-img" src="{{ article.imagePath|imagine_filter('squared_thumbnail_small') }}">
+                        {#
+                            I love this! Need to thumbnail something?
+                            Just pass it the Flysystem path: you don't need the word uploads or anything like that.
+                            The uploaded_asset() function will still be useful if you want the public path to an asset without thumbnailing,
+                            but if you're using imagine_filter, passing the short, relative path is all you need.
+                            Try it! Refresh! It still doesn't work?
+                            Oh yea! A few minutes ago, we deleted all of the original images from the fixtures.
+                            But we did re-upload a few of them.
+                            So if you scroll down... here we go -
+                            here's the Earth image we uploaded.
+                            So, it is now working perfectly.
+                            Let's reload our fixtures to make sure:
+                            php bin/console doctrine:fixtures:load
+                                Careful, database "main" will be purged. Do you want to continue? (yes/no) [no]:
+                                > yes
+
+                                  > purging database
+                                  > loading App\DataFixtures\TagFixture
+                                  > loading App\DataFixtures\UserFixture
+                                  > loading App\DataFixtures\ArticleFixtures
+                                  > loading App\DataFixtures\CommentFixture
+                        #}
                         <div class="article-title d-inline-block pl-3 align-middle">
                             <span>{{ article.title }}</span>
                             <small>({{ article.nonDeletedComments|length }} comments)</small>

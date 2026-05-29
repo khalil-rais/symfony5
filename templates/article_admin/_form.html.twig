@@ -41,17 +41,14 @@
             }) }}
         </div>
         {#
-            Back in the template, we can say {% if articleForm.vars.data %} -
-            that will be the Article object - then .imageFilename.
-            If we have an image filename,
-            print <img src="{{ }}"> and paste.
-            Replace article with articleForm.vars.data.
-            And yes, I should add an alt attribute - please do that!
-            Set the height to 100, because the actual thumbnail is 200 for quality reasons.
+            For the other one, go back to the admin article section - log back in with password "engage", because we reloaded the database.
+            When we're editing an image, yep, also broken.
+            Find this in templates/article_admin/_form.html.twig: take off uploaded_asset().
+            And... got it!
         #}
         <div class="col-sm-3">
             {% if articleForm.vars.data.imageFilename|default %}
-                <img src="{{ uploaded_asset(articleForm.vars.data.imagePath)|imagine_filter('squared_thumbnail_small')}}" height="100">
+                <img src="{{ articleForm.vars.data.imagePath|imagine_filter('squared_thumbnail_small') }}" height="100">
             {% endif %}
         </div>
         {#

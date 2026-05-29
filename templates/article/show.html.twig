@@ -42,10 +42,12 @@
                 To really make our getPublicPath() shine, I want to do the same thing here.
             #}
             {#
-                Copy the name and this time go into show.html.twig.
-                Add the |imagine_filter() and paste!
+                Now the homepage, yes - everything is here.
+                Let's make the same change in the other two places we're thumbnailing.
+                Click onto the show page.
+                This lives in templates/article/show.html.twig: remove uploaded_asset there. Refresh... good!
             #}
-            <img class="show-article-img" src="{{ uploaded_asset(article.imagePath)|imagine_filter('squared_thumbnail_medium') }}">
+            <img class="show-article-img" src="{{ article.imagePath|imagine_filter('squared_thumbnail_medium') }}">
             {#
                 Reload! It works!
                 The first time it has the resolve in the URL and is handled by a Symfony route & controller.
