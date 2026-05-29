@@ -6,6 +6,19 @@
 parameters:
     cache_adapter: cache.adapter.apcu
     locale: 'en'
+    # It's not a huge problem,
+    # but repetition is a bummer
+    # and this will cause some issues when moving to S3:
+    # we'll need to hunt down all of these paths
+    # and change them to point to the S3 domain.
+    # Let's tighten this up.
+    # In services.yaml, create two new parameters:
+    # The first will be uploads_dir_name set to uploads -
+    # this is the name of the directory where we are storing uploaded files.
+    # Call the second one uploads_base_url and set this to almost the same thing:
+    # / and then %uploads_dir_name%. This represents the base URL to the uploaded assets.
+    uploads_dir_name: 'uploads'
+    uploads_base_url: '/%uploads_dir_name%'
 
 services:
     # default configuration for services in *this* file
@@ -66,6 +79,11 @@ services:
             # Yes! We have files! Refresh the homepage.
             # We are good! We still need to tweak a few more details,
             # but our app is now way more ready to work locally or in the cloud.
+            # Cool! But, Symfony will not be able to autowire this string argument. You can see the error if you
+            # try to reload any page. Yep!
+            # We know how to fix that: back in services.yaml, add a bind: $uploadedAssetsBaseUrl
+            # set to %uploads_base_url%. Now... it works!
+            $uploadedAssetsBaseUrl: '%uploads_base_url%'
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'

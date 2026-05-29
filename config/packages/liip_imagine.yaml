@@ -99,7 +99,9 @@ liip_imagine:
                 # we know that the public path to this will be /uploads/media/cache/foo.jpg.
                 # We'll talk more about this setting later when we move to s3.
                 cache_prefix: media/cache
-                root_url: /uploads
+                # Thanks to these, we can do some cleanup! In liip_imagine.yaml, we need the URL. Copy
+                # uploads_base_url and then use %uploads_base_url%.
+                root_url: '%uploads_base_url%'
     # Ok, delete the media/ directory entirely.
     # Oh, and I almost forgot the last step:
     # add cache set to flysystem_resolver - let's put an "r" on that.

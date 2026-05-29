@@ -40,6 +40,8 @@ class UploaderHelper
     private $requestStackContext;
     private $publicUploadsFilesystem;
     private $logger;
+    private $publicAssetBaseUrl;
+
 
     /*
         Config done!
@@ -53,23 +55,20 @@ class UploaderHelper
     /*
         First, rename the argument to be more descriptive, how about $publicUploadFilesystem:
      */
-    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger)
+    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl)
     {
         /*
-            That'll fix that problem but I don't love doing this.
-            Honestly, I hate silencing errors.
-            One of the benefits of throwing an exception is that we can configure Symfony
-            to notify us of errors via the logger.
-            At SymfonyCasts, we send all errors to a Slack channel so we know
-            if something weird is going on not that we ever have bugs.
-            Here's what I propose: a soft failure:
-            we don't fail, but we do log that an error happened.
-            Back on the constructor, autowire a new argument: LoggerInterface $logger. I'll hit Alt + Enter
-            and select initialize fields to create that property and set it.
+            The last place is in UploaderHelper. The getBasePath() call will give us the directory
+            where the site is installed - usually an empty string. Then we need to pass in the
+            uploads_base_url parameter.
+            Add a new argument to the constructor: string $uploadedAssetsBaseUrl. I'll create the
+            property by hand and give it a slightly different name: $publicAssetBaseUrl, not for any
+            particular reason. Set that in the constructor:
          */
         $this->publicUploadsFilesystem = $publicUploadsFilesystem;
         $this->requestStackContext = $requestStackContext;
         $this->logger = $logger;
+        $this->publicAssetBaseUrl = $uploadedAssetsBaseUrl;
     }
     /*
         This class will handle all things related to uploading files.
@@ -335,14 +334,11 @@ class UploaderHelper
     public function getPublicPath(string $path): string
     {
         /*
-            One of the things I've noticed is that this word uploads -
-            the directory where uploads are being stored -
-            is starting to show up in a few places.
-            We have it here in our liip_imagine config file, the oneup_flysystem.yaml file and in UploaderHelper:
-            it's used in getPublicPath().
+            Back in getPublicPath(), use this: getBasePath() then
+            $this->publicAssetsBaseUrl, which will contain the / at the beginning.
          */
         return $this->requestStackContext
-                ->getBasePath().'/uploads/'.$path;
+                ->getBasePath().$this->publicAssetBaseUrl.$path;
     }
     /*
         If our app lives at the root of the domain - like it does right now -

@@ -35,7 +35,9 @@ oneup_flysystem:
     adapters:
         public_uploads_adapter:
             local:
-                directory: '%kernel.project_dir%/public/uploads'
+                # Next, in oneup_flysystem.yaml, we need the directory name. Copy the other parameter:
+                # %uploads_dir_name%.
+                directory: '%kernel.project_dir%/public/%uploads_dir_name%'
     # That is the root of this filesystem:
     # everything will be stored relative to this.
     # Give the filesystem a similar name - public_uploads_filesystem - and set adapter: to public_uploads_adapter.
