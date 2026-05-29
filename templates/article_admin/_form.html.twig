@@ -47,9 +47,27 @@
             And... got it!
         #}
         <div class="col-sm-3">
+            {#
+                Small step, but with all this config in one spot, we can do something kinda cool with almost no effort.
+                But first, I want to triple check that all this public path stuff is setup correctly.
+                Our getPublicPath() method is currently used in one spot:
+                by the uploaded_asset() Twig function.
+                But, we're not actually using this Twig function anywhere at the moment.
+                So try this: in the form, we're showing the thumbnail.
+                It might be useful to allow the user to click this and see the original image.
+                That's pretty easy: add <a href=""> and use uploaded_asset(articleForm.vars.data.imagePath).
+                That's it!
+                Wrap this around the img tag and let's also add target="_blank".
+            #}
             {% if articleForm.vars.data.imageFilename|default %}
-                <img src="{{ articleForm.vars.data.imagePath|imagine_filter('squared_thumbnail_small') }}" height="100">
+                <a href="{{ uploaded_asset(articleForm.vars.data.imagePath) }}" target="_blank">
+                    <img src="{{articleForm.vars.data.imagePath|imagine_filter('squared_thumbnail_small')}}" height="100">
+                </a>
             {% endif %}
+            {#
+                Cool. Test that - refresh and click.
+                Nice! This sends us directly to the source image.
+            #}
         </div>
         {#
             Try it! Refresh and yes!
