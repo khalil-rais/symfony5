@@ -18,8 +18,19 @@ parameters:
     # Call the second one uploads_base_url and set this to almost the same thing:
     # / and then %uploads_dir_name%. This represents the base URL to the uploaded assets.
     uploads_dir_name: 'uploads'
-    uploads_base_url: '/%uploads_dir_name%'
-
+    # Next, go back to services.yaml.
+    # And for the uploads_base_url, use %env()% and inside,
+    # SITE_BASE_URL: that's the syntax for referencing an environment variable.
+    uploads_base_url: '%env(SITE_BASE_URL)%/%uploads_dir_name%'
+    # And just like that - every single path to every single uploaded asset will now be absolute.
+    # Seriously! Test it out! Boom! Both the link href and the image src contain the https://localhost:8000 part.
+    # And, sure, you could add some config so
+    # that you could turn this on only when you need it,
+    # but I don't really see the point.
+    # I'll keep absolute URLs always.
+    # Next: let's start uploading private assets:
+    # stuff that can't be put into the public/ directory
+    # because we need to check security before we let a user download it.
 services:
     # default configuration for services in *this* file
     _defaults:
