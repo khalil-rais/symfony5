@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\File\File;
 use App\Entity\Article;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use App\Service\UploaderHelper;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -45,48 +48,34 @@ class ArticleReferenceAdminController extends BaseController
      * @Route("/admin/article/{id}/references",name="admin_article_add_reference", methods={"POST"})
      * @IsGranted("MANAGE", subject="article")
      */
-    public function uploadArticleReferenceArticle (Article $article, Request $request)
+    public function uploadArticleReferenceArticle (Article $article, Request
+    $request, UploaderHelper $uploaderHelper, EntityManagerInterface
+    $entityManager)
     {
         /*
-            Finally, we're ready to fetch the file:
-            add the Request argument - the one from HttpFoundation -
-            and let's dd($request->files->get())
-            and then the name from the input field: reference.
+            Back in the controller, let's finish this whole darn thing.
+            Set the file to an $uploadedFile object
+            and I'll add the same inline documentation
+            that says that this is an UploadedFile object - the one from HttpFoundation.
          */
-        dd($request->files->get('reference'));
+        /** @var UploadedFile $uploadedFile */
+        $uploadedFile = $request->files->get('reference');
         /*
-            Solid start. Copy the route name and head back to the template.
+            Then say $filename =... oh -
+            we don't have the UploaderHelper service yet!
+            Add that argument: UploaderHelper $uploaderHelper.
+            Then $filename = $uploaderHelper->uploadArticleReference($uploadedFile).
          */
+        $filename = $uploaderHelper->uploadArticleReference($uploadedFile);
         /*
-            ArticleReferenceAdminController.php on line 56:
-            Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
-              -test: false
-              -originalName: "plektrum-desktop.png"
-              -mimeType: "image/png"
-              -error: 0
-              path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
-              filename: "php4d1u9cl9nd9f18jy5hn"
-              basename: "php4d1u9cl9nd9f18jy5hn"
-              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php4d1u9cl9nd9f18jy5hn"
-              extension: ""
-              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php4d1u9cl9nd9f18jy5hn"
-              aTime: 2026-06-02 15:19:42
-              mTime: 2026-06-02 15:19:42
-              cTime: 2026-06-02 15:19:42
-              inode: 99533777
-              size: 6635
-              perms: 0100600
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
+            We know that won't work yet...
+            but if we use our imagination,
+            we know that... someday, it should
+            return the new filename that was stored on the filesystem.
+            To put this value into the database,
+            we need to create a new ArticleReference object and persist it.
          */
+
     }
 
 }

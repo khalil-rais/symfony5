@@ -8,6 +8,7 @@ namespace App\Service;
     how about UploaderHelper?
  */
 
+use App\Entity\Article;
 use Behat\Transliterator\Transliterator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Asset\Context\RequestStackContext;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\FileNotFoundException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class UploaderHelper
 {
@@ -351,4 +353,50 @@ class UploaderHelper
         If we move to the cloud, we only need to change the URL here! Awesome!
      */
 
+    /*
+        But, we'll start in very similar way:
+        by opening our favorite service, and all-around nice class, UploaderHelper.
+        Down here, add a new public function uploadArticleReference()
+        that will have a File argument and return a string,
+        pretty much the same as the other method, except that we won't need an $existingFilename
+        because we won't let ArticleReference objects be updated.
+        If you want to upload a modified file - cool!
+        Delete the old ArticleReference and upload a new one.
+        You'll see what I mean as we keep building this out.
+     */
+    public function uploadArticleReference (File $file) : string
+    {
+        //To get started, just dd($file).
+        dd($file);
+        /*
+            UploaderHelper.php on line 370:
+            Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
+              -test: false
+              -originalName: "plektrum-desktop_variant2.png"
+              -mimeType: "image/png"
+              -error: 0
+              path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
+              filename: "phph8ei1bgog0ep87SByft"
+              basename: "phph8ei1bgog0ep87SByft"
+              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phph8ei1bgog0ep87SByft"
+              extension: ""
+              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phph8ei1bgog0ep87SByft"
+              aTime: 2026-06-02 15:34:55
+              mTime: 2026-06-02 15:34:55
+              cTime: 2026-06-02 15:34:55
+              inode: 99538919
+              size: 8126
+              perms: 0100600
+              owner: 501
+              group: 20
+              type: "file"
+              writable: true
+              readable: true
+              executable: false
+              file: true
+              dir: false
+              link: false
+            }
+         */
+    }
 }
