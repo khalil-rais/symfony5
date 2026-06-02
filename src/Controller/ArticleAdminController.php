@@ -163,8 +163,24 @@ class ArticleAdminController extends BaseController
         }
 
         return $this->render('article_admin/edit.html.twig', [
-            'articleForm' => $form->createView()
+            'articleForm' => $form->createView(),
+            /*
+                Find the edit() action of ArticleAdminController and pass an article variable. Now
+                we can say article.id.
+             */
+            'article' => $article,
         ]);
+        /*
+            Phew! Ok, let's check this out:
+            refresh and inspect element on the form.
+            Yep, the URL looks right and the enctype attribute is there.
+            Ok, try it: select the Symfony Best Practices doc and upload!
+            Yes! It's our favorite UploadedFile object!
+            These article references are special
+            because we need to keep them private:
+            they should only be accessible to the author or a super admin.
+            The process for uploading & downloading private files is, a bit different.
+         */
     }
 
     /**

@@ -33,13 +33,15 @@
         <div class="col-sm-4">
             <h3>References</h3>
             {#
-                Here's the plan:
-                add a <form> tag with the normal method="POST" and enctype="multipart/form-data".
-                Inside, add a single upload field:
-                <input type="file" name="">, how about reference.
-                Then, <button type="submit">, some classes to make it not ugly, and "Upload".
+                Set the action attribute to
+                {{ path() }}, the route name, and for the placeholder part, I'll use multiple lines and pass id
+                set to article.id. Oh wait... we don't have an article variable inside this template. We do
+                have the articleForm variable, and we could get the Article from that... but to shorten
+                things, let's properly pass it in.
             #}
-            <form action="" method="POST" enctype="multipart/form-data">
+            <form action="{{ path('admin_article_add_reference', {
+                id: article.id
+            }) }}" method="POST" enctype="multipart/form-data">
                 <input type="file" name="reference">
                 <button type="submit" class="btn btn-sm btn-primary">Upload</button>
             </form>
