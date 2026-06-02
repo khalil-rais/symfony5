@@ -372,20 +372,20 @@ class UploaderHelper
             UploaderHelper.php on line 370:
             Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
               -test: false
-              -originalName: "plektrum-desktop_variant2.png"
-              -mimeType: "image/png"
+              -originalName: "Kassenbon_2026-04-23_11.49.pdf"
+              -mimeType: "application/pdf"
               -error: 0
               path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
-              filename: "phph8ei1bgog0ep87SByft"
-              basename: "phph8ei1bgog0ep87SByft"
-              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phph8ei1bgog0ep87SByft"
+              filename: "php6fk26i1vcvhh5fsUxlb"
+              basename: "php6fk26i1vcvhh5fsUxlb"
+              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php6fk26i1vcvhh5fsUxlb"
               extension: ""
-              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phph8ei1bgog0ep87SByft"
-              aTime: 2026-06-02 15:34:55
-              mTime: 2026-06-02 15:34:55
-              cTime: 2026-06-02 15:34:55
-              inode: 99538919
-              size: 8126
+              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php6fk26i1vcvhh5fsUxlb"
+              aTime: 2026-06-02 15:52:00
+              mTime: 2026-06-02 15:52:00
+              cTime: 2026-06-02 15:52:00
+              inode: 99543704
+              size: 9799
               perms: 0100600
               owner: 501
               group: 20

@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Service\UploaderHelper;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\ArticleReference;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -48,8 +49,7 @@ class ArticleReferenceAdminController extends BaseController
      * @Route("/admin/article/{id}/references",name="admin_article_add_reference", methods={"POST"})
      * @IsGranted("MANAGE", subject="article")
      */
-    public function uploadArticleReferenceArticle (Article $article, Request
-    $request, UploaderHelper $uploaderHelper, EntityManagerInterface
+    public function uploadArticleReference (Article $article, Request $request, UploaderHelper $uploaderHelper, EntityManagerInterface
     $entityManager)
     {
         /*
@@ -74,6 +74,57 @@ class ArticleReferenceAdminController extends BaseController
             return the new filename that was stored on the filesystem.
             To put this value into the database,
             we need to create a new ArticleReference object and persist it.
+         */
+        /*
+            Back up in our controller, say $articleReference = new ArticleReference()
+            and pass $article.
+            Call $article->setFilename($filename) to store the unique filename
+            where this file was stored on the filesystem.
+         */
+        $articleReference = new ArticleReference($article);
+        $articleReference->setFilename($filename);
+        /*
+            But remember! There are a couple of new pieces of info
+            that we can set on ArticleReference- like the original filename.
+            Set that to $uploadedFile->getClientOriginalName().
+            Now, technically this method can return null, though,
+            I'm not actually sure if that's something that can happen in any realistic scenario.
+            But, just in case, add ?? $filename.
+            So, if the client original name is missing for some reason, fall back to $filename.
+         */
+        $articleReference->setOriginalFilename($uploadedFile->getClientOriginalName() ?? $filename);
+        /*
+            Finally, just in case we ever want to know what type of file this is,
+            we'll store the file's mime type.
+            Set this to $uploadedFile->getMimeType().
+            This can also return null -
+            so default it to application/octet-stream,
+            which is sort of a common way to say
+            "I have no idea what this file is".
+         */
+        $articleReference->setMimeType($uploadedFile->getMimeType() ?? 'application/octet-stream');
+        /*
+            With that done, save this: add the EntityManagerInterface $entityManager argument,
+            then $entityManager->persist($articleReference) and $entityManager->flush().
+         */
+        $entityManager->persist($articleReference);
+        $entityManager->flush();
+        /*
+            Finish with return redirectToRoute() and send the user back to the edit page:
+            admin_article_edit passing this id set to $article->getId().
+         */
+        return $this->redirectToRoute('admin_article_edit', [
+            'id' => $article->getId(),
+        ]);
+        /*
+            Yep - that's the route on the edit endpoint.
+            Alright! With any luck, it should hit our dd() statement.
+            Go back to your browser:
+            I already have the Symfony Best Practices PDF selected.
+            Hit update... yea! UploadedFile coming from UploaderHelper.
+            Next: let's move the uploaded file... except that...
+            we can't move it using the filesystem service object we have now...
+            because we can't store these private files in the public/ directory. Hmm...
          */
 
     }
