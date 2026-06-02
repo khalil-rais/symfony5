@@ -38,6 +38,24 @@ class ArticleReference
      */
     private $mimeType;
 
+    /*
+        Oh, but before we do - go open that class.
+        This is a very traditional entity:
+        it has some properties and everything has a getter and a setter.
+        That's great, but because every ArticleReference needs to have its Article property set
+        and because an ArticleReference will never change articles,
+        find the setArticle() method and obliterate it!
+        Instead, add a public function __construct() with a required Article argument.
+        Set that onto the article property.
+        This is an optional step -
+        but it's always nice to think critically about your entities:
+        what methods do you not need?
+     */
+    public function __construct(Article $article)
+    {
+        $this->article = $article;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,13 +64,6 @@ class ArticleReference
     public function getArticle(): ?Article
     {
         return $this->article;
-    }
-
-    public function setArticle(?Article $article): self
-    {
-        $this->article = $article;
-
-        return $this;
     }
 
     public function getFilename(): ?string
