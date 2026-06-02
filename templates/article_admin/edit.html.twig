@@ -2,19 +2,60 @@
 
 {% block content_body %}
     <h1>Edit the Article! 🚀</h1>
+    {#
+        Open the edit template: templates/article_admin/edit.html.twig.
+        Everything we're going to do will be inside of this template, not the new template.
+        The reason is simple: trying to upload files to a new entity -
+        something that hasn't been saved to the database - is super hard!
+        You need to store files in a temporary spot,
+        keep track of them,
+        and assign them to the entity
+        when your user does finally save -
+        if they ever do that.
+        So, totally possible - but complex.
+        If you can, have your user fill in some basic data,
+        save your new entity to the database,
+        then show the upload fields.
+        Anyways, let's add an <hr> and set up a bit of structure:
+        div class="row" and div class="col-sm-8".
+        Say "Details" here and move the entire form inside.
+        Now add a div class="col-sm-4" and say "References".
+    #}
+    <hr>
 
+    <div class="row">
+        <div class="col-sm-8">
+            <h3>Details</h3>
+            {{ include('article_admin/_form.html.twig', {
+                button_text: 'Update!'
+            }) }}
+        </div>
+        <div class="col-sm-4">
+            <h3>References</h3>
+            {#
+                Here's the plan:
+                add a <form> tag with the normal method="POST" and enctype="multipart/form-data".
+                Inside, add a single upload field:
+                <input type="file" name="">, how about reference.
+                Then, <button type="submit">, some classes to make it not ugly, and "Upload".
+            #}
+            <form action="" method="POST" enctype="multipart/form-data">
+                <input type="file" name="reference">
+                <button type="submit" class="btn btn-sm btn-primary">Upload</button>
+            </form>
+            {#
+                Cool! Yes, we are going to talk about allowing the user to upload multiple files at once.
+                Don't worry, things are going to get much fancier.
+                Next, let's get the endpoint setup for this upload and store everything in the database,
+                including a few pieces of information about the file
+                that we did not store for the article images.
+            #}
+        </div>
+    </div>
     {#
-        If you've never seen this before, we'll explain it in a minute.
-        Now that we have a new imageFile field, let's go render it!
-        Open edit.html.twig.
-        Remove the HTML form - we're done with that.
+        Let's see how this looks... nice!
+        Form on the left, upload widget thingy on the right.
     #}
-    {#
-        That's it! The simplest possible file upload setup: one field, one button.
-    #}
-    {{ include('article_admin/_form.html.twig', {
-        button_text: 'Update!'
-    }) }}
 {% endblock %}
 
 {% block javascripts %}
