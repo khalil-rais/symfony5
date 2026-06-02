@@ -347,26 +347,14 @@ class Article
     {
         return $this->articleReferences;
     }
-
-    public function addArticleReference(ArticleReference $articleReference): static
-    {
-        if (!$this->articleReferences->contains($articleReference)) {
-            $this->articleReferences->add($articleReference);
-            $articleReference->setArticle($this);
-        }
-
-        return $this;
-    }
-
-    public function removeArticleReference(ArticleReference $articleReference): static
-    {
-        if ($this->articleReferences->removeElement($articleReference)) {
-            // set the owning side to null (unless already changed)
-            if ($articleReference->getArticle() === $this) {
-                $articleReference->setArticle(null);
-            }
-        }
-
-        return $this;
-    }
+    /*
+        Before we get back to work, open the Article entity.
+        The command did create the $articleReferences property
+        that allows us to say $article->getArticleReferences().
+        That's super convenient.
+        It also added addArticleReference() and removeArticleReference().
+        I'm going to delete these:
+        I'm just not going to need them:
+        I'll read the references from the article, but never set them from this direction.
+     */
 }
