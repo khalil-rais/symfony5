@@ -43,6 +43,7 @@ class UploaderHelper
     private $publicUploadsFilesystem;
     private $logger;
     private $publicAssetBaseUrl;
+    private $privateFilesystem;
 
 
     /*
@@ -57,7 +58,17 @@ class UploaderHelper
     /*
         First, rename the argument to be more descriptive, how about $publicUploadFilesystem:
      */
-    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl)
+    /*
+        Tip: If you're using version 4 of oneup/flysystem-bundle (so, flysystem v2),
+        autowire Filesystem instead of FilesystemInterface from League\Flysystem.
+
+        Now, copy that argument name and, in UploaderHelper,
+        add a second argument: FilesystemInterface $privateUploadFilesystem.
+        Create a new property on top called $privateFilesystem and set it below:
+        $this->privateFilesystem = $privateUploadFilesystem
+
+     */
+    public function __construct(FilesystemInterface $publicUploadsFilesystem, FilesystemInterface $privateUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl)
     {
         /*
             The last place is in UploaderHelper. The getBasePath() call will give us the directory
@@ -71,6 +82,7 @@ class UploaderHelper
         $this->requestStackContext = $requestStackContext;
         $this->logger = $logger;
         $this->publicAssetBaseUrl = $uploadedAssetsBaseUrl;
+        $this->privateFilesystem = $privateUploadsFilesystem;
     }
     /*
         This class will handle all things related to uploading files.

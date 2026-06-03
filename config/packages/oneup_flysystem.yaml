@@ -158,9 +158,28 @@ oneup_flysystem:
     # “Cannot autowire service UploaderHelper argument $filesystem of __construct() references FilesystemInterface but no such service exists.”
     # There are two ways to fix this.
     # First, we could re-add the alias option and point it at this FilesystemInterface:
+
+        # But for now, a great solution is to create a private filesystem.
+        # Open the config/packages/oneup_flysystem.yaml file.
+        # Copy the public_uploads_adapter,
+        # paste and call it private_uploads_adapter.
+        # You can store the files anywhere, as long as it's not in public/.
+        # But, the var/ directory is sort of meant for this type of thing.
+        # So let's say: var/uploads.
+        # Oh, and I could re-use my uploads_dir_name parameter here -
+        # but it won't give us any benefit.
+        # That parameter is really meant to keep the upload directory and public path to assets in sync.
+        # But these files won't have a public path anyways, we'll make them downloadable in an entirely different way.
+        private_uploads_adapter:
+            local:
+                directory: '%kernel.project_dir%/var/uploads'
     filesystems:
         public_uploads_filesystem:
             adapter: public_uploads_adapter
             # alias: League\Flysystem\Filesystem
             # Or, we can create a new bind.
             # I'll do the second, because it works better if you have multiple filesystem services, which we will soon.
+        # Next, for filesystems, do the same thing:
+        # make a private_uploads_filesystem that will use the private_uploads_adapter.
+        private_uploads_filesystem:
+            adapter: private_uploads_adapter

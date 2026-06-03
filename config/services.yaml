@@ -95,6 +95,13 @@ services:
             # We know how to fix that: back in services.yaml, add a bind: $uploadedAssetsBaseUrl
             # set to %uploads_base_url%. Now... it works!
             $uploadedAssetsBaseUrl: '%uploads_base_url%'
+            # Cool! Next, in UploaderHelper, we're already passing the $publicUploadFilesystem as an argument.
+            # We will also need the private one.
+            # Before we add it here, go into services.yaml.
+            # Remember, under _defaults, we're binding the $publicUploadFilesystem argument to the public fileystem service.
+            # Let's do the same for the private one.
+            # Call it $privateUploadFilesystem and change the service id to point to the "private" one.
+            $privateUploadsFilesystem: '@oneup_flysystem.private_uploads_filesystem_filesystem'
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'
