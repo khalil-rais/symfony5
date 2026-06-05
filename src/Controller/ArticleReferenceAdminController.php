@@ -83,28 +83,53 @@ class ArticleReferenceAdminController extends BaseController
             and we can't just open up that file and add them.
             No worries: pass a second argument: the constraint to validate against.
          */
+        /*
+            This is great but what we really want to do is control the types of files that are uploaded. C
+            hange the max size to 5m and add a mimeTypes option set to an array.
+            Tip: To allow files larger than 2MB, you'll probably need to tweak the upload_max_filesize setting in your php.ini file.
+            Then, don't forget to restart your web server!
+         */
         $violations = $validator->validate(
             $uploadedFile,
-            /*
-                Remember: there are two main constraints for uploads:
-                the Image constraint that we used before and the more generic File constraint,
-                which we need here because the user can upload more than just images.
-                Say new File() - the one from the Validator component.
-             */
             new FileConstraints([
+                'maxSize' => '5M',
                 /*
-                    This constraint has two main options.
-                    The first is maxSize. Set it to 1k... just so we can see the error.
+                    Let's see... what do we want to allow?
+                    Well, probably any image is ok - so we can use image/* and definitely we should allow application/pdf.
                  */
-                'maxSize' => '1k',
+                /*
+                    But... what else?
+                    It's tricky: there are a lot of mime types out there.
+                    A nice way to cheat is to press Shift+Shift and look for a core class called MimeTypeExtensionGuesser.
+                    This is a pretty neat class:
+                    it's what Symfony uses behind the scenes to "guess" the correct file extension based on the mime type of a file.
+                    It's useful right now because it has a huge list of mime types and their extensions.
+                    Check it out: search for 'doc'. There it is: application/msword.
+                    And if you keep digging for other things like docx or xls,
+                    you can get a pretty good list of stuff you might want to accept.
+                    Close this file and go back to the option:
+                    I'll paste in a few mime types.
+                    This covers a lot your standard "document" stuff.
+                    Oh, I forgot one! Add application/vnd.ms-excel.
+                 */
+                'mimeTypes' => [
+                    'image/*',
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'text/plain',
+                ],
             ]),
         );
         /*
-            This $violations variable is basically an array of errors...
-            except it's not actually an array - it's an object that holds errors.
-            To check if anything failed validation,
-            we can say if $violations->count() is greater than 0.
-            For now, let's just dd($violations) so we can see what it looks like.
+            Let's try it out! Go back, select the Best Practices PDF, Upload and... no error!
+            Try it again - but with this earth.zip file - that's a zip of two photos.
+            Submit and... error!
+            But wow is that a wordy error.
+            You can change that message with the mimeTypesMessage option.
          */
         if ($violations->count() > 0) {
             /*
