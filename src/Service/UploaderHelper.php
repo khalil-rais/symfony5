@@ -39,6 +39,12 @@ class UploaderHelper
         Instead of just injecting the kernel.project_dir parameter,
         we'll pass in the whole string to where uploads should be stored.
      */
+    /*
+        Now we can do the same thing down in uploadArticleReference.
+        Oh, but first, we need to create another constant for the directory
+        const ARTICLE_REFERENCE = 'article_reference.
+     */
+    const ARTICLE_REFERENCE = 'article_reference';
     private $requestStackContext;
     private $publicUploadsFilesystem;
     private $logger;
@@ -115,125 +121,12 @@ class UploaderHelper
     public function uploadArticleImage(File $file, ?string $existingFilename): string
     {
         /*
-            Ok! Let's go steal some code for this.
-            In fact, we're going to steal pretty much all the logic here...
-            and paste it in.
-            Make sure to retype the r on Urlizer to get the use statement on top.
-        */
-        /*
-            I'll put my cursor on that argument name,
-            hit Alt + Enter and select initialize fields to create that property and set it.
-            Now, below, we can say $this->uploadsPath and then /article_image.
-        */
-        /*
-            Let's see: everything looks happy, ah - except for getClientOriginalName():
-            that method does not exist in File - it only exists in UploadedFile.
-            Ok, let's get fancy then:
-            if $file is an instanceof UploadedFile,
-            we can say $originalFilename = $file->getClientOriginalName().
-            Else, set $originalFilename to $file->getFilename() -
-            that's just the name of the file on the filesytem.
+            All done! Back up in uploadArticleImage(),
+            re-select all that code we just copied, delete it,
+            do a happy dance and replace it with $newFilename = $this->uploadFile() passing the $file,
+            the directory - self::ARTICLE_IMAGE - and whether or not this file should be public, which is true.
          */
-        if ($file instanceof UploadedFile) {
-            $originalFilename = $file->getClientOriginalName();
-        } else {
-            $originalFilename = $file->getFilename();
-        }
-        /*
-            After this, delete the pathinfo() stuff -
-            we can move that to the next line.
-            Inside urlize(), re-add the pathinfo()
-            and pass the same second argument: PATHINFO_FILENAME.
-         */
-        $newFilename = Transliterator::urlize(pathinfo($originalFilename,
-                PATHINFO_FILENAME)).'-'
-            .uniqid().'.'.$file->guessExtension();
-        /*
-            I think that's all we need!
-            Let's completely clear out the uploads/ directory.
-            Now, find your terminal and run:
-            php bin/console doctrine:fixtures:load
-             Careful, database "main" will be purged. Do you want to continue? (yes/no) [no]:
-             > yes
-
-               > purging database
-               > loading App\DataFixtures\TagFixture
-               > loading App\DataFixtures\UserFixture
-               > loading App\DataFixtures\ArticleFixtures
-
-            In File.php line 36:
-
-              The file "/Users/khalil.rais/cauldron_overflow/src/DataFixtures/images/asteroid.jpeg" does not exist
-         */
-        /*
-            That's beautiful! In UploaderHelper, we need to make this work not with an UploadedFile object, but with the parent File.
-            Change the type-hint to File - again, make sure you get the one from HttpFoundation
-            or you will have no fun.
-            To keep things clear, I'll Refactor -> Rename this variable to $file.
-         */
-        /*
-            Now, in the method, instead of $file->move(), we can say
-            $this->filesystem->write(), which is used to create new files. Pass this
-            self::ARTICLE_IMAGE.'/'.$newFilename and then the contents of the file:
-            file_get_contents() with $file->getPathname().
-         */
-        /*
-            The first is that using file_get_contents() eats memory:
-            it reads the entire contents of the file into PHP's memory.
-            That's not a huge deal for tiny files,
-            but it could be a big deal if you start uploading bigger stuff.
-            And, it's just not necessary.
-            For that reason, in general, when you use Flysystem, instead of using methods like ->write() or ->update(), you should use ->writeStream() or ->updateStream().
-         */
-        /*
-            It works the same, except that we need to pass a stream instead of the contents.
-
-            Create the stream with $stream = fopen($file->getPathname()) and,
-            because we just need to read the file, use the r flag.
-            Now, pass stream instead of the contents.
-         */
-        $stream = fopen($file->getPathname(), 'r');
-        /*
-            Ok, there's one more thing I want to tighten up.
-            If one of the calls to the Filesystem object fails,
-            what do you think will happen? An exception?
-            Hold Command or Ctrl and click on writeStream().
-            Check out the docs:
-            we will get an exception if we pass an invalid stream
-            or if the file already exists.
-            But for any other type of failure, maybe a network error instead of an exception,
-            the method just returns false!
-            Actually, that's not completely true -
-            it depends on your adapter.
-            For example, if you're using the S3 adapter and there's a network error,
-            it may throw its own type of exception.
-            But the point is this: if any of the Filesystem methods fail,
-            you might not get an exception:
-            it might just return false.
-            For that reason, I like to code defensively.
-            Assign this to a $result variable.
-         */
-        $result = $this->publicUploadsFilesystem->writeStream(
-            self::ARTICLE_IMAGE.'/'.$newFilename,
-            $stream
-        );
-        /*
-            Then say: if ($result === false),
-            let's throw our own exception - I do want to know that something failed:
-            “Could not write uploaded file "%s"” and pass $newFilename.
-         */
-        if ($result === false) {
-            throw new \Exception(sprintf('Could not write uploaded file "%s"', $newFilename));
-        }
-        /*
-            Yea... that's it! Same thing, but no memory issues.
-            But we do need to add one more detail after:
-            if is_resource($stream), then fclose($stream).
-            The "if" is needed because some Flysystem adapters close the stream by themselves.
-         */
-        if (is_resource($stream)) {
-            fclose($stream);
-        }
+        $newFilename = $this->uploadFile($file, self::ARTICLE_IMAGE, true);
         /*
             That's it!
             This File object has a ton of different methods for getting the filename, the full path,
@@ -378,37 +271,88 @@ class UploaderHelper
      */
     public function uploadArticleReference (File $file) : string
     {
-        //To get started, just dd($file).
-        dd($file);
         /*
-            UploaderHelper.php on line 370:
-            Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
-              -test: false
-              -originalName: "Kassenbon_2026-04-23_11.49.pdf"
-              -mimeType: "application/pdf"
-              -error: 0
-              path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
-              filename: "php6fk26i1vcvhh5fsUxlb"
-              basename: "php6fk26i1vcvhh5fsUxlb"
-              pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php6fk26i1vcvhh5fsUxlb"
-              extension: ""
-              realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/php6fk26i1vcvhh5fsUxlb"
-              aTime: 2026-06-02 15:52:00
-              mTime: 2026-06-02 15:52:00
-              cTime: 2026-06-02 15:52:00
-              inode: 99543704
-              size: 9799
-              perms: 0100600
-              owner: 501
-              group: 20
-              type: "file"
-              writable: true
-              readable: true
-              executable: false
-              file: true
-              dir: false
-              link: false
-            }
+            Back down, all we need is return $this->uploadFile(),
+            with $file, self::ARTICLE_REFERENCE and false so that it uses the private filesystem.
          */
+        return $this->uploadFile($file, self::ARTICLE_REFERENCE, false);
+        /*
+            I think that's it!
+            Let's test this puppy out!
+            Move over and refresh to re-POST the form.
+            No error... but I have no idea if that worked...
+            because we're not rendering anything yet.
+            Check out the var/ directory... var/uploads/article_reference/symfony-best-practices...,
+            we got it!
+            Of course, there's absolutely no way for anyone to access this file...
+            but we'll fix that up soon enough.
+            Next: unless we really, really, trust our authors,
+            we probably shouldn't let them upload any file type.
+            Let's tighten up validation.
+         */
+    }
+
+    /*
+        Ok, we're ready!
+        Most of the logic in uploadArticleImage() should be reusable:
+        we're basically going to do the same thing, just through the private filesystem:
+        we need to figure out the filename and stream it through Flysystem.
+        The only part of this method that we don't need is the $existingFilename.
+        We don't need to delete an existing file
+        because we're not going to allow files to be "updated" for a specific ArticleReference -
+        we'll just have the user delete them and re-upload the new file.
+        Refactoring time!
+        Copy all of this code down through the fclose()
+        and, at the bottom, create a new private function called uploadFile().
+        This will take in the File object that we're uploading...
+        and we also need to pass the directory name -
+        you'll see what that is in a moment.
+        Then add a bool $isPublic flag so that this method knows
+        whether to store things in the public or private filesystem.
+     */
+    public function uploadFile(File $file,  string $directory, bool $isPublic): string
+    {
+        /*
+            To start, paste that exact logic
+         */
+        if ($file instanceof UploadedFile) {
+            $originalFilename = $file->getClientOriginalName();
+        } else {
+            $originalFilename = $file->getFilename();
+        }
+
+        $newFilename = Transliterator::urlize(pathinfo($originalFilename,
+                PATHINFO_FILENAME)).'-'
+            .uniqid().'.'.$file->guessExtension();
+
+        /*
+            Let's see... the first thing we need to do is handle this $isPublic argument.
+            So Let's say $filesystem = $isPublic ? and, if it is public,
+            use $this->filesystem, otherwise use $this->privateFilesystem.
+            Below, replace $this->filesystem with $filesystem.
+         */
+        $filesystem = $isPublic ? $this->publicUploadsFilesystem : $this->privateFilesystem;
+        $stream = fopen($file->getPathname(), 'r');
+        /*
+            The other thing we need to update is the directory:
+            it's hardcoded to ARTICLE_IMAGE.
+            Replace that with $directory:
+            this is the directory inside the filesystem where the file will be stored.
+         */
+        $result = $filesystem->writeStream(
+            $directory.'/'.$newFilename,
+            $stream
+        );
+        if ($result === false) {
+            throw new \Exception(sprintf('Could not write uploaded file "%s"', $newFilename));
+        }
+        if (is_resource($stream)) {
+            fclose($stream);
+        }
+        /*
+            and, at the bottom, return $newFilename.
+            Oh, and I should also probably add a return type.
+         */
+        return $newFilename;
     }
 }
