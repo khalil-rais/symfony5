@@ -14,6 +14,7 @@ use App\Entity\ArticleReference;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints\File as FileConstraints;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -84,45 +85,41 @@ class ArticleReferenceAdminController extends BaseController
             No worries: pass a second argument: the constraint to validate against.
          */
         /*
-            This is great but what we really want to do is control the types of files that are uploaded. C
-            hange the max size to 5m and add a mimeTypes option set to an array.
-            Tip: To allow files larger than 2MB, you'll probably need to tweak the upload_max_filesize setting in your php.ini file.
-            Then, don't forget to restart your web server!
+            Oh! There's one last case we need to validate for.
+            Hit enter on the URL to refresh the form.
+            Do nothing and hit upload.
+            Ah!!! Whoops! Everything explodes inside UploaderHelper...
+            because there is no uploaded file! The horror!
+            Back in the controller, the second argument to validate() can accept an array of validation constraints.
+            Put the new File into an array.
+            Then add: new NotBlank() with a custom message: please select a file to upload.
          */
         $violations = $validator->validate(
             $uploadedFile,
-            new FileConstraints([
-                'maxSize' => '5M',
+            [
+                new NotBlank(),
                 /*
-                    Let's see... what do we want to allow?
-                    Well, probably any image is ok - so we can use image/* and definitely we should allow application/pdf.
+                    Refresh one more time.
+                    The huge error is replaced by a much more pleasant validation message.
+                    Next: the author can upload a file reference...
+                    but it is literally impossible for them to download it.
+                    How can we make these private files accessible,
+                    but still check security first?
                  */
-                /*
-                    But... what else?
-                    It's tricky: there are a lot of mime types out there.
-                    A nice way to cheat is to press Shift+Shift and look for a core class called MimeTypeExtensionGuesser.
-                    This is a pretty neat class:
-                    it's what Symfony uses behind the scenes to "guess" the correct file extension based on the mime type of a file.
-                    It's useful right now because it has a huge list of mime types and their extensions.
-                    Check it out: search for 'doc'. There it is: application/msword.
-                    And if you keep digging for other things like docx or xls,
-                    you can get a pretty good list of stuff you might want to accept.
-                    Close this file and go back to the option:
-                    I'll paste in a few mime types.
-                    This covers a lot your standard "document" stuff.
-                    Oh, I forgot one! Add application/vnd.ms-excel.
-                 */
-                'mimeTypes' => [
-                    'image/*',
-                    'application/pdf',
-                    'application/msword',
-                    'application/vnd.ms-excel',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                    'text/plain',
-                ],
-            ]),
+                new FileConstraints([
+                    'maxSize' => '5M',
+                    'mimeTypes' => [
+                        'image/*',
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        'text/plain',
+                    ],
+                ]),
+            ],
         );
         /*
             Let's try it out! Go back, select the Best Practices PDF, Upload and... no error!
