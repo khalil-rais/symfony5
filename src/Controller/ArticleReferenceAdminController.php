@@ -11,6 +11,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Service\UploaderHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\ArticleReference;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints\File as FileConstraints;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -45,12 +47,19 @@ class ArticleReferenceAdminController extends BaseController
         which leverages a custom voter that we created in our Symfony series.
         It basically makes sure that you are the author of this article or a super admin.
      */
+    /*
+        But because we're not inside a form,
+        we need to validate directly...
+        which is totally fine!
+        Add another argument: ValidatorInterface $validator.
+        This is the service that the form system uses internally for validation.
+     */
     /**
      * @Route("/admin/article/{id}/references",name="admin_article_add_reference", methods={"POST"})
      * @IsGranted("MANAGE", subject="article")
      */
     public function uploadArticleReference (Article $article, Request $request, UploaderHelper $uploaderHelper, EntityManagerInterface
-    $entityManager)
+    $entityManager, ValidatorInterface $validator)
     {
         /*
             Back in the controller, let's finish this whole darn thing.
@@ -60,6 +69,78 @@ class ArticleReferenceAdminController extends BaseController
          */
         /** @var UploadedFile $uploadedFile */
         $uploadedFile = $request->files->get('reference');
+        /*
+            Then, before we do anything with that uploaded file,
+            say $violations = $validator->validate().
+            Pass this the object that you want to validate.
+            For us, it's the $uploadedFile object itself.
+            If we stopped here, it would read any validation annotations off of that class
+            and apply those rules...
+            which would be zero rules!
+            This is a core class!
+            There's no validation rules,
+            and we can't just open up that file and add them.
+            No worries: pass a second argument: the constraint to validate against.
+         */
+        $violations = $validator->validate(
+            $uploadedFile,
+            /*
+                Remember: there are two main constraints for uploads:
+                the Image constraint that we used before and the more generic File constraint,
+                which we need here because the user can upload more than just images.
+                Say new File() - the one from the Validator component.
+             */
+            new FileConstraints([
+                /*
+                    This constraint has two main options.
+                    The first is maxSize. Set it to 1k... just so we can see the error.
+                 */
+                'maxSize' => '1k',
+            ]),
+        );
+        /*
+            This $violations variable is basically an array of errors...
+            except it's not actually an array - it's an object that holds errors.
+            To check if anything failed validation,
+            we can say if $violations->count() is greater than 0.
+            For now, let's just dd($violations) so we can see what it looks like.
+         */
+        if ($violations->count() > 0) {
+            dd($violations);
+        }
+        /*
+            Cool! Move over, select the Best Practices PDF - that's definitely more than 1kb - and upload!
+            Say hello to the ConstraintViolationList:
+            a glorified array of ConstraintViolation error objects.
+            And there's the message: the file is too large.
+            If you want, you can customize that message by passing the maxSizeMessage option...
+            because it is kind of a nerdy message.
+         */
+        /*
+            ArticleReferenceAdminController.php on line 109:
+            Symfony\Component\Validator\ConstraintViolationList {#360 ▼
+              -violations: array:1 [▼
+                0 => Symfony\Component\Validator\ConstraintViolation {#354 ▼
+                  -message: "The file is too large (47 kB). Allowed maximum size is 1 kB."
+                  -messageTemplate: "The file is too large ({{ size }} {{ suffix }}). Allowed maximum size is {{ limit }} {{ suffix }}."
+                  -parameters: array:5 [▼
+                    "{{ file }}" => ""/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpvsia7iq05ftielIkFHM""
+                    "{{ size }}" => "47"
+                    "{{ limit }}" => "1"
+                    "{{ suffix }}" => "kB"
+                    "{{ name }}" => ""tbt_9_16.png""
+                  ]
+                  -plural: null
+                  -root: Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▶}
+                  -propertyPath: ""
+                  -invalidValue: Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▶}
+                  -constraint: Symfony\Component\Validator\Constraints\File {#534 ▶}
+                  -code: "df8637af-d466-48c6-a59d-e7126250a654"
+                  -cause: null
+                }
+              ]
+            }
+         */
         /*
             Then say $filename =... oh -
             we don't have the UploaderHelper service yet!
