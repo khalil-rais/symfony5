@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\ArticleReference;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints\File as FileConstraints;
+use Symfony\Component\Validator\ConstraintViolation;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -106,7 +107,30 @@ class ArticleReferenceAdminController extends BaseController
             For now, let's just dd($violations) so we can see what it looks like.
          */
         if ($violations->count() > 0) {
-            dd($violations);
+            /*
+                So, in theory, you can have multiple validation rules and multiple errors.
+                To keep things simple, let's show the first error if there is one.
+                Use $violation = $violations[0] to get it.
+                The ConstraintViolationList class implements ArrayAccess,
+                which is why we can use this syntax.
+                Oh, and let's help out my editor by telling it that this is a ConstraintViolation object.
+             */
+            /** @var ConstraintViolation $violation */
+            $violation = $violations[0];
+            /*
+                And now... hmm... how should we show this error to the user?
+                This controller will eventually turn into an AJAX,
+                or API endpoint that communicates via JSON. But because this is still a normal form submit,
+                the easiest option is to put the error into a flash message and display it on the next page.
+                Say $this->addFlash(), pass it an "error" type, and then $violation->getMessage().
+             */
+            $this->addFlash('error', $violation->getMessage());
+            /*
+                Finish by stealing the redirect code from the bottom to send us back to the edit page.
+             */
+            return $this->redirectToRoute('admin_article_edit', [
+                'id' => $article->getId(),
+            ]);
         }
         /*
             Cool! Move over, select the Best Practices PDF - that's definitely more than 1kb - and upload!

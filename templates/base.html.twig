@@ -70,6 +70,22 @@
                 {{ message }}
             </div>
         {% endfor %}
+        {#
+            To render that flash message, open templates/base.html.twig and scroll down...
+            I'm looking for the flash message logic we added in our Symfony series.
+            There it is! We're rendering success messages, but we don't have anything to render error messages.
+            Copy this, paste, and loop over error.
+            Make it look scary with alert-danger.
+        #}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {#
+            Cool! Test it out - refresh! And... nice!
+            It redirects and there is our error.
+        #}
 
         {% block body %}{% endblock %}
 
