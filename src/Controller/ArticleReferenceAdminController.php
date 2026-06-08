@@ -74,27 +74,36 @@ class ArticleReferenceAdminController extends BaseController
         /** @var UploadedFile $uploadedFile */
         $uploadedFile = $request->files->get('reference');
         /*
-            Then, before we do anything with that uploaded file,
-            say $violations = $validator->validate().
-            Pass this the object that you want to validate.
-            For us, it's the $uploadedFile object itself.
-            If we stopped here, it would read any validation annotations off of that class
-            and apply those rules...
-            which would be zero rules!
-            This is a core class!
-            There's no validation rules,
-            and we can't just open up that file and add them.
-            No worries: pass a second argument: the constraint to validate against.
+            When you select a file with Dropzone,
+            it's smart enough to upload to the action URL on our form.
+            So in theory it should just sort of work.
+            Back in the controller, scroll up to the upload endpoint and dump($uploadedFile).
+            I'm not using dd() - dump and die -
+            because this will submit via AJAX -
+            and by using dump() without die'ing,
+            we'll be able to see it in the profiler.
          */
+        dump($uploadedFile);
         /*
-            Oh! There's one last case we need to validate for.
-            Hit enter on the URL to refresh the form.
-            Do nothing and hit upload.
-            Ah!!! Whoops! Everything explodes inside UploaderHelper...
-            because there is no uploaded file! The horror!
-            Back in the controller, the second argument to validate() can accept an array of validation constraints.
-            Put the new File into an array.
-            Then add: new NotBlank() with a custom message: please select a file to upload.
+            Ok: select a file.
+            The first cool thing is that the file upload AJAX request showed up down on the web debug toolbar!
+            I'll click the hash and open that up in a new tab.
+            This is awesome!
+            We're now looking at all the profiler data for that AJAX request!
+            Actually that's not true.
+            Look closely: it says that we were redirected from a POST request to the admin_article_add_reference route.
+            We're looking at the profiler for the article edit page!
+            This is a bit confusing.
+            Click the "Last 10" link to see a list of the last 10 requests made into our app.
+            Now it's more obvious:
+            Dropzone made a POST request to /admin/article/41/references - that's our upload endpoint.
+            But, for some reason, that redirected us to the edit page.
+            Click the token link to see the profiler for the POST request.
+            Check out the Debug tab.
+            There it is: this is the dump from our controller and it's null.
+            Where's our upload?
+            The problem is that, by default, Dropzone uploads a field called file.
+            But in the controller, we're expecting it to be called reference.
          */
         $violations = $validator->validate(
             $uploadedFile,
