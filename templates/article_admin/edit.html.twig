@@ -33,6 +33,29 @@
         <div class="col-sm-4">
             <h3>References</h3>
             {#
+                Except how can we allow authors to access them?
+                As a first step, let's at least list the files on the page.
+                In edit.html.twig, add a <ul> with some Bootstrap classes.
+            #}
+            <ul class="list-group small">
+                {#
+                    Then loop with {% for reference in article.articleReferences %}.
+                    Inside, add an <li>, a bunch of classes to make it look fancy,
+                    and then print, how about, reference.originalFilename.
+                #}
+                {% for reference in article.articleReferences %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ reference.originalFilename }}
+                    </li>
+                {% endfor %}
+                {#
+                    This is pretty cool: when we move the files onto the server, we give them a weird filename. But
+                    because we saved the original filename, we can show that here: the author has no idea we're
+                    naming their files crazy things internally.
+                    Let's see how this looks. Nice! 2 uploaded PDF's.
+                #}
+            </ul>
+            {#
                 Set the action attribute to
                 {{ path() }}, the route name, and for the placeholder part, I'll use multiple lines and pass id
                 set to article.id. Oh wait... we don't have an article variable inside this template. We do
