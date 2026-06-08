@@ -77,9 +77,13 @@
 
                 Try it! Refresh and... hello Dropzone!
             #}
+            {#
+                The goal here is to find the form element and initialize Dropzone on it.
+                To do that, let's add another class on the form: js-reference-dropzone.
+            #}
             <form action="{{ path('admin_article_add_reference', {
                 id: article.id
-            }) }}" method="POST" enctype="multipart/form-data" class="dropzone">
+            }) }}" method="POST" enctype="multipart/form-data" class="dropzone js-reference-dropzone">
             </form>
             {#
                 Cool! Yes, we are going to talk about allowing the user to upload multiple files at once.
