@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints\File as FileConstraints;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -362,7 +363,57 @@ class ArticleReferenceAdminController extends BaseController
          */
         $response->headers->set('Content-Type', $reference->getMimeType());
         /*
-            Try it again. Hello PDF!
+            Another thing you might want to do is force the browser to download the file.
+            It's really up to you.
+            By default, based on the Content-Type,
+            the browser may try to open the file - like it is here -
+            or have the user download it.
+            To force the browser to always download the file,
+            we can leverage a header called Content-Disposition.
+            This header has a very specific format,
+            so Symfony comes with a helper to create it.
+            Say $disposition = HeaderUtils::makeDisposition().
+            For the first argument, we'll tell it
+            whether we want the user to download the file,
+            or open it in the browser by passing HeaderUtils::DISPOSITION_ATTACHMENT or DISPOSITION_INLINE.
+         */
+        $disposition = HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            /*
+                Next, pass it the filename.
+                This is especially cool because,
+                without this, the browser would probably try to call the file just "download" -
+                because that's the last part of the URL.
+                Now it will use $reference->getOriginalFilename().
+                Tip: If your original filename is not in ASCII characters,
+                add a 3rd argument to HeaderUtils::makeDisposition to provide a "fallback" filename.
+             */
+            $reference->getOriginalFilename()
+        );
+        /*
+            Before we set this header,
+            I just want you to see what it looks like.
+            So, dd($disposition)
+         */
+        //dd($disposition);
+        /*
+            ArticleReferenceAdminController.php on line 398:
+            "attachment; filename=CV_Rais_de_260602.pdf"
+         */
+        /*
+            move over, refresh and there it is.
+            It's just a string, like any other header -
+            but it has this specific format,
+            which is why Symfony has a helper method.
+         */
+        /*
+            Set this on the actual response with $response->headers->set('Content-Disposition', $disposition).
+         */
+        $response->headers->set('Content-Disposition', $disposition);
+        /*
+            Try it one more time.
+            Yes! It downloads and uses the original filename.
+            Next: let's make this all way cooler by uploading instantly via AJAX.
          */
 
         return $response;
