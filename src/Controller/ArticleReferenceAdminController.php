@@ -92,18 +92,64 @@ class ArticleReferenceAdminController extends BaseController
             We're now looking at all the profiler data for that AJAX request!
             Actually that's not true.
             Look closely: it says that we were redirected from a POST request to the admin_article_add_reference route.
+
+            302 Redirect from POST @admin_article_add_reference (084a77)
             We're looking at the profiler for the article edit page!
             This is a bit confusing.
             Click the "Last 10" link to see a list of the last 10 requests made into our app.
+10 results found
+Status 	IP 	Method 	URL 	Time 	Token
+200 	127.0.0.1   GET https://127.0.0.1:8000/admin/article/91/edit    08-Jun-2026 15:35:14 	deb9e4
+302 	127.0.0.1   POST    https://127.0.0.1:8000/admin/article/91/references  08-Jun-2026 15:35:14 	084a77
+        ...
             Now it's more obvious:
             Dropzone made a POST request to /admin/article/41/references - that's our upload endpoint.
             But, for some reason, that redirected us to the edit page.
             Click the token link to see the profiler for the POST request.
+
             Check out the Debug tab.
-            There it is: this is the dump from our controller and it's null.
+            There it is: this is the dump from our controller and it's null:
+            Dumped Contents
+            In ArticleReferenceAdminController.php line 86:
+
+            null
+
             Where's our upload?
-            The problem is that, by default, Dropzone uploads a field called file.
-            But in the controller, we're expecting it to be called reference.
+            The problem is that, by default, Dropzone uploads a field called file:
+Uploaded Files
+Key 	Value
+file
+
+Symfony\Component\HttpFoundation\File\UploadedFile {#16 ▼
+  -test: false
+  -originalName: "plektrum-desktop-variant3.png"
+  -mimeType: "image/png"
+  -error: 0
+  path: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T"
+  filename: "phpm7rd58nen6egbOeuCrP"
+  basename: "phpm7rd58nen6egbOeuCrP"
+  pathname: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpm7rd58nen6egbOeuCrP"
+  extension: ""
+  realPath: "/private/var/folders/7k/dmlmkxps5259w7n8h4q4p4b00000gn/T/phpm7rd58nen6egbOeuCrP"
+  aTime: 2026-06-08 15:35:14
+  mTime: 2026-06-08 15:35:14
+  cTime: 2026-06-08 15:35:14
+  inode: 100437607
+  size: 8031
+  perms: 0100600
+  owner: 501
+  group: 20
+  type: "file"
+  writable: true
+  readable: true
+  executable: false
+  file: true
+  dir: false
+  link: false
+}
+            But in the controller, we're expecting it to be called reference:
+Key 	Value
+reference ""
          */
         $violations = $validator->validate(
             $uploadedFile,
