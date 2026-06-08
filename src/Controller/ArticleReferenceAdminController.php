@@ -15,6 +15,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints\File as FileConstraints;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -295,14 +296,61 @@ class ArticleReferenceAdminController extends BaseController
          */
         $article = $reference->getArticle();
         $this->denyAccessUnlessGranted('MANAGE', $article);
-        dd($reference);
         /*
-            Refresh to try it.
-            We still have access because we're logged in as an admin.
-            Next, let's take our file stream and send it to the user!
-            We'll also learn how to control the filename
-            and force the user's browser to download it.
+            We have a method that will allow us to open a stream of the file's contents.
+            But how can we send that to the user?
+            We're used to returning a Response object or a JsonResponse object
+            where we already have the response as a string or array.
+            But if you want to stream something to the user
+            without reading it all into memory,
+            you need a special class called StreamedResponse.
+            Add $response = new StreamedResponse().
+            This takes one argument - a callback. At the bottom, return this.
          */
+        $response = new StreamedResponse(function() use ($reference,$uploaderHelper) {
+            /*
+                Here's the idea: we can't just start streaming the response or echo'ing content right now inside the controller:
+                Symfony's just not ready for that yet,
+                it has more work to do, more headers to set, etc.
+                That's why we normally create a Response object and later,
+                when it's ready, Symfony echo's the response's content for us.
+                With a StreamedResponse, when Symfony is ready to finally send the data,
+                it executes our callback and then we can do whatever we want.
+                Heck, we can echo 'foo' and that's what the user would see.
+
+                Add a use statement and bring $reference and $uploaderHelper into the callback's scope
+                so we can use them.
+                To send a file stream to the user,
+                it looks a little strange.
+                Start with $outputStream set to fopen('php://output') and wb.
+             */
+            $outputStream = fopen('php://output', 'wb');
+            /*
+                We usually use fopen to write to a file.
+                But this special php://output allows us to write to the "output" stream -
+                a fancy way of saying that anything we write to this stream will just get "echo'ed" out.
+                Next, set $fileStream to $uploaderHelper->readStream()
+                and pass this the path to the file -
+                something like article_reference/symfony-best-practices-blah-blah.pdf.
+             */
+            /*
+                Great! Back in the controller, pass $reference->getFilePath()
+                and then false for the $isPublic argument.
+             */
+            $fileStream = $uploaderHelper->readStream($reference->getFilePath(), false);
+            /*
+                Finally, now that we have a "write" stream
+                and a "read" stream, we can use a function called stream_copy_to_stream() to do exactly that!
+                Copy $fileStream to $outputStream.
+             */
+            stream_copy_to_stream($fileStream, $outputStream);
+            /*
+                There ya go! The fanciest way of echo'ing content that you've probably ever seen,
+                but it avoids eating memory.
+             */
+        });
+
+        return $response;
     }
 
 }

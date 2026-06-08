@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ArticleReferenceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Service\UploaderHelper;
 
 /**
  * @ORM\Entity(repositoryClass=ArticleReferenceRepository::class)
@@ -100,6 +101,24 @@ class ArticleReference
         $this->mimeType = $mimeType;
 
         return $this;
+    }
+
+    /*
+        Oh, except, we don't have an easy way to do that yet!
+        In our Article entity, we added a nice getImagePath() method
+        that read the constant from UploaderHelper and added the filename.
+        I like that.
+        Let's copy that and go do the exact same thing in ArticleReference.
+        At the bottom, paste and rename this to getFilePath().
+        Let's add a return type too -
+        I probably should have done that in Article.
+        Then, re-type the r on UploaderHelper to get the use statement,
+        change the constant to ARTICLE_REFERENCE
+        and update the method call to getFilename().
+     */
+    public function getFilePath(): string
+    {
+        return UploaderHelper::ARTICLE_REFERENCE.'/'.$this->getFilename();
     }
 }
 /*
