@@ -80,8 +80,6 @@
             <form action="{{ path('admin_article_add_reference', {
                 id: article.id
             }) }}" method="POST" enctype="multipart/form-data" class="dropzone">
-                <input type="file" name="reference">
-                <button type="submit" class="btn btn-sm btn-primary">Upload</button>
             </form>
             {#
                 Cool! Yes, we are going to talk about allowing the user to upload multiple files at once.
