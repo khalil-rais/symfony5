@@ -46,6 +46,21 @@
                 {% for reference in article.articleReferences %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ reference.originalFilename }}
+                        {#
+                            Love it! Copy the route name and head back into the template.
+                            Add a <span> here for styling and an anchor with href="{{ path() }}",
+                            the route name, and id: reference.id.
+                            For the text, I'll use the Font Awesome download icon.
+                        #}
+                        <span>
+                            <a href="{{path('admin_article_download_reference', {
+                                id: reference.id
+                            }) }}"><span class="fa fa-download"></span></a>
+                        </span>
+                        {#
+                            Try it out! Refresh and... download!
+                            So far so good.
+                        #}
                     </li>
                 {% endfor %}
                 {#

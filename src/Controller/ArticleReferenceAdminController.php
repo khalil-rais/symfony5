@@ -256,4 +256,61 @@ class ArticleReferenceAdminController extends BaseController
 
     }
 
+    /*
+        To add a download link,
+        we know that we can't just link to the file directly:
+        it's not public.
+        Instead, we're going to link to a Symfony route and controller
+        and that controller will check security and return the file to the user.
+        Let's do this in ArticleReferenceAdminController.
+        Add a new public function, how about, downloadArticleReference().
+     */
+    /*
+        Add the @Route() above this with /admin/article/references/{id}/download -
+        where the {id} this time is the id of the ArticleReference object.
+        Then, name="admin_article_download_reference" and methods={"GET"},
+        just to be extra cool.
+     */
+    /**
+     * @Route("/admin/article/references/{id}/download", name="admin_article_download_reference", methods={"GET"})
+     */
+    public function downloadArticleReference(ArticleReference $reference)
+    {
+        /*
+            Because the {id} is the id of the ArticleReference,
+            we can add that as an argument: ArticleReference $reference.
+            Just dd($reference) so we can see if this is working.
+         */
+        dd($reference);
+        /*
+
+                            ArticleReferenceAdminController.php on line 284:
+                            App\Entity\ArticleReference {#700 ▼
+                              -id: 1
+                              -article: Proxies\__CG__\App\Entity\Article {#752 ▼
+                                -id: 91
+                                -title: null
+                                -slug: null
+                                -content: null
+                                -publishedAt: null
+                                -heartCount: 0
+                                -imageFilename: null
+                                -comments: null
+                                -tags: null
+                                -author: null
+                                -location: null
+                                -specificLocationName: null
+                                -articleReferences: null
+                                #createdAt: null
+                                #updatedAt: null
+                                +__isInitialized__: false
+                                 …2
+                              }
+                              -filename: "tbt-9-16-6a22daf304c5e.png"
+                              -originalFilename: "tbt_9_16.png"
+                              -mimeType: "image/png"
+                            } 
+         */
+    }
+
 }
