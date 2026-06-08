@@ -71,15 +71,15 @@
                 #}
             </ul>
             {#
-                Set the action attribute to
-                {{ path() }}, the route name, and for the placeholder part, I'll use multiple lines and pass id
-                set to article.id. Oh wait... we don't have an article variable inside this template. We do
-                have the articleForm variable, and we could get the Article from that... but to shorten
-                things, let's properly pass it in.
+                Dropzone basically "takes over" your form tag.
+                You don't need a button anymore or even the file input.
+                The form tag does need a dropzone class but that's it!
+
+                Try it! Refresh and... hello Dropzone!
             #}
             <form action="{{ path('admin_article_add_reference', {
                 id: article.id
-            }) }}" method="POST" enctype="multipart/form-data">
+            }) }}" method="POST" enctype="multipart/form-data" class="dropzone">
                 <input type="file" name="reference">
                 <button type="submit" class="btn btn-sm btn-primary">Upload</button>
             </form>
@@ -98,8 +98,52 @@
     #}
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {#
+        Grab the minified link tag too.
+        We don't have a stylesheets block yet,
+        so we need to add one:
+        {% block stylesheets %}{% endblock %},
+        call {{ parent() }} and paste the link tag.
+    #}
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css"
+          integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g="
+          crossorigin="anonymous" />
+{% endblock %}
 {% block javascripts %}
     {{ parent() }}
 
     <script src="{{ asset('js/admin_article_form.js') }}"></script>
+    {#
+        First: the upload part.
+        Google for a library called Dropzone:
+        it's probably the most popular JavaScript library for handling file uploads.
+        It creates a little "drop zone"
+        and when you drop a file here or select a file,
+        it starts uploading.
+        Super nice!
+        Search for a Dropzone CDN.
+        I normally use Webpack Encore, and so,
+        whenever I need a third-party library,
+        I install it via yarn and import it when I need to use it.
+        If you're using Encore,
+        you can do this - and I recommend it.
+        But in this tutorial,
+        to keep things simple, we're not using Encore.
+        And so, in our edit template,
+        we're including a normal JavaScript file that lives in the public/js/ directory: admin_article_form.js,
+        which holds some pretty traditional JavaScript.
+
+        To get Dropzone rocking,
+        copy the minified JavaScript file
+        and go to the template Actually,
+        copy the whole script tag with SRI -
+        that'll include the nice integrity attribute.
+    #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.js"
+            integrity="sha256-cs4thShDfjkqFGk5s2Lxj35sgSRr4MRcyccmi0WKqCM="
+            crossorigin="anonymous">
+    </script>
 {% endblock %}
