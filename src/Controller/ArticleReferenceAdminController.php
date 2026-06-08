@@ -274,42 +274,34 @@ class ArticleReferenceAdminController extends BaseController
     /**
      * @Route("/admin/article/references/{id}/download", name="admin_article_download_reference", methods={"GET"})
      */
-    public function downloadArticleReference(ArticleReference $reference)
+    public function downloadArticleReference(ArticleReference $reference, UploaderHelper $uploaderHelper)
     {
         /*
-            Because the {id} is the id of the ArticleReference,
-            we can add that as an argument: ArticleReference $reference.
-            Just dd($reference) so we can see if this is working.
+            In the controller add the UploaderHelper argument.
+            Oh, but before we use this,
+            I forgot to check security!
+            That was the whole point!
+            The goal is to allow these files to be downloaded by anyone
+            who has access to edit the article.
+            We've been checking that via the @IsGranted('MANAGE') annotation -
+            which leverages a custom voter we created in the Symfony series.
+            We can use this annotation here
+            because the article in the annotation refers to the $article argument to the controller.
+            But in this new controller, we don't have an article argument,
+            so we can't use the annotation in the same way.
+            No problem: add $article = $reference->getArticle()
+            and then run the security check manually: $this->denyAccessUnlessGranted()
+            with that same 'MANAGE' string and $article.
          */
+        $article = $reference->getArticle();
+        $this->denyAccessUnlessGranted('MANAGE', $article);
         dd($reference);
         /*
-
-                            ArticleReferenceAdminController.php on line 284:
-                            App\Entity\ArticleReference {#700 ▼
-                              -id: 1
-                              -article: Proxies\__CG__\App\Entity\Article {#752 ▼
-                                -id: 91
-                                -title: null
-                                -slug: null
-                                -content: null
-                                -publishedAt: null
-                                -heartCount: 0
-                                -imageFilename: null
-                                -comments: null
-                                -tags: null
-                                -author: null
-                                -location: null
-                                -specificLocationName: null
-                                -articleReferences: null
-                                #createdAt: null
-                                #updatedAt: null
-                                +__isInitialized__: false
-                                 …2
-                              }
-                              -filename: "tbt-9-16-6a22daf304c5e.png"
-                              -originalFilename: "tbt_9_16.png"
-                              -mimeType: "image/png"
-                            } 
+            Refresh to try it.
+            We still have access because we're logged in as an admin.
+            Next, let's take our file stream and send it to the user!
+            We'll also learn how to control the filename
+            and force the user's browser to download it.
          */
     }
 
