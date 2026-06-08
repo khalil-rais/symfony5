@@ -355,4 +355,56 @@ class UploaderHelper
          */
         return $newFilename;
     }
+
+    /*
+        In some ways, our job in the controller is really simple:
+        read the contents of the file and send it to the user.
+        But we don't actually want to read the contents of the file into a string
+        and then put it in a Response.
+        Because if it's a large file,
+        that will eat up PHP memory.
+        This is already why, in UploaderHelper, we're using a stream to write the file.
+        And now, we'll use a stream to read it.
+        To keep all this streaming logic centralized in this class,
+        add a new public function readStream() with a string $path argument and bool $isPublic
+        so we know which of these two filesystems to read from.
+     */
+    /*
+        Above the method, advertise that this will return a resource -
+        PHP doesn't have a resource return type yet.
+        Inside, step 1 is to get the right filesystem using the $isPublic argument.
+     */
+    /**
+     * @return resource
+     */
+    public function readStream(string $path, bool $isPublic)
+    {
+        $filesystem = $isPublic ? $this->publicUploadsFilesystem : $this->privateFilesystem;
+        /*
+            Then, $resource = $filesystem->readStream($path).
+            Tip: If you're using version 4 of oneup/flysystem-bundle (so, flysystem v2),
+            you don't need to code defensively anymore!
+            All methods will throw an exception automatically if the operation fails.
+         */
+        $resource = $filesystem->readStream($path);
+        /*
+            That's pretty much it!
+            But hold Cmd or Ctrl and click to see the readStream() method.
+            Ah yes, if this fails, Flysystem will return false.
+            So let's code defensively:
+            if ($resource === false),
+            throw a new \Exception() with a nice message:
+            “Error opening stream for %s” and pass $path.
+            At the bottom, return $resource.
+         */
+        if ($resource === false) {
+            throw new \Exception(sprintf('Error opening stream for "%s"', $path));
+        }
+        return $resource;
+        /*
+            This is great!
+            We now have an easy way to get a stream to read any file in our filesystems
+            which will work if the file is stored locally or somewhere else.
+         */
+    }
 }
