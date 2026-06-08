@@ -349,6 +349,21 @@ class ArticleReferenceAdminController extends BaseController
                 but it avoids eating memory.
              */
         });
+        /*
+            Try it out!
+            Refresh and it works sort of.
+            We are sending the file contents
+            but the browser is clearly not handling it well.
+            The reasons is that we haven't told the browser what type of file this is,
+            so it's just treating it like the world's ugliest web page.
+            And... hey! Remember when we stored the $mimeType of the file in the database?
+            that's about to come in handy big time!
+            Add $response->headers->set() with Content-Type set to $reference->getMimeType().
+         */
+        $response->headers->set('Content-Type', $reference->getMimeType());
+        /*
+            Try it again. Hello PDF!
+         */
 
         return $response;
     }
