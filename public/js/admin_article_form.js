@@ -292,10 +292,10 @@ DNS ResolutionSystem
 <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${reference.id}">
     ${reference.originalFilename}
     <span>
-        <a href="/admin/article/references/${reference.id}/download">
-            <span class="fa fa-download"></span>
+        <a href="/admin/article/references/${reference.id}/download" class="btn btn-link btn-sm">
+            <span class="fa fa-download"  style="vertical-align: middle"></span>
         </a>
-        <button class="js-reference-delete btn btn-link">
+        <button class="js-reference-delete btn btn-link btn-sm">
             <span class="fa fa-trash"></span>
         </button>
     </span>
