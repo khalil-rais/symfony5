@@ -29,6 +29,9 @@ $(document).ready(function() {
             - that's the element we just added the attribute to.
          */
         var referenceList = new ReferenceList($('.js-reference-list'));
+        /*
+            Back on top, pass in the object - referenceList.
+         */
         initializeDropzone(referenceList);
     }
     var $locationSelect = $('.js-article-form-location');
@@ -125,6 +128,36 @@ class ReferenceList
         })
     }
 
+    /*
+        Ok, refresh, select any file and... in the console... nice!
+        We already did the work of returning the new ArticleReference JSON on success...
+        even though we didn't need it before.
+        Thanks past us!
+        And now, we're dangerous.
+        If we can somehow take that data,
+        put it into the references property in our class and re-render, we'll be good!
+        To help that, add a new function called addReference().
+        This will take in a new reference and then push it onto this.references.
+        Then call this.render().
+     */
+    /*
+        For people that are used to React,
+        I do want to mention two things.
+        First, we're mutating, um, changing the this.references property
+        when we say this.references.push().
+        Changing "state", which is basically what this is,
+        is a big "no no" in React.
+        But in our simpler system, it's fine.
+        Second, each time we call this.render(),
+        it is completely emptying the ul and re-adding all the HTML from scratch.
+        Front-end frameworks like React or Vue are way smarter than this
+        and are able to update just the pieces that changed.
+     */
+    /*
+        Anyways, inside of initializeDropzone(), add a referenceList argument:
+        we're going to force this to get passed to us.
+        I'll even document that this will be an instance of the ReferenceList class.
+     */
     addReference(reference) {
         this.references.push(reference);
         this.render();
@@ -210,7 +243,34 @@ function initializeDropzone(referenceList) {
         paramName: 'reference',
         init: function() {
             this.on('success', function(file, data) {
+                /*
+                    Now that we're rendering this in JavaScript,
+                    we have a clean way to add a new row whenever a file finishes uploading.
+                    Back inside the init function for Dropzone,
+                    add another event listener:
+                    this.on('success') and pass a callback with the same file and data arguments.
+                    To start, just console.log(data) so we can see what it looks like.
+                    console.log(file, data);
+                    15:37:25.440
+                    File { upload: {…}, status: "success", previewElement: div.dz-preview.dz-processing.dz-image-preview.dz-success, previewTemplate: div.dz-preview.dz-processing.dz-image-preview.dz-success, accepted: true, processing: true, xhr: XMLHttpRequest, dataURL: "data:image/png;base64,iV...c1/rX", width: 316, height: 170 }
+
+                    Object { id: 12, filename: "binarylogic-6a2aba155ea72.png", originalFilename: "BinaryLogic.png", mimeType: "image/png" }
+                    admin_article_form.js:221:25
+
+                 */
+                /*
+                    And now inside success, instead of console.log(),
+                    we'll say referenceList.addReference(data).
+                 */
                 referenceList.addReference(data);
+                /*
+                    Cool! Give your page a nice refresh.
+                    And... let's see: astronaut.jpg is the last file on the list currently.
+                    So let's upload Earth from the Moon.jpeg.
+                    It uploads and... boom! So fast!
+                    We can even instantly downloaded it.
+                    Next: let's keep leveling up: authors need a way to delete existing file references.
+                 */
             });
 
             this.on('error', function(file, data) {
