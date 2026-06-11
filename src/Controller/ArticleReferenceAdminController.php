@@ -498,4 +498,80 @@ reference ""
         return $response;
     }
 
+    /*
+        To power the frontend,
+        we need a new API endpoint
+        that will return all of the references for a specific Article.
+        We got this: go into ArticleReferenceAdminController
+        and create a new public function called getArticleReferences().
+     */
+    /*
+        Add the @Route() above this with /admin/article/{id}/references.
+        This time, the id is the article id.
+        URLs aren't technically important, but this is on purpose:
+        in an API, /admin/article/{id} would be the URL
+        to get info about a specific article.
+        Adding /references onto that is a nice way to read its references.
+        Now add the methods="GET" - yes you can leave off the curly braces
+        when there's just one method - and name="admin_article_list_references".
+     */
+    /*
+        Down in the method, add the Article argument
+        and don't forget the security check:
+        @IsGranted("MANAGE").
+        We can use the annotation this time
+        because we do have an article argument.
+        Then, oh, it's beautiful:
+        return $this->json($article->getArticleReferences());.
+     */
+    /*
+        How nice is it!?
+        Let's check it out: in the browser,
+        take off the /edit and replace it with /references.
+        And... oh boy, it explodes!
+        “Semantical error: Couldn't find constant article... make sure annotations are installed and enabled.”
+     */
+    /*
+        Well, they are - this is a total rookie mistake I made with my annotations.
+        On the @IsGranted annotation, it should be subject="article".
+        @IsGranted("MANAGE", subject="article").
+        Try it again.
+    */
+    /**
+     * @Route("/admin/article/{id}/references", methods="GET", name="admin_article_list_references")
+     * @IsGranted("MANAGE", subject="article")
+     */
+    public function getArticleReferences(Article $article)
+    {
+        /*
+            return $this->json($article->getArticleReferences());
+
+            Here we go - that's the error I was expecting:
+            our favorite circular reference has been detected.
+            This is the exact same thing we saw a second ago
+            when we tried to serialize a single ArticleReference.
+            And the fix is the same:
+            we need to use the main serialization group.
+            Pass 200 as the status code, no custom headers,
+            but one custom groups option set to main.
+         */
+        return $this->json(
+            $article->getArticleReferences(),
+            200,
+            [],
+            [
+                'groups' => ['main']
+            ]
+        );
+        /*
+            Try it again. Gorgeous!
+            That contains everything we need to render the list in JavaScript.
+            https://127.0.0.1:8000/admin/article/91/references
+            [{"id":1,"filename":"tbt-9-16-6a22daf304c5e.png","originalFilename":"tbt_9_16.png","mimeType":"image\/png"},{"id":2,"filename":"cv-rais-de-260602-6a22edbbe35ad.pdf","originalFilename":"CV_Rais_de_260602.pdf","mimeType":"application\/pdf"},{"id":3,"filename":"cv-rais-de-260602-6a22edc59ceac.pdf","originalFilename":"CV_Rais_de_260602.pdf","mimeType":"application\/pdf"},...]
+         */
+
+
+    }
+
+
 }
