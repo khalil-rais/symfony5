@@ -407,4 +407,33 @@ class UploaderHelper
             which will work if the file is stored locally or somewhere else.
          */
     }
+
+    /*
+        Ok: how can we delete a file?
+        Through the magic of Flysystem of course!
+        And the best place for that logic to live is probably UploaderHelper.
+        We already have functions for uploading two types of files,
+        getting the public path and reading a stream.
+        Copy the readStream() function declaration, paste, rename it to deleteFile()
+        and remove the return type.
+     */
+    public function deleteFile(string $path, bool $isPublic)
+    {
+        /*
+            We'll start the same way: by grabbing whichever filesystem we need.
+         */
+        $filesystem = $isPublic ? $this->publicUploadsFilesystem : $this->privateFilesystem;
+        /*
+            Next say $result = $filesystem->delete() and pass that $path.
+         */
+        $result = $filesystem->delete($path);
+        /*
+            Finally, code defensively: if $result === false,
+            throw a new exception with Error deleting "%s" and $path.
+         */
+        if ($result === false) {
+            throw new \Exception(sprintf('Error deleting "%s"', $path));
+        }
+
+    }
 }
