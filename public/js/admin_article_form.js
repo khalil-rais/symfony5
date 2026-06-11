@@ -100,7 +100,16 @@ class ReferenceList
         });
         this.references = [];
         this.render();
-
+        /*
+            Copy that class name and go back up to the constructor.
+            Here say this.$element.on('click') and then pass .js-reference-delete.
+            This is called a delegate event handler.
+            It's handy because it allows us to attach a listener to any .js-reference-delete elements,
+            even if they're added to the HTML after this line is executed.
+            For the callback, I'll pass an ES6 arrow function so that
+            the this variable inside is still my ReferenceList object.
+            Call a new method: this.handleReferenceDelete() and pass it the event object.
+         */
         this.$element.on('click', '.js-reference-delete', (event) => {
             this.handleReferenceDelete(event);
         });
@@ -164,18 +173,78 @@ class ReferenceList
     }
 
     handleReferenceDelete(event) {
+        /*
+            Copy that name, head down, and paste to create that.
+            Inside, we need to do two things:
+            make the AJAX request to delete the item from the server
+            and remove the reference from the references array and call this.render() so it disappears.
+            Start with const $li =.
+            I'm going to use the button that was just clicked to find the <li> element
+            that's around everything -
+            you'll see why in a second.
+            So, const $li = $(event.currentTarget) to get the button that was clicked,
+            then .closest('.list-group-item').
+         */
         const $li = $(event.currentTarget).closest('.list-group-item');
+        /*
+            To create the URL for the DELETE request,
+            I need the id of this specific article reference.
+            To get that, add a new data-id attribute on the li set to ${reference.id}.
+            I'm adding this here instead of directly on the button
+            so that we could re-use it for other behaviors.
+            Now we can say const id = $li.data('id') and $li.addClass('disabled')
+            to make it look like we're doing something during the AJAX call.
+         */
         const id = $li.data('id');
         $li.addClass('disabled');
-
+        /*
+            Make that with $.ajax() with url() set to '/admin/article/references/'+id and method "DELETE":
+         */
         $.ajax({
             url: '/admin/article/references/'+id,
             method: 'DELETE'
-        }).then(() => {
+        })
+            /*
+                To handle success, chain a .then() on this with another arrow function.
+             */
+            .then(() => {
             this.references = this.references.filter(reference => {
+                /*
+                    Now that the article reference has been deleted from the server,
+                    let's remove it from this.references.
+                    A nice way to do that is by saying:
+                    this.references = this.references.filter() and passing this an arrow function with return reference.id !== id.
+                 */
                 return reference.id !== id;
             });
+            /*
+                This callback function will be called once for each item in the array.
+                If the function returns true,
+                that item will be put into the new references variable.
+                If it returns false, it won't be.
+                The end effect is that we get an identical array,
+                except without the reference that was just deleted.
+                After this, call this.render().
+             */
             this.render();
+            /*
+                Let's try it! Refresh and... cool!
+                There's our delete icon - it looks a little weird,
+                but we'll fix that in a minute.
+                Let's see, in var/uploads we have a rocket.jpeg file.
+                Let's delete that one.
+                Ha! It disappeared! The 204 status code looks good and the file is gone!
+DELETE
+	https://127.0.0.1:8000/admin/article/references/2
+Status
+204
+VersionHTTP/2
+Transferred296 B (0 B size)
+Referrer Policystrict-origin-when-cross-origin
+Request PriorityHighest
+DNS ResolutionSystem
+                It's strange when things work on the first try!
+             */
         });
     }
 
@@ -207,6 +276,17 @@ class ReferenceList
             The data from the references will ultimately come from our new endpoint,
             so I'm using the same keys that our JSON has.
          */
+        /*
+            That's it! That is a nice endpoint!
+            Head back to our JavaScript so we can put this all together.
+            First, down in the render() function,
+            add a little trash icon next to the download link.
+            I'll make this a button,
+            just because semantically, it requires a DELETE request,
+            so it's not something the user can click without JavaScript.
+            Give it a js-reference-delete class so we can find it,
+            some styling classes and, inside, we'll use FontAwesome for the icon.
+         */
         const itemsHtml = this.references.map(reference => {
             return `
 <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${reference.id}">
@@ -215,6 +295,9 @@ class ReferenceList
         <a href="/admin/article/references/${reference.id}/download">
             <span class="fa fa-download"></span>
         </a>
+        <button class="js-reference-delete btn btn-link">
+            <span class="fa fa-trash"></span>
+        </button>
     </span>
 </li>`
             /*
