@@ -17,6 +17,7 @@ use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -592,7 +593,11 @@ reference ""
     /**
      * @Route("/admin/article/references/{id}", name="admin_article_delete_reference", methods={"DELETE"})
      */
-    public function deleteArticleReference(ArticleReference $reference)
+    public function deleteArticleReference(
+        ArticleReference $reference,
+        UploaderHelper $uploaderHelper,
+        EntityManagerInterface $entityManager
+    )
     {
         /*
             Inside, add the ArticleReference $reference argument and then we'll add our normal security check.
@@ -600,6 +605,36 @@ reference ""
          */
         $article = $reference->getArticle();
         $this->denyAccessUnlessGranted('MANAGE', $article);
+        /*
+            That's nice!
+            Back in the controller, add an UploaderHelper argument,
+            oh and we're also going to need the EntityManagerInterface service as well.
+            Remove the reference from the database with $entityManager->remove($reference) and $entityManager->flush().
+            Then $uploaderHelper->deleteFile() passing that $reference->getFilePath() and false
+            so it uses the private filesystem.
+         */
+        $entityManager->remove($reference);
+        $entityManager->flush();
+        $uploaderHelper->deleteFile($reference->getFilePath(), false);
+        /*
+            Quick note: in the real world, if there was a problem deleting the file from Flysystem -
+            which is definitely possible when you're storing in the cloud -
+            then you could end up with a situation where the row is deleted in the database,
+            but the file still exists!
+            If you changed the order, you'd have the opposite problem:
+            the file might get deleted,
+            but then the row stays because of a temporary connection error to the database.
+            If you're worried about this,
+            use a Doctrine transaction to wrap all of this logic.
+            If the file was successfully deleted, commit the transaction.
+            If not, roll it back so both the file and row stay.
+            Anyways, what should this endpoint return?
+            Well... how about... nothing!
+            Return a new Response() - the one from HttpFoundation -
+            with null as the content and a 204 status code.
+            204 means: the operation was successful but I have nothing else to say!
+         */
+        return new Response(null, 204);
     }
 
 }
