@@ -1,8 +1,3 @@
-import $ from 'jquery';
-import Dropzone from 'dropzone';
-import 'dropzone/dist/dropzone.css'
-import Sortable from 'sortablejs';
-
 /*
     We could fix this in the controller
     but we can also configure Dropzone to use the reference key.
@@ -18,7 +13,6 @@ import Sortable from 'sortablejs';
 Dropzone.autoDiscover = false;
 
 $(document).ready(function() {
-    initializeDropzone();
     const $autoComplete = $('.js-user-autocomplete');
     if (!$autoComplete.is(':disabled')) {
         import('./components/algolia-autocomplete').then((autocomplete) => {
@@ -27,6 +21,13 @@ $(document).ready(function() {
     }
     const $referenceList = $('.js-reference-list');
     if ($referenceList[0]) {
+        /*
+            Before we dive into this class,
+            let's start using it up on our document.ready() function.
+            Say var referenceList = new ReferenceList() and
+            pass it $('.js-reference-list')
+            - that's the element we just added the attribute to.
+         */
         var referenceList = new ReferenceList($('.js-reference-list'));
         initializeDropzone(referenceList);
     }
@@ -56,12 +57,32 @@ $(document).ready(function() {
     });
 });
 
+/*
+    Next, in admin_article_form.js,
+    I'm going to paste in a class that I've started:
+    you can copy this from the code block on this page.
+    This uses the newer "class" syntax from JavaScript
+    which is compatible with most browsers,
+    but not all of them.
+    That's why I've added this note to use Webpack Encore,
+    which will rewrite the new syntax
+    so that it's compatible with whatever browsers you need.
+ */
 // todo - use Webpack Encore so ES6 syntax is transpiled to ES5
 class ReferenceList
 {
+    /*
+
+     */
     constructor($element) {
         var stuff = new WeakSet([]);
-
+        /*
+            And... yea! The class mostly takes care of the rest!
+            In the constructor(), we take in the jQuery element and store it on this.$element.
+            It also keeps track of all the references that it has,
+            which starts empty and calls this.render(),
+            whose job is to completely fill the ul element.
+         */
         this.$element = $element;
         this.sortable = Sortable.create(this.$element[0], {
             handle: '.drag-handle',
@@ -84,7 +105,18 @@ class ReferenceList
         this.$element.on('blur', '.js-edit-filename', (event) => {
             this.handleReferenceEditFilename(event);
         });
-
+        /*
+            Finally, at the bottom, we take all that HTML
+            and stick it into the element.
+            This is a bit similar to what React does, but definitely less powerful.
+            Back up in the constructor, the references array starts empty,
+            but we immediately make an Ajax call by reading the data-url attribute off of our element.
+            When it finishes, we set this.references to its data and once again call this.render().
+            Phew! Let's see if it actually works!
+            Refresh and... yes!
+            If you watched closely, it was empty for a moment,
+            then filled in once the AJAX call finished.
+         */
         $.ajax({
             url: this.$element.data('url')
         }).then(data => {
@@ -130,18 +162,33 @@ class ReferenceList
     }
 
     render() {
+        /*
+            this.references.map is a fancy way to loop over the references array,
+            which is empty at the start,
+            but won't be forever.
+            For each reference, it creates a string of HTML that is basically a copy of
+            what we had in our template before.
+            This uses a feature called template literals that allows us
+            to create a multi-line string with variables inside -
+            like reference.originalFilename and referenced.id.
+            The data from the references will ultimately come from our new endpoint,
+            so I'm using the same keys that our JSON has.
+         */
         const itemsHtml = this.references.map(reference => {
             return `
 <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${reference.id}">
-    <span class="drag-handle fa fa-reorder"></span>
-    <input type="text" value="${reference.originalFilename}" class="form-control js-edit-filename" style="width: auto;">
-
+    ${reference.originalFilename}
     <span>
-        <a href="/admin/article/references/${reference.id}/download" class="btn btn-link btn-sm"><span class="fa fa-download" style="vertical-align: middle"></span></a>
-        <button class="js-reference-delete btn btn-link btn-sm"><span class="fa fa-trash"></span></button>
+        <a href="/admin/article/references/${reference.id}/download">
+            <span class="fa fa-download"></span>
+        </a>
     </span>
-</li>
-`
+</li>`
+            /*
+                I did hardcode the URL to the download endpoint instead of doing something fancier.
+                You could generate that with FOSJsRoutingBundle if you want,
+                but hardcoding it is also not a huge deal.
+             */
         });
 
         this.$element.html(itemsHtml.join(''));
@@ -153,55 +200,20 @@ class ReferenceList
     If I were using Webpack Encore,
     I'd probably organize this function into its own file and import it.
  */
-function initializeDropzone() {
-    /*
-        Copy that, and back inside our JavaScript,
-        say var formElement = document.querySelector() with .js-reference-dropzone.
-     */
+function initializeDropzone(referenceList) {
     var formElement = document.querySelector('.js-reference-dropzone');
-    /*
-        Yes, yes, I'm using straight JavaScript here instead of jQuery
-        to be a bit more hipster - no big reason for that.
-        There's also a jQuery plugin for Dropzone.
-        Next, to avoid an error on the "new" form that doesn't have this element, if !formElement, return.
-     */
     if (!formElement) {
         return;
     }
-    /*
-        Finally, initialize things with var dropzone = new Dropzone(formElement).
-        And now we can pass an array of options.
-        The one we need now is paramName.
-        Set it to reference.
-     */
+
     var dropzone = new Dropzone(formElement, {
         paramName: 'reference',
-        /*
-            Ok, let's look back at what happened with stars.
-            This failed validation
-            and so the server returned a 400 status code.
-            Dropzone did notice that - it knows it failed.
-            But, by default, Dropzone expects the Response to be just a string with the error message,
-            not a nice JSON structure with a detail key like we have.
-            No worries: we just need a little extra JavaScript to help this along.
-            Back in admin_article_form.js,
-            add another option called init and set that to a function.
-         */
         init: function() {
-            /*
-                Dropzone calls this when it's setting itself up,
-                and it's a great place to add extra behavior via events.
-                For example, want to do something whenever there's an error?
-                Call this.on('error')
-                and pass that a callback with two arguments:
-                a file object that holds details about the file that was uploaded and data -
-                the data sent back from the server.
-             */
+            this.on('success', function(file, data) {
+                referenceList.addReference(data);
+            });
+
             this.on('error', function(file, data) {
-                /*
-                    Because the real validation message lives on the detail key,
-                    we can say: if data.detail, this.emit('error') passing file and the actual error message string: data.detail.
-                 */
                 if (data.detail) {
                     this.emit('error', file, data.detail);
                 }
