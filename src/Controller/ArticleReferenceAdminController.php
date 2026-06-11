@@ -573,5 +573,33 @@ reference ""
 
     }
 
+    /*
+        The next thing our file gallery needs is the ability to delete files.
+        I know this tutorial is all about uploading
+        but in these chapters, we're sorta, accidentally creating a nice API for our Article references.
+        We already have the ability to get all references for a specific article,
+        create a new reference and download a reference's file.
+        Now we need an endpoint to delete a reference.
+        Add a new function at the bottom called deleteArticleReference().
+        Put the @Route() above this with /admin/article/references/{id}, name="admin_article_delete_reference" and - this will be important - methods={"DELETE"}.
+        We do not want to make it possible
+        to make a GET request to this endpoint.
+        First, because that's crazy-dangerous.
+        And second, because if we kept building out the API,
+        we would want to have a different endpoint for making a GET request to /admin/article/references/{id}
+        that would return the JSON for that one reference.
+     */
+    /**
+     * @Route("/admin/article/references/{id}", name="admin_article_delete_reference", methods={"DELETE"})
+     */
+    public function deleteArticleReference(ArticleReference $reference)
+    {
+        /*
+            Inside, add the ArticleReference $reference argument and then we'll add our normal security check.
+            In fact, copy it from above and put it here.
+         */
+        $article = $reference->getArticle();
+        $this->denyAccessUnlessGranted('MANAGE', $article);
+    }
 
 }
