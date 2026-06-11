@@ -287,6 +287,15 @@ DNS ResolutionSystem
             Give it a js-reference-delete class so we can find it,
             some styling classes and, inside, we'll use FontAwesome for the icon.
          */
+        /*
+            While we're here,
+            let's fix this alignment issue - it's weirding me out.
+            Down in the render() function, add a few Bootstrap classes
+            to the download link and make the delete button smaller.
+            Try that. Better... but it's still just a touch off.
+            Add vertical-align: middle to the download icon.
+            It's subtle but... yep - the buttons are lined up now.
+         */
         const itemsHtml = this.references.map(reference => {
             return `
 <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${reference.id}">
@@ -300,6 +309,10 @@ DNS ResolutionSystem
         </button>
     </span>
 </li>`
+            /*
+                Next: our users are begging for another feature:
+                the ability to rename the file after it's been uploaded.
+             */
             /*
                 I did hardcode the URL to the download endpoint instead of doing something fancier.
                 You could generate that with FOSJsRoutingBundle if you want,
