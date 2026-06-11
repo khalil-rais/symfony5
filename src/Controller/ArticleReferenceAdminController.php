@@ -187,29 +187,18 @@ reference ""
          */
         if ($violations->count() > 0) {
             /*
-                So, in theory, you can have multiple validation rules and multiple errors.
-                To keep things simple, let's show the first error if there is one.
-                Use $violation = $violations[0] to get it.
-                The ConstraintViolationList class implements ArrayAccess,
-                which is why we can use this syntax.
-                Oh, and let's help out my editor by telling it that this is a ConstraintViolation object.
+                The AJAX upload finishes successfully
+                but the response is a redirect
+                which doesn't break anything technically
+                but it's weird.
+                Our endpoint isn't setup to be an API endpoint -
+                it's 100% traditional:
+                we're redirecting on error and success.
+                But now that we are using this as an API endpoint, let's fix that!
+                And this kinda simplifies things.
+                For the validation error, we can say return $this->json($violations, 400).
              */
-            /** @var ConstraintViolation $violation */
-            $violation = $violations[0];
-            /*
-                And now... hmm... how should we show this error to the user?
-                This controller will eventually turn into an AJAX,
-                or API endpoint that communicates via JSON. But because this is still a normal form submit,
-                the easiest option is to put the error into a flash message and display it on the next page.
-                Say $this->addFlash(), pass it an "error" type, and then $violation->getMessage().
-             */
-            $this->addFlash('error', $violation->getMessage());
-            /*
-                Finish by stealing the redirect code from the bottom to send us back to the edit page.
-             */
-            return $this->redirectToRoute('admin_article_edit', [
-                'id' => $article->getId(),
-            ]);
+            return $this->json($violations, 400);
         }
         /*
             Cool! Move over, select the Best Practices PDF - that's definitely more than 1kb - and upload!
@@ -294,23 +283,58 @@ reference ""
         $entityManager->persist($articleReference);
         $entityManager->flush();
         /*
-            Finish with return redirectToRoute() and send the user back to the edit page:
-            admin_article_edit passing this id set to $article->getId().
+            How nice is that?
+            And at the bottom, we don't really need to return anything yet,
+            but it's pretty standard to return the JSON of a resource after creating it.
+            So, return $this->json($articleReference).
          */
-        return $this->redirectToRoute('admin_article_edit', [
-            'id' => $article->getId(),
-        ]);
         /*
-            Yep - that's the route on the edit endpoint.
-            Alright! With any luck, it should hit our dd() statement.
-            Go back to your browser:
-            I already have the Symfony Best Practices PDF selected.
-            Hit update... yea! UploadedFile coming from UploaderHelper.
-            Next: let's move the uploaded file... except that...
-            we can't move it using the filesystem service object we have now...
-            because we can't store these private files in the public/ directory. Hmm...
-         */
+            return $this->json($articleReference);
+            Let's try it!
+            Move over, refresh
+            even though we don't need to
+            and select astronaut.jpg.
+            This time it fails!
+            Let's see what the error looks like.
+            Hmm, actually, better: click to open the
+            profiler - you can always see the error there. Oh:
+            “A circular reference has been detected when serializing the object of class "App\Entity\Article" (configured limit: 1).”
+            This is a super common problem with the serializer,
+            and we saw it earlier.
 
+            We're serializing ArticleReference.
+            And, by default, that will serialize all the properties that have getter methods including the article property.
+            Then when it serializes the Article,
+            it finds the $articleReferences property
+            and tries to serialize the ArticleReference objects in an endless loop.
+         */
+        /*
+            Back in the controller, let's break this onto multiple lines.
+            The second argument is the status code and we should actually use 201 -
+            that's the proper status code when you've created a resource.
+            Next is headers - we don't need anything custom,
+            and, for context, add an array with groups set to ['main'].
+         */
+        return $this->json(
+            $articleReference,
+            201,
+            [],
+            [
+                'groups' => ['main']
+            ]
+        );
+        /*
+            Let's see if that fixed things.
+            Close the profiler and select "stars".
+            Duh - I totally forgot - the stars file is too big -
+            you can see it failed.
+            But when you hover over it object Object?
+            That's not a great error message.
+            We'll fix that in a minute.
+            Select Earth from the Moon.jpg and nice!
+            It works and the JSON response looks awesome!
+            {"id":7,"filename":"plektrum-desktop-6a2a75f967162.png","originalFilename":"plektrum-desktop.png","mimeType":"image\/png"}
+         */
     }
 
     /*

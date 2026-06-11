@@ -5,16 +5,28 @@ namespace App\Entity;
 use App\Repository\ArticleReferenceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Service\UploaderHelper;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=ArticleReferenceRepository::class)
  */
 class ArticleReference
 {
+    /*
+        The easiest way to fix this is to define a serialization group.
+        In ArticleReference, above the id property,
+        add @Groups and let's invent one called main.
+        Put this above all the fields
+        that we actually want to serialize,
+        how about $id, $filename, $originalFilename and $mimeType.
+        We're not actually using the JSON response yet so it doesn't matter -
+        but we will use it in a few minutes.
+     */
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups("main")
      */
     private $id;
 
@@ -26,16 +38,19 @@ class ArticleReference
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("main")
      */
     private $filename;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("main")
      */
     private $originalFilename;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("main")
      */
     private $mimeType;
 
