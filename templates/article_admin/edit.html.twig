@@ -33,42 +33,25 @@
         <div class="col-sm-4">
             <h3>References</h3>
             {#
-                Except how can we allow authors to access them?
-                As a first step, let's at least list the files on the page.
-                In edit.html.twig, add a <ul> with some Bootstrap classes.
+                To do that,
+                we're not going to use Vue.js or React.
+                Those are both wonderful options,
+                and if you're serious about building some high-quality front-end apps,
+                you need to give them a serious look.
+                But, to keep the concepts understandable,
+                I'm going to stick to jQuery and a few modern JavaScript techniques.
+                Start in edit.html.twig.
+                Find the list and completely empty it:
+                we'll fill this in via JavaScript.
+                But add a new class so we can find it: js-reference-list.
+                Let's also add a data-url attribute:
+                I want to print the URL to our new endpoint to make it easy for JavaScript
+                to fetch the references.
+                Copy the new route name,
+                paste it into path and add pass the id route wildcard set to article.id.
             #}
-            <ul class="list-group small">
-                {#
-                    Then loop with {% for reference in article.articleReferences %}.
-                    Inside, add an <li>, a bunch of classes to make it look fancy,
-                    and then print, how about, reference.originalFilename.
-                #}
-                {% for reference in article.articleReferences %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ reference.originalFilename }}
-                        {#
-                            Love it! Copy the route name and head back into the template.
-                            Add a <span> here for styling and an anchor with href="{{ path() }}",
-                            the route name, and id: reference.id.
-                            For the text, I'll use the Font Awesome download icon.
-                        #}
-                        <span>
-                            <a href="{{path('admin_article_download_reference', {
-                                id: reference.id
-                            }) }}"><span class="fa fa-download"></span></a>
-                        </span>
-                        {#
-                            Try it out! Refresh and... download!
-                            So far so good.
-                        #}
-                    </li>
-                {% endfor %}
-                {#
-                    This is pretty cool: when we move the files onto the server, we give them a weird filename. But
-                    because we saved the original filename, we can show that here: the author has no idea we're
-                    naming their files crazy things internally.
-                    Let's see how this looks. Nice! 2 uploaded PDF's.
-                #}
+            <ul class="list-group small js-reference-list"
+                data-url="{{path('admin_article_list_references', {id: article.id}) }}">
             </ul>
             {#
                 Dropzone basically "takes over" your form tag.
