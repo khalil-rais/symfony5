@@ -675,6 +675,18 @@ reference ""
             say $serializer->deserialize().
             The serializer only has these two methods: serialize() and deserialize().
          */
+        /*
+            Ok, let's see if I've finally got everything right.
+            Refresh, add a dash to the filename,
+            click off and... 500 error! That's progress!
+            Open the profiler for that request in a new tab.
+            Ok: a "Syntax Error" coming from a JsonDecode class.
+            Oh, and look at the data that's passed to the deserialize() function!
+            That's not JSON!
+            Silly mistake.
+
+            Serializer->deserialize('id=3&filename=cv-rais-de-260602-6a22edc59ceac.pdf&originalFilename=CV_Rais.pdf&mimeType=application%2Fpdf', 'App\\Entity\\ArticleReference', 'json', array('object_to_populate' => object(ArticleReference), 'groups' => array('input'))) in src/Controller/ArticleReferenceAdminController.php (line 678)
+         */
         $serializer->deserialize(
         /*
             This method needs the raw JSON from the request -
