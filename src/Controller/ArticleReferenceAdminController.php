@@ -668,7 +668,8 @@ reference ""
         UploaderHelper $uploaderHelper,
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
-        Request $request)
+        Request $request,
+        ValidatorInterface $validator)
     {
         /*
             To automagically turn the JSON into an ArticleReference object,
@@ -712,6 +713,36 @@ reference ""
                 'groups' => ['input']
             ]
         );
+        /*
+            Then, inside our endpoint,
+            there's no form here, but that's fine.
+            Add the ValidatorInterface $validator argument.
+            And right after we update the object with the serializer,
+            add $violations = $validator->validate()
+            and pass it the $reference object.
+            Then if $violations->count() > 0,
+            return $this->json($violations, 400).
+         */
+        $violations = $validator->validate($reference);
+        if ($violations->count() > 0) {
+            return $this->json($violations, 400);
+        }
+        /*
+            We're actually not going to handle that in JavaScript -
+            I'll leave rendering the errors up to you -
+            you could highlight the element in red
+            and print the error below whatever you want.
+            But let's at least make sure it works.
+            Clear out the filename, hit tab to blur and there it is!
+            A 400 error with our beautiful error response.
+            To handle this in JavaScript,
+            you'll chain a .catch() onto the end of the AJAX call
+            and then do whatever you want.
+            Ok, what else can we add to our upload widget?
+            How about the ability to reorder the list.
+            That's next.
+            {"type":"https:\/\/symfony.com\/errors\/validation","title":"Validation Failed","detail":"originalFilename: This value should not be blank.","violations":[{"propertyPath":"originalFilename","title":"This value should not be blank.","parameters":{"{{ value }}":"\u0022\u0022"},"type":"urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"}]}
+         */
         $article = $reference->getArticle();
         $this->denyAccessUnlessGranted('MANAGE', $article);
         /*

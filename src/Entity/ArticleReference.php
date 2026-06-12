@@ -6,6 +6,7 @@ use App\Repository\ArticleReferenceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Service\UploaderHelper;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ArticleReferenceRepository::class)
@@ -51,9 +52,23 @@ class ArticleReference
         we need to restrict their power to changing the originalFilename.
         Above $originalFilename, turn the groups value into an array and give it a second group: input.
      */
+    /*
+        The last thing we need to do is add validation.
+        I know, it's always that annoying last detail once you've got the "happy" path working perfectly.
+        But, right now, we could leave the filename completely blank
+        and our system would be ok with that.
+        Well ya know what? I am totally not ok with that!
+        Ultimately, our endpoint modifies the ArticleReference object
+        and that is what we should validate.
+        Above the originalFilename field, add @NotBlank()
+        and let's also use @Length().
+        The length can be 255 in the database, but let's use max=100.
+     */
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"main", "input"})
+     * @Assert\NotBlank()
+     * @Assert\Length(max=100)
      */
     private $originalFilename;
 
