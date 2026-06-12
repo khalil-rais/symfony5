@@ -87,17 +87,26 @@ class ReferenceList
             whose job is to completely fill the ul element.
          */
         this.$element = $element;
-        this.sortable = Sortable.create(this.$element[0], {
-            handle: '.drag-handle',
-            animation: 150,
-            onEnd: () => {
-                $.ajax({
-                    url: this.$element.data('url')+'/reorder',
-                    method: 'POST',
-                    data: JSON.stringify(this.sortable.toArray())
-                });
-            }
-        });
+        /*
+            Next, open admin_article_form.js
+            and scroll up to the constructor so we can start using this.
+            Here's the plan:
+            we're going to make each element - each "row" - sortable.
+            And when we finish dragging,
+            we'll send an AJAX request to save the new positions.
+            Add this.sortable = Sortable.create().
+            We're storing the instance of our new sortable object onto a property
+            because we'll need it later.
+            Pass this the parent of the elements that should be sortable.
+            So in our case, we want to attach sortable to the <ul> element that's around everything.
+            Fortunately, that's exactly what this.$element represents!
+            So we can say this.$element,
+            and, this actually wants a raw HTMLElement, not a jQuery object, so add [0].
+
+            Give it a test! Refresh... and grab... sweet!
+            When we finish ordering, nothing saves yet, but we'll get there.
+         */
+        this.sortable = Sortable.create(this.$element[0]);
         this.references = [];
         this.render();
         /*

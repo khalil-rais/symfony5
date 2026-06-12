@@ -165,6 +165,18 @@ class ArticleReference
         return $this;
     }
 
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
     /*
         Oh, except, we don't have an easy way to do that yet!
         In our Article entity, we added a nice getImagePath() method
