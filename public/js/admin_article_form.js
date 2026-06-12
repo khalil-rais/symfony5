@@ -119,6 +119,31 @@ class ReferenceList
                 There's our drag handle and... nice - it's a bit smoother.
              */
             animation: 150,
+            /*
+                1- To make an AJAX call when we finishing dragging,
+                add a new option: onEnd set to an arrow function.
+                Inside console.log(this.sortable) -
+                that's the sortable object we stored earlier .toArray().
+             */
+            onEnd: () => {
+                console.log(this.sortable.toArray());
+            }
+            /*
+                2- Check it out: refresh the page, drag one of these...
+                and go look at the console.
+                Woh! Those are the reference ids... in the right order!
+                15:28:37.732 Array(11) [ "3", "1", "4", "5", "6", "7", "8", "9", "10", "11", … ]
+                admin_article_form.js:129:25
+
+                Try it again: move this one up and... yep!
+                The id 11 just moved up a few spots.
+                But... how the heck is this working?
+                How does sortable know what the ids are?
+                Well, honestly... we got lucky.
+                It knows thanks to the data-id attribute that we put on each li!
+                We added that for our own JavaScript...
+                but the Sortable library also knows to read that!
+             */
         });
         this.references = [];
         this.render();
