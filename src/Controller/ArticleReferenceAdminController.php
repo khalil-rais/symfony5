@@ -18,6 +18,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -649,16 +650,90 @@ reference ""
         I don't think I'm referencing that route name anywhere.
         And instead of methods={"DELETE"}, use methods={"PUT"}.
      */
+    /*
+        So far, we've been using $this->json() to turn an object or multiple objects into JSON.
+        This uses Symfony's serializer behind the scenes.
+        Now we're going to use the serializer to do the opposite:
+        to turn JSON back into an ArticleReference object.
+        That's called deserialization.
+        Let's add a few more arguments: SerializerInterface $serializer and Request -
+        the one from HttpFoundation -
+        so we can read the raw JSON body.
+     */
     /**
      * @Route("/admin/article/references/{id}",name="admin_article_update_reference", methods={"PUT"})
      */
     public function updateArticleReference(
         ArticleReference $reference,
         UploaderHelper $uploaderHelper,
-        EntityManagerInterface $entityManager)
+        EntityManagerInterface $entityManager,
+        SerializerInterface $serializer,
+        Request $request)
     {
+        /*
+            To automagically turn the JSON into an ArticleReference object,
+            say $serializer->deserialize().
+            The serializer only has these two methods: serialize() and deserialize().
+         */
+        $serializer->deserialize(
+        /*
+            This method needs the raw JSON from the request -
+            that's $request->getContent(),
+            what type of object to turn this into - ArticleReference::class - and the format of the data: json,
+            because the serializer can also handle XML or any crazy format you dream up.
+         */
+            $request->getContent(),
+            ArticleReference::class,
+            'json',
+            [
+                /*
+                    Finally, we can pass some options - called "context".
+                    By default, deserialize() will always create a new object
+                    but we want it to update an existing object.
+                    To do that, pass an option called object_to_populate set to $reference.
+                 */
+                'object_to_populate' => $reference,
+                /*
+                    In the controller, way back down here, set groups to input.
+                    So if any other fields or passed, they'll just be ignored.
+                 */
+                'groups' => ['input']
+            ]
+        );
         $article = $reference->getArticle();
         $this->denyAccessUnlessGranted('MANAGE', $article);
+        /*
+            And... yea, that's it!
+            We do need to think about validation - but, pff, we'll handle that later.
+            Right now we can celebrate with $entityManager->persist($reference),
+            which we technically don't need because this isn't a new object,
+            but I usually add it, and $entityManager->flush().
+         */
+        $entityManager->persist($reference);
+        $entityManager->flush();
+
+        /*
+            What should we return?
+            Typically after you edit a resource in an API,
+            we return that resource again.
+            Scroll all the way up to our upload endpoint and steal the JSON logic.
+            We could also refactor this into a private method if we wanted to avoid duplication.
+            Back down in our method, paste, rename the variable to $reference
+            and use 200 as the status code: we're not creating a resource in this case.
+         */
+        return $this->json(
+            $reference,
+            200,
+            [],
+            [
+                'groups' => ['main']
+            ]
+        );
+        /*
+            Ok, that endpoint should be good!
+            Or at least, we're ready to hook up our JavaScript
+            so we can find out if it explodes when we use it! That's next.
+         */
     }
     /*
         Cool! Let's think about how we want this endpoint to work.

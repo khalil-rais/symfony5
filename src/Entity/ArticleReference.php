@@ -42,9 +42,18 @@ class ArticleReference
      */
     private $filename;
 
+    /*
+        Oh, and when we've been serializing,
+        we've been passing a groups option,
+        which tells the serializer to put the properties from the "main" group into the JSON.
+        We can do the same thing here:
+        we don't want a clever user to be able to update the internal filename or the id:
+        we need to restrict their power to changing the originalFilename.
+        Above $originalFilename, turn the groups value into an array and give it a second group: input.
+     */
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("main")
+     * @Groups({"main", "input"})
      */
     private $originalFilename;
 
