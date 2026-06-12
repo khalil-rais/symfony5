@@ -120,30 +120,36 @@ class ReferenceList
              */
             animation: 150,
             /*
-                1- To make an AJAX call when we finishing dragging,
-                add a new option: onEnd set to an arrow function.
-                Inside console.log(this.sortable) -
-                that's the sortable object we stored earlier .toArray().
+                1- Ok, let's hook up the JavaScript!
+                Back in admin_article_form.js, scroll up... let's see -
+                find the onEnd() of sortable.
+                Say $.ajax() and give this the url key.
+                For the URL, remember, the ul element has a data-url attribute,
+                which is the path to the admin_article_list_references route, so /admin/article/{id}/references.
+                Not by accident, the URL that we want is that plus /reorder.
              */
             onEnd: () => {
-                console.log(this.sortable.toArray());
+                $.ajax({
+                    /*
+                        2- So let's do a little bit of code re-use
+                        and a little bit of hardcoding: in general, I don't worry too much about hardcoding URLs in JavaScript.
+                        Copy this.$element.data('url') from below,
+                        paste, and add /reorder.
+                        Then, method set to POST and data set to JSON.stringify(this.sortable.toArray()).
+                     */
+                    url: this.$element.data('url')+'/reorder',
+                    method: 'POST',
+                    data: JSON.stringify(this.sortable.toArray())
+                });
+                /*
+                    3- Ok, let's do this! Move over and refresh.
+                    No errors yet... Move "astronaut-1.jpg" down two spots and... hey!
+                    A 200 status code on that AJAX request! 
+                    [{"id":1,"filename":"tbt-9-16-6a22daf304c5e.png","originalFilename":"tbt_9_16.png","mimeType":"image\/png"},{"id":3,"filename":"cv-rais-de-260602-6a22edc59ceac.pdf","originalFilename":"CV_Rais.pdf","mimeType":"application\/pdf"},...]
+                    That's a good sign. Refresh and... aw!
+                    It's right back up on top!
+                 */
             }
-            /*
-                2- Check it out: refresh the page, drag one of these...
-                and go look at the console.
-                Woh! Those are the reference ids... in the right order!
-                15:28:37.732 Array(11) [ "3", "1", "4", "5", "6", "7", "8", "9", "10", "11", … ]
-                admin_article_form.js:129:25
-
-                Try it again: move this one up and... yep!
-                The id 11 just moved up a few spots.
-                But... how the heck is this working?
-                How does sortable know what the ids are?
-                Well, honestly... we got lucky.
-                It knows thanks to the data-id attribute that we put on each li!
-                We added that for our own JavaScript...
-                but the Sortable library also knows to read that!
-             */
         });
         this.references = [];
         this.render();
