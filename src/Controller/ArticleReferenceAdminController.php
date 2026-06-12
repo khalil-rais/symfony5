@@ -785,4 +785,74 @@ reference ""
         In this case, the data will have only one field: originalFilename.
      */
 
+    /*
+        1- This is amazing!
+        This is the exact data we need to send to the server!
+        Open up ArticleReferenceAdminController and find downloadArticleReference().
+        If you look closely, about half of the methods in this controller have an {id} route wildcard
+        where the id is for an ArticleReference.
+        Those endpoints are actions that operating on a single item.
+        The other half of the endpoints, the ones on top, also have an {id} wildcard,
+        but these are for the Article.
+        What about our new endpoint?
+        We'll be reordering all of the references for one article...
+        so it's a bit more like these ones on top.
+        Copy this entire action for getting article references,
+        change the name to reorderArticleReferences and put /reorder on the URL.
+        Make this a method="POST" and name it admin_article_reorder_references.
+     */
+    /**
+     * @Route("/admin/article/{id}/references/reorder", methods="POST", name="admin_article_reorder_references")
+     * @IsGranted("MANAGE", subject="article")
+     */
+    public function reorderArticleReferences(
+        Article $article,
+        Request $request,
+        EntityManagerInterface $entityManager
+    )
+    /*
+        public function reorderArticleReferences(Article $article)
+        2.2- Inside the method, here's the plan:
+        our JavaScript will send a JSON body containing an array of the ids in the right order.
+        This array exactly.
+        Add the Request argument so we can get read
+        that data and the EntityManagerInterface so we can save stuff.
+     */
+    {
+        /*
+            3-To decode the JSON this time,
+            it's so simple!
+            I'm going to skip using Symfony's serializer.
+            Say $orderedIds = json_decode() passing that $request->getContent() and true
+            so it gives us an associative array.
+         */
+        $orderedIds = json_decode($request->getContent(), true);
+        /*
+            4- Then, if orderedIds === false, something went wrong.
+            Let's return this->json() and,
+            to at least somewhat match the validation responses we've had so far,
+            let's set a detail key to,
+            how about, Invalid body with 400 for the status code.
+         */
+        if ($orderedIds === null) {
+            return $this->json(['detail' => 'Invalid body'], 400);
+        }
+        /*
+            2- If you're wondering about the URL or the method POST,
+            well, this endpoint isn't very RESTful,
+            it doesn't fit into the nice create-read-update-delete model
+            and that's ok.
+            Usually when I have a weird endpoint like this,
+            I use POST.
+         */
+        return $this->json(
+            $article->getArticleReferences(),
+            200,
+            [],
+            [
+                'groups' => ['main']
+            ]
+        );
+    }
+
 }
