@@ -100,7 +100,21 @@
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
-
+    {#
+        Ok, the database is ready!
+        For the frontend, there are a ton of libraries that can help you sort and reorder stuff.
+        I'm going to use one called Sortable.
+        It's got a lot of support and tons of options.
+        We'll need a few of them.
+        If you're using Webpack Encore,
+        I'd recommend installing this via yarn and then importing the library when you need it.
+        Because we're not, I'll Google for "sortablejs cdn".
+        It's this one, from jsdelivr - the first is a different library.
+        It turns out "Sortable" is a pretty generic name.
+        Click to copy the HTML+SRI script tag,
+        then go find the edit template. Scroll down to the JavaScript block and paste!
+        Hey! We now have a global Sortable variable.
+    #}
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
     <script src="{{ asset('js/algolia-autocomplete.js') }}"></script>
