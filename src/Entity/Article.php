@@ -86,10 +86,33 @@ class Article
      */
     private $specificLocationName;
 
+    /*
+        1- Oh wait... the problem is that we're not rendering the list correctly!
+        This list loads by making an Ajax request.
+        In the controller... here's the endpoint: getArticleReferences().
+        And it gets the data from $article->getArticleReferences().
+        The problem is that this method doesn't know
+        that it should order the reference's by position.
+        Open up the Article entity and, above $articleReferences, add @ORM\OrderBy({"position"="ASC"}).
+     */
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\ArticleReference", mappedBy="article")
+     * @ORM\OrderBy({"position"="ASC"})
      */
     private $articleReferences;
+    /*
+        2- Let's go check out the endpoint:
+        I'll click to open the URL in a new tab.
+        Woohoo! astronaut-1.jpg is third!
+        Refresh the main page.
+        Boom! The astronaut is right were we sorted it.
+        Let's move it down a bit further,
+        move the Symfony Best Practices up from the bottom
+        and refresh.
+        The sorting sticks. Awesome!
+        Next, instead of saving the uploaded files locally,
+        let's upload them to AWS S3.
+     */
 
     public function __construct()
     {

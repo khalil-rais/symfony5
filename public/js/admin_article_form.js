@@ -144,7 +144,7 @@ class ReferenceList
                 /*
                     3- Ok, let's do this! Move over and refresh.
                     No errors yet... Move "astronaut-1.jpg" down two spots and... hey!
-                    A 200 status code on that AJAX request! 
+                    A 200 status code on that AJAX request!
                     [{"id":1,"filename":"tbt-9-16-6a22daf304c5e.png","originalFilename":"tbt_9_16.png","mimeType":"image\/png"},{"id":3,"filename":"cv-rais-de-260602-6a22edc59ceac.pdf","originalFilename":"CV_Rais.pdf","mimeType":"application\/pdf"},...]
                     That's a good sign. Refresh and... aw!
                     It's right back up on top!
