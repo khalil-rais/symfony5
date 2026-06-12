@@ -79,6 +79,29 @@ class ArticleReference
     private $mimeType;
 
     /*
+        To start, the ArticleReference entity needs a field that can store its order in the list.
+        Find your terminal and run:
+        php bin/console make:entity
+        Update ArticleReference and add one new field position.
+        This is an integer
+        and make it not nullable. Cool!
+        Go find the property there it is.
+        Make it default to 0: until the user decides to reorder stuff,
+        setting them all to 0 is fine.
+
+        Create the migration with the usual:
+        php bin/console make:migration
+        and go to the src/Migrations directory
+        so we can make sure it doesn't contain any surprises.
+        Looks perfect! Close that and run:
+        php bin/console doctrine:migrations:migrate
+     */
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $position = 0;
+
+    /*
         Oh, but before we do - go open that class.
         This is a very traditional entity:
         it has some properties and everything has a getter and a setter.
