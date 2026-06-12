@@ -106,7 +106,20 @@ class ReferenceList
             Give it a test! Refresh... and grab... sweet!
             When we finish ordering, nothing saves yet, but we'll get there.
          */
-        this.sortable = Sortable.create(this.$element[0]);
+        /*
+            Before we do, I think we can make this a bit nicer.
+            Pass a second argument to create(): an array of options.
+            Pass one called handle set to .drag-handle.
+         */
+        this.sortable = Sortable.create(this.$element[0],{
+            handle: '.drag-handle',
+            /*
+                Oh, and while we're making this fancy, add animation:
+                150... it just makes it look cooler. Try it!
+                There's our drag handle and... nice - it's a bit smoother.
+             */
+            animation: 150,
+        });
         this.references = [];
         this.render();
         /*
@@ -351,21 +364,15 @@ DNS ResolutionSystem
 
     render() {
         /*
-            To make this all work, but to avoid going totally insane and coding JavaScript for the next 30 minutes,
-            we're going to turn the printed string into an input text body and, on "blur" -
-            so when we click away from it,
-            we'll make an AJAX request to save the new filename.
-            Let's copy the original filename code
-            and replace it with <input type="text" and value="that original filename stuff.
-            Let's also add two classes:
-            one from Bootstrap to make things look nice and another - js-edit-filename -
-            so that we can find this field in JavaScript.
-            Oh, one more detail:
-            add a style attribute with width: auto - just another styling thing.
+            With this, instead of being able to grab anywhere to start sorting,
+            we'll only be able to grab elements with this class.
+            Down in render, how about, before the text field,
+            add <span class="drag-handle">, and fa and fa-reorder.
          */
         const itemsHtml = this.references.map(reference => {
             return `
 <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${reference.id}">
+    <span class="drag-handle fa fa-reorder"></span>
     <input 
         type="text" 
         value="${reference.originalFilename}" 
