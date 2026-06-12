@@ -837,6 +837,36 @@ reference ""
         if ($orderedIds === null) {
             return $this->json(['detail' => 'Invalid body'], 400);
         }
+
+        /*
+            1- Ok, cool: we've got the array of ids in the new order we want.
+            Use this to say $orderedIds = array_flip($orderedIds).
+            This deserves some explanation.
+            The original array is a map from the position to the id -
+            the keys are 0, 1, 2, 3 and so on.
+            After the flip, we have a very handy array:
+            the key is the id and the value is its new position.
+         */
+        // from (position)=>(id) to (id)=>(position)
+        $orderedIds = array_flip($orderedIds);
+
+        /*
+            2- To use this, foreach over $article->getArticleReferences() as $reference.
+            And inside, $reference->setPosition() passing this $orderedIds[$reference->getId()]
+            to look up the new position.
+         */
+        foreach ($article->getArticleReferences() as $reference) {
+            $reference->setPosition($orderedIds[$reference->getId()]);
+        }
+        /*
+            3- And yes, we could code more defensively -
+            like checking to make sure each array key was actually sent.
+            And I would do that if this were a public API that other people used,
+            or if invalid data could cause some harm.
+            Anyways, at the bottom, save: $entityManager->flush().
+         */
+        $entityManager->flush();
+
         /*
             2- If you're wondering about the URL or the method POST,
             well, this endpoint isn't very RESTful,
