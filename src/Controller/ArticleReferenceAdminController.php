@@ -637,4 +637,34 @@ reference ""
         return new Response(null, 204);
     }
 
+    /*
+        Let's keep thinking about our ArticleReference routes as a set of nice, RESTful API endpoints.
+        We already have an endpoint to create and delete an ArticleReference.
+        This will be an endpoint to edit a reference
+        except that the only field the user will be allowed to edit will be the originalFilename.
+        Copy the beginning of our delete endpoint, paste, close it up
+        and we'll call this updateArticleReference().
+        Keep the same URL, but change the route name to admin_article_update_reference -
+        it should be reference, not references, let's fix that in both places -
+        I don't think I'm referencing that route name anywhere.
+        And instead of methods={"DELETE"}, use methods={"PUT"}.
+     */
+    /**
+     * @Route("/admin/article/references/{id}",name="admin_article_update_reference", methods={"PUT"})
+     */
+    public function updateArticleReference(
+        ArticleReference $reference,
+        UploaderHelper $uploaderHelper,
+        EntityManagerInterface $entityManager)
+    {
+        $article = $reference->getArticle();
+        $this->denyAccessUnlessGranted('MANAGE', $article);
+    }
+    /*
+        Cool! Let's think about how we want this endpoint to work.
+        First, our JavaScript will send a request with a JSON body that contains the data
+        that should be updated on the ArticleReference.
+        In this case, the data will have only one field: originalFilename.
+     */
+
 }
