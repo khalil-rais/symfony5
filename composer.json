@@ -13,6 +13,7 @@
         "knplabs/knp-markdown-bundle": "^1.7",
         "knplabs/knp-paginator-bundle": "^5.9",
         "knplabs/knp-time-bundle": "^1.8",
+        "league/flysystem-aws-s3-v3": "^1.0",
         "liip/imagine-bundle": "^2.1",
         "nexylan/slack-bundle": "^2.3",
         "oneup/flysystem-bundle": "^3",

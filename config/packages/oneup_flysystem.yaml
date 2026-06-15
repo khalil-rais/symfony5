@@ -175,11 +175,33 @@ oneup_flysystem:
                 directory: '%kernel.project_dir%/var/uploads'
     filesystems:
         public_uploads_filesystem:
-            adapter: public_uploads_adapter
-            # alias: League\Flysystem\Filesystem
-            # Or, we can create a new bind.
-            # I'll do the second, because it works better if you have multiple filesystem services, which we will soon.
+
+            # Once that finishes there.
+            # Now we can use this awss3v3 adapter.
+            # Open up config/packages/oneup_flysystem.yaml.
+            # Remove all that local config.
+            # Replace it with awss3v3:.
+            # The first sub-key this needs is: client,
+            # which points to the service id for the S3Client.
+            #
+            # Add client:, copy the service id, and paste.
+            awss3v3:
+                client: Aws\S3\S3Client
+                # Just like before, copy that, duplicate it in .env.local
+                # and give it a real value,
+                # which if you go back to S3, is sfcasts-spacebar. Paste that.
+                # Finally, copy the new variable's name,
+                # open oneup_flysystem.yaml,
+                # and set bucket to %env(AWS_S3_ACCESS_BUCKET)%.
+                bucket: '%env(AWS_S3_BUCKET_NAME)%'
         # Next, for filesystems, do the same thing:
         # make a private_uploads_filesystem that will use the private_uploads_adapter.
         private_uploads_filesystem:
-            adapter: private_uploads_adapter
+            # That's it! What about the private_uploads_adapter?
+            # Well, temporarily, copy the config from the public adapter
+            # and paste it exactly down there.
+            # We're actually not going to need two filesystems anymore
+            # but we'll talk about that soon.
+            awss3v3:
+                client: Aws\S3\S3Client
+                bucket: '%env(AWS_S3_BUCKET_NAME)%'
