@@ -176,3 +176,53 @@ services:
     # that subdirectory would be there.
     # Small detail, but our site is still super portable.
     # Next, let's create thumbnails of our image so the user doesn't need to download the full size.
+    # Let's close all these tabs so we can concentrate.
+    # Open config/services.yaml and,
+    # at the bottom, paste that config!
+    # But I'm going to simplify this:
+    # copy the class name, remove it,
+    # and paste that as the service id.
+    # Why? First, because, when possible,
+    # it's just easier to use the class name as the service id instead of inventing a string id. A
+    # nd second, this will allow us to autowire the S3Client service into any of our services or controllers.
+    # We won't need that for what we're doing, but it's nice.
+    Aws\S3\S3Client:
+        arguments:
+            # This takes just one argument: a big array of config.
+            -
+                # This old looking API version is actually still the most recent.
+                version: '2006-03-01' # or 'latest'
+                # For region, this depends on what region you chose for your bucket.
+                # Mine is us-east-1 because I selected Virginia.
+                # If you selected a different region, it won't work. Kidding!
+                # Just do some Googling to find the right region id.
+                region: "region-id" # 'eu-central-1' for example
+                credentials:
+                    # What about the key and secret?
+                    # These are the values IAM gave us after creating the user.
+                    # But, we probably don't want to put their values right here
+                    # and commit them to the repository.
+                    # key: "s3-key"
+                    # secret: "s3-secret"
+
+                    # If you want, you could copy the values
+                    # and put them directly into this file.
+                    # But remember, the .env file is committed to your git repository
+                    # and you really don't want any secret value to be committed.
+                    # Instead, create a new file at the root of your app called .env.local.
+                    # This file is also read by Symfony and any values will override the ones in .env.
+                    # It's also ignored from git via our .gitignore file.
+                    # Copy the two keys from .env and paste them here.
+                    # And now we can grab the real values. Copy
+                    # the id, paste, then show the secret, copy, and paste that.
+                    # Environment variables, set!
+                    # To use them, head back to services.yaml.
+                    # Replace the key with the special environment variable syntax: %env()% and inside,
+                    # AW... go copy the name - AWS_S3_ACCESS_ID.
+                    # Re-use that syntax for the secret: AWS_S3_ACCESS_SECRET.
+                    key: '%env(AWS_S3_ACCESS_ID)%'
+                    secret: '%env(AWS_S3_ACCESS_SECRET)%'
+                    # If you forget about Flysystem for a minute,
+                    # we now have a fully functional S3Client service
+                    # that we can autowire and use to do anything with our new bucket!
+                    # The question now is: how can we tell Flysystem to use this?
