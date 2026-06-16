@@ -63,9 +63,34 @@ class ArticleReferenceAdminController extends BaseController
         Add another argument: ValidatorInterface $validator.
         This is the service that the form system uses internally for validation.
      */
+    /*
+        Let me show you what I mean.
+        I'm going to use Postman to interact with our endpoint
+        as if it were truly meant to be an API endpoint used by API clients.
+        For the URL, copy the URL in the browser,
+        paste, and change /edit to /references.
+        Yep, that'll hit our controller.
+        Make this a POST request.
+        What about the body of the request?
+        What should that look like?
+        Well, because we wrote our endpoint to basically handle a traditional form-submit,
+        the format will be form-data.
+        For the key, remember that we're expecting the file data on a field called reference.
+        Change the field type to "file" and select earth.jpeg.
+        That's it! Before trying this, our site is being served over https thanks to the Symfony local web server
+        and some certificate magic it does behind the scenes.
+        But Postman doesn't know to use that magic,
+        so the certificate won't work.
+        In the Postman preferences - I've already done it - turn SSL verification off.
+        Or you can run the Symfony web server with the --allow-http flag if you want to avoid this.
+        Ok, send the request! Oh... what's this?
+        Check out the preview.
+        The login page, of course!
+        Uploading requires a valid user.
+        Just to play around, let's remove the @IsGranted() temporarily.
+     */
     /**
      * @Route("/admin/article/{id}/references",name="admin_article_add_reference", methods={"POST"})
-     * @IsGranted("MANAGE", subject="article")
      */
     public function uploadArticleReference (Article $article, Request $request, UploaderHelper $uploaderHelper, EntityManagerInterface
     $entityManager, ValidatorInterface $validator)
@@ -339,6 +364,13 @@ reference ""
             Select Earth from the Moon.jpg and nice!
             It works and the JSON response looks awesome!
             {"id":7,"filename":"plektrum-desktop-6a2a75f967162.png","originalFilename":"plektrum-desktop.png","mimeType":"image\/png"}
+         */
+        /*
+            Try it again. Beautiful! It works!
+            So, the first way to build an upload endpoint for an API is like this!
+            An endpoint that requires the multipart form data format
+            that we checked out at the beginning of this tutorial.
+            Any API client will be able to work with this and a lot of API's are built this way.
          */
     }
 
