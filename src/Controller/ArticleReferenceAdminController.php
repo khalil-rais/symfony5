@@ -389,6 +389,23 @@ reference ""
             Add $response = new StreamedResponse().
             This takes one argument - a callback. At the bottom, return this.
          */
+        /*
+            Head to /admin/article and log back in since we cleared our database recently:
+            admin1@thespacebar.com, password engage.
+            Edit any of the articles.
+            Everything should work just fine:
+            I'll select a few references to upload and it works nicely.
+            It is a bit slower now that the server is sending the files to S3 in the background,
+            though that should be less noticeable once we're on production,
+            especially if our server is also hosted on AWS.
+            So can we download these? Try it!
+            Yea, it works great!
+            Open up ArticleReferenceAdminController and search for "download".
+            Here it is: the download is handled by downloadArticleReference:
+            we open a file stream from Flysystem - which is now from S3 - and stream that back to the user.
+            By planning ahead and using Flysystem, when we switched to S3, nothing had to change!
+            But, there is one tiny problem.
+         */
         $response = new StreamedResponse(function() use ($reference,$uploaderHelper) {
             /*
                 Here's the idea: we can't just start streaming the response or echo'ing content right now inside the controller:
