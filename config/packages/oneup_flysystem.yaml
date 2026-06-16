@@ -37,6 +37,24 @@ oneup_flysystem:
         # Using the word "public" in the adapter and filesystem isn't accurate anymore!
         # Let's use uploads_adapter and uploads_filesystem.
         uploads_adapter:
+            # Once that finishes there.
+            # Now we can use this awss3v3 adapter.
+            # Open up config/packages/oneup_flysystem.yaml.
+            # Remove all that local config.
+            # Replace it with awss3v3:.
+            # The first sub-key this needs is: client,
+            # which points to the service id for the S3Client.
+            #
+            # Add client:, copy the service id, and paste.
+            awss3v3:
+                client: Aws\S3\S3Client
+                # Just like before, copy that, duplicate it in .env.local
+                # and give it a real value,
+                # which if you go back to S3, is sfcasts-spacebar. Paste that.
+                # Finally, copy the new variable's name,
+                # open oneup_flysystem.yaml,
+                # and set bucket to %env(AWS_S3_ACCESS_BUCKET)%.
+                bucket: '%env(AWS_S3_BUCKET_NAME)%'
             local:
                 # Next, in oneup_flysystem.yaml, we need the directory name. Copy the other parameter:
                 # %uploads_dir_name%.
@@ -164,28 +182,10 @@ oneup_flysystem:
 
     filesystems:
         uploads_filesystem:
-
-            # Once that finishes there.
-            # Now we can use this awss3v3 adapter.
-            # Open up config/packages/oneup_flysystem.yaml.
-            # Remove all that local config.
-            # Replace it with awss3v3:.
-            # The first sub-key this needs is: client,
-            # which points to the service id for the S3Client.
-            #
-            # Add client:, copy the service id, and paste.
-            awss3v3:
-                client: Aws\S3\S3Client
-                # Just like before, copy that, duplicate it in .env.local
-                # and give it a real value,
-                # which if you go back to S3, is sfcasts-spacebar. Paste that.
-                # Finally, copy the new variable's name,
-                # open oneup_flysystem.yaml,
-                # and set bucket to %env(AWS_S3_ACCESS_BUCKET)%.
-                bucket: '%env(AWS_S3_BUCKET_NAME)%'
         # Hey! This is awesome!
         # Thanks to the object-by-object permissions super-power of S3,
         # we don't need an extra "private" filesystem at all!
         # We can do some serious cleanup!
         # Start in config/packages/oneup_flysystem.yaml:
         # remove the private_uploads_adapter and filesystem.
+            adapter: uploads_adapter

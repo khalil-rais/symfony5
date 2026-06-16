@@ -38,7 +38,7 @@ parameters:
     # Change this to https://s3.amazonaws.com/
     # and then our bucket name, which is already available as an environment variable: %env()%,
     # then go copy AWS_S3_ACCESS_BUCKET, and paste.
-    uploads_base_url: '%https://s3.amazonaws.com/%env(AWS_S3_BUCKET_NAME)%'
+    uploads_base_url: 'https://s3.amazonaws.com/%env(AWS_S3_BUCKET_NAME)%'
     # This is our new base URL.
     # What about the uploads_dir_name parameter?
     # We're not using that at all anymore! Trash it.

@@ -74,7 +74,7 @@ class UploaderHelper
     /*
         Change the argument to match the bind: $uploadFilesystem.
      */
-    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl, FilesystemInterface $uploadsFilesystem)
+    public function __construct(FilesystemInterface $uploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl)
     {
         /*
             The last place is in UploaderHelper. The getBasePath() call will give us the directory
@@ -84,7 +84,7 @@ class UploaderHelper
             property by hand and give it a slightly different name: $publicAssetBaseUrl, not for any
             particular reason. Set that in the constructor:
          */
-        $this->publicUploadsFilesystem = $publicUploadsFilesystem;
+        $this->publicUploadsFilesystem = $uploadsFilesystem;
         $this->requestStackContext = $requestStackContext;
         $this->logger = $logger;
         $this->publicAssetBaseUrl = $uploadedAssetsBaseUrl;
