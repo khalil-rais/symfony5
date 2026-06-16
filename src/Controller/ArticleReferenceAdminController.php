@@ -406,6 +406,25 @@ reference ""
             By planning ahead and using Flysystem, when we switched to S3, nothing had to change!
             But, there is one tiny problem.
          */
+        /*
+            I have one more performance enhancement I want to do. I
+            f you click download, it works great!
+            But if these files were bigger,
+            you'd start to notice that the downloads would be kinda slow!
+            Open up ArticleReferenceAdminController and search for download.
+            Remember: we're reading a stream from S3 and sending that directly to the user.
+            That's cool but it also means that there's a middleman in the process: our server!
+            That slows things down.
+            Couldn't we somehow give the user direct access to the file on S3?
+            Go back to our bucket,
+            head to its root directory, then click into article_reference.
+            If you click any of these files, each does have a URL.
+            But if you try to go to it, it's not public.
+            That's great because these files are meant to be private
+            but it sorta ruins our idea of pointing users directly to this URL.
+            Well, good news! We can have our cake and eat it too... as we say... for some reason in English.
+            Um, we can have the best of both worlds with... signed URLs.
+         */
         $response = new StreamedResponse(function() use ($reference,$uploaderHelper) {
             /*
                 Here's the idea: we can't just start streaming the response or echo'ing content right now inside the controller:
