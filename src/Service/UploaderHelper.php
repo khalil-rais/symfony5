@@ -17,6 +17,7 @@ use League\Flysystem\FilesystemInterface;
 use League\Flysystem\FileNotFoundException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use League\Flysystem\AdapterInterface;
 
 class UploaderHelper
 {
@@ -74,7 +75,9 @@ class UploaderHelper
         $this->privateFilesystem = $privateUploadFilesystem
 
      */
-    public function __construct(FilesystemInterface $publicUploadsFilesystem, FilesystemInterface $privateUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl)
+    private FilesystemInterface $filesystem;
+
+    public function __construct(FilesystemInterface $publicUploadsFilesystem, FilesystemInterface $privateUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl, FilesystemInterface $filesystem)
     {
         /*
             The last place is in UploaderHelper. The getBasePath() call will give us the directory
@@ -89,6 +92,7 @@ class UploaderHelper
         $this->logger = $logger;
         $this->publicAssetBaseUrl = $uploadedAssetsBaseUrl;
         $this->privateFilesystem = $privateUploadsFilesystem;
+        $this->filesystem = $filesystem;
     }
     /*
         This class will handle all things related to uploading files.
@@ -361,29 +365,51 @@ class UploaderHelper
         } else {
             $originalFilename = $file->getFilename();
         }
-
         $newFilename = Transliterator::urlize(pathinfo($originalFilename,
                 PATHINFO_FILENAME)).'-'
             .uniqid().'.'.$file->guessExtension();
-
         /*
-            Let's see... the first thing we need to do is handle this $isPublic argument.
-            So Let's say $filesystem = $isPublic ? and, if it is public,
-            use $this->filesystem, otherwise use $this->privateFilesystem.
-            Below, replace $this->filesystem with $filesystem.
+            Head over to UploaderHelper and find uploadFile().
+            So far, we've been using the $isPublic argument
+            to choose between the public and private filesystem objects.
+            But when we changed to S3,
+            I temporarily made these two filesystems identical.
+            That wasn't on accident: with S3,
+            we don't need two filesystems anymore!
+            We can use the same one for both public and private files,
+            and control the visibility on a file-by-file basis.
+            Check it out: remove the $filesystem = part and always use $this->filesystem.
          */
-        $filesystem = $isPublic ? $this->publicUploadsFilesystem : $this->privateFilesystem;
         $stream = fopen($file->getPathname(), 'r');
         /*
-            The other thing we need to update is the directory:
-            it's hardcoded to ARTICLE_IMAGE.
-            Replace that with $directory:
-            this is the directory inside the filesystem where the file will be stored.
+            To tell Flysystem that a file should be public or private,
+            add a third argument to writeStream(): an array of options.
+            The option we want is visibility.
+            If $isPublic is true, use AdapterInterface - the one from Flysystem - ::VISIBILITY_PUBLIC.
+            Otherwise, AdapterInterface::VISIBILITY_PRIVATE.
          */
-        $result = $filesystem->writeStream(
+        $result = $this->filesystem->writeStream(
             $directory.'/'.$newFilename,
-            $stream
+            $stream,
+            [
+                'visibility' => $isPublic ?
+                    AdapterInterface::VISIBILITY_PUBLIC : AdapterInterface::VISIBILITY_PRIVATE
+            ]
         );
+        /*
+            Cool, right?
+            That won't instantly change the permissions on the files we've already uploaded.
+            So let's go upload a new one.
+            Close the tab, select a new file, how about rocket.jpg and update!
+            The thumbnail still works and if you click it, yes!
+            The original file is public!
+            By the way, you can see this setting
+            when you're looking at the individual files in S3.
+            Click back to the root of the bucket,
+            find the rocket.jpg file and click it.
+            Under "Permissions", here we go.
+            My account has all permissions, of course, and under "Public Access", Everyone has "Read object" access.
+         */
         if ($result === false) {
             throw new \Exception(sprintf('Could not write uploaded file "%s"', $newFilename));
         }
