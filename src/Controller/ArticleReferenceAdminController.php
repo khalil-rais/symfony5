@@ -18,6 +18,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Serializer\SerializerInterface;
 use Aws\S3\S3Client;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -374,9 +375,49 @@ reference ""
 
         $article = $reference->getArticle();
         $this->denyAccessUnlessGranted('MANAGE', $article);
+        /*
+            2- And ResponseContentDisposition.
+            Move the $disposition code up above,
+            then use that value down here.
+         */
+        $disposition = HeaderUtils::makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $reference->getOriginalFilename()
+        );
+        /*
+            3- Cool, right? Go download the file one more time.
+            Ha! It downloads and uses the original filename.
+            This is probably the best way to allow users to download private files.
+            Oh, and if you need even faster downloads,
+            because S3 isn't that fast for large files,
+            you can do the same thing with Cloudfront.
+            Cloudfront is another service that gives users faster access to S3 files,
+            and has a similar process for creating signed URLs.
+            Ok friends, only one thing left, and it's a fun one!
+            Let's talk about how our file upload endpoint might look different if we were building a pure API.
+         */
+        /*
+            1- But we did lose one thing:
+            our Content-Disposition header!
+            This gave us two nice things:
+            it forced the user to download the file instead of loading it "inline",
+            and it controlled the download filename.
+            Hmm, this is tricky.
+            Now that the user is no longer downloading the file directly from us,
+            we don't really have a way to set custom headers on the response.
+            Well, actually, that's a big ol' lie!
+            There are two ways to do that.
+            First, you can set custom headers on each object in S3.
+            Or you can hint to S3 that you want it to set custom headers on your behalf
+            when the user goes to the signed URL.
+            How? Add another option to getCommand(): ResponseContentType set to $reference->getMimeType().
+            That'll hint to S3 that we want it to set a Content-Type header on the download response.
+         */
         $command = $s3Client->getCommand('GetObject', [
             'Bucket' => $s3BucketName,
-            'Key' => $reference->getFilePath()
+            'Key' => $reference->getFilePath(),
+            'ResponseContentType' => $reference->getMimeType(),
+            'ResponseContentDisposition' => $disposition,
         ]);
         $request = $s3Client->createPresignedRequest($command, '+30 minutes');
         /*
