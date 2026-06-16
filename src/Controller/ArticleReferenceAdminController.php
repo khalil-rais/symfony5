@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
+use Aws\S3\S3Client;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -340,204 +342,62 @@ reference ""
     }
 
     /*
-        To add a download link,
-        we know that we can't just link to the file directly:
-        it's not public.
-        Instead, we're going to link to a Symfony route and controller
-        and that controller will check security and return the file to the user.
-        Let's do this in ArticleReferenceAdminController.
-        Add a new public function, how about, downloadArticleReference().
-     */
-    /*
-        Add the @Route() above this with /admin/article/references/{id}/download -
-        where the {id} this time is the id of the ArticleReference object.
-        Then, name="admin_article_download_reference" and methods={"GET"},
-        just to be extra cool.
+        Head back to downloadArticleReference().
+        Remove the UploaderHelper argument -
+        we won't need that anymore -
+        and add S3Client $s3client.
+        Also add string $s3BucketName.
      */
     /**
      * @Route("/admin/article/references/{id}/download", name="admin_article_download_reference", methods={"GET"})
      */
-    public function downloadArticleReference(ArticleReference $reference, UploaderHelper $uploaderHelper)
+    public function downloadArticleReference(ArticleReference $reference, S3Client $s3Client, string $s3BucketName)
     {
         /*
-            In the controller add the UploaderHelper argument.
-            Oh, but before we use this,
-            I forgot to check security!
-            That was the whole point!
-            The goal is to allow these files to be downloaded by anyone
-            who has access to edit the article.
-            We've been checking that via the @IsGranted('MANAGE') annotation -
-            which leverages a custom voter we created in the Symfony series.
-            We can use this annotation here
-            because the article in the annotation refers to the $article argument to the controller.
-            But in this new controller, we don't have an article argument,
-            so we can't use the annotation in the same way.
-            No problem: add $article = $reference->getArticle()
-            and then run the security check manually: $this->denyAccessUnlessGranted()
-            with that same 'MANAGE' string and $article.
+            Cool! Back in the controller,
+            copy the $disposition line -
+            we're going to put this back in a minute.
+            Then, delete everything after the security check,
+            paste the $disposition line,
+            but comment it out for now.
+            Ok, let's go steal some code from the docs!
+            We already have the S3Client object,
+            so just grab the rest.
+            Paste that then... let's see... replace my-bucket with the $s3BucketName variable.
+            For Key, that's the file path: $reference->getFilePath().
+            And, for $request = $s3Client->createPresignedRequest(),
+            you can use whatever lifetime you want.
+            These files are pretty small,
+            so we don't need too much time -
+            but let's make the URLs live for 30 minutes.
          */
+
         $article = $reference->getArticle();
         $this->denyAccessUnlessGranted('MANAGE', $article);
+        $command = $s3Client->getCommand('GetObject', [
+            'Bucket' => $s3BucketName,
+            'Key' => $reference->getFilePath()
+        ]);
+        $request = $s3Client->createPresignedRequest($command, '+30 minutes');
         /*
-            We have a method that will allow us to open a stream of the file's contents.
-            But how can we send that to the user?
-            We're used to returning a Response object or a JsonResponse object
-            where we already have the response as a string or array.
-            But if you want to stream something to the user
-            without reading it all into memory,
-            you need a special class called StreamedResponse.
-            Add $response = new StreamedResponse().
-            This takes one argument - a callback. At the bottom, return this.
+            Now that we have this "request" thing...
+            how can we get the URL?
+            Back on their docs, scroll down...
+            here it is: $request->getUri().
+            When the user hits our endpoint,
+            what we want to do is redirect them to the URL.
+            Do that with return new RedirectResponse(), (string) -
+            they mentioned that in the docs,
+            it turns the URI into a string - then $request->getUri().
          */
+        return new RedirectResponse((string) $request->getUri());
         /*
-            Head to /admin/article and log back in since we cleared our database recently:
-            admin1@thespacebar.com, password engage.
-            Edit any of the articles.
-            Everything should work just fine:
-            I'll select a few references to upload and it works nicely.
-            It is a bit slower now that the server is sending the files to S3 in the background,
-            though that should be less noticeable once we're on production,
-            especially if our server is also hosted on AWS.
-            So can we download these? Try it!
-            Yea, it works great!
-            Open up ArticleReferenceAdminController and search for "download".
-            Here it is: the download is handled by downloadArticleReference:
-            we open a file stream from Flysystem - which is now from S3 - and stream that back to the user.
-            By planning ahead and using Flysystem, when we switched to S3, nothing had to change!
-            But, there is one tiny problem.
+            Let's try it! Refresh! And... download!
+            Ha! It works!
+            We're loading this directly from S3.
+            This long URL contains a signature that proves to S3
+            that the request was pre-authenticated and should last for 30 minutes.
          */
-        /*
-            I have one more performance enhancement I want to do. I
-            f you click download, it works great!
-            But if these files were bigger,
-            you'd start to notice that the downloads would be kinda slow!
-            Open up ArticleReferenceAdminController and search for download.
-            Remember: we're reading a stream from S3 and sending that directly to the user.
-            That's cool but it also means that there's a middleman in the process: our server!
-            That slows things down.
-            Couldn't we somehow give the user direct access to the file on S3?
-            Go back to our bucket,
-            head to its root directory, then click into article_reference.
-            If you click any of these files, each does have a URL.
-            But if you try to go to it, it's not public.
-            That's great because these files are meant to be private
-            but it sorta ruins our idea of pointing users directly to this URL.
-            Well, good news! We can have our cake and eat it too... as we say... for some reason in English.
-            Um, we can have the best of both worlds with... signed URLs.
-         */
-        $response = new StreamedResponse(function() use ($reference,$uploaderHelper) {
-            /*
-                Here's the idea: we can't just start streaming the response or echo'ing content right now inside the controller:
-                Symfony's just not ready for that yet,
-                it has more work to do, more headers to set, etc.
-                That's why we normally create a Response object and later,
-                when it's ready, Symfony echo's the response's content for us.
-                With a StreamedResponse, when Symfony is ready to finally send the data,
-                it executes our callback and then we can do whatever we want.
-                Heck, we can echo 'foo' and that's what the user would see.
-
-                Add a use statement and bring $reference and $uploaderHelper into the callback's scope
-                so we can use them.
-                To send a file stream to the user,
-                it looks a little strange.
-                Start with $outputStream set to fopen('php://output') and wb.
-             */
-            $outputStream = fopen('php://output', 'wb');
-            /*
-                We usually use fopen to write to a file.
-                But this special php://output allows us to write to the "output" stream -
-                a fancy way of saying that anything we write to this stream will just get "echo'ed" out.
-                Next, set $fileStream to $uploaderHelper->readStream()
-                and pass this the path to the file -
-                something like article_reference/symfony-best-practices-blah-blah.pdf.
-             */
-            /*
-                Great! Back in the controller, pass $reference->getFilePath()
-                and then false for the $isPublic argument.
-             */
-            /*
-                Let's see these two methods are called from ArticleReferenceAdminController.
-                Take off that second argument for readStream().
-             */
-            $fileStream = $uploaderHelper->readStream($reference->getFilePath());
-            /*
-                Finally, now that we have a "write" stream
-                and a "read" stream, we can use a function called stream_copy_to_stream() to do exactly that!
-                Copy $fileStream to $outputStream.
-             */
-            stream_copy_to_stream($fileStream, $outputStream);
-            /*
-                There ya go! The fanciest way of echo'ing content that you've probably ever seen,
-                but it avoids eating memory.
-             */
-        });
-        /*
-            Try it out!
-            Refresh and it works sort of.
-            We are sending the file contents
-            but the browser is clearly not handling it well.
-            The reasons is that we haven't told the browser what type of file this is,
-            so it's just treating it like the world's ugliest web page.
-            And... hey! Remember when we stored the $mimeType of the file in the database?
-            that's about to come in handy big time!
-            Add $response->headers->set() with Content-Type set to $reference->getMimeType().
-         */
-        $response->headers->set('Content-Type', $reference->getMimeType());
-        /*
-            Another thing you might want to do is force the browser to download the file.
-            It's really up to you.
-            By default, based on the Content-Type,
-            the browser may try to open the file - like it is here -
-            or have the user download it.
-            To force the browser to always download the file,
-            we can leverage a header called Content-Disposition.
-            This header has a very specific format,
-            so Symfony comes with a helper to create it.
-            Say $disposition = HeaderUtils::makeDisposition().
-            For the first argument, we'll tell it
-            whether we want the user to download the file,
-            or open it in the browser by passing HeaderUtils::DISPOSITION_ATTACHMENT or DISPOSITION_INLINE.
-         */
-        $disposition = HeaderUtils::makeDisposition(
-            HeaderUtils::DISPOSITION_ATTACHMENT,
-            /*
-                Next, pass it the filename.
-                This is especially cool because,
-                without this, the browser would probably try to call the file just "download" -
-                because that's the last part of the URL.
-                Now it will use $reference->getOriginalFilename().
-                Tip: If your original filename is not in ASCII characters,
-                add a 3rd argument to HeaderUtils::makeDisposition to provide a "fallback" filename.
-             */
-            $reference->getOriginalFilename()
-        );
-        /*
-            Before we set this header,
-            I just want you to see what it looks like.
-            So, dd($disposition)
-         */
-        //dd($disposition);
-        /*
-            ArticleReferenceAdminController.php on line 398:
-            "attachment; filename=CV_Rais_de_260602.pdf"
-         */
-        /*
-            move over, refresh and there it is.
-            It's just a string, like any other header -
-            but it has this specific format,
-            which is why Symfony has a helper method.
-         */
-        /*
-            Set this on the actual response with $response->headers->set('Content-Disposition', $disposition).
-         */
-        $response->headers->set('Content-Disposition', $disposition);
-        /*
-            Try it one more time.
-            Yes! It downloads and uses the original filename.
-            Next: let's make this all way cooler by uploading instantly via AJAX.
-         */
-
-        return $response;
     }
 
     /*

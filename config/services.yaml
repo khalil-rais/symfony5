@@ -64,6 +64,11 @@ services:
 
         # setup special, global autowiring rules
         bind:
+            # That won't autowire, so copy the argument name, open up services.yaml
+            # and add a bind for this $s3BucketName:.
+            # For the value, copy the environment variable bucket syntax from before
+            # and... paste.
+            $s3BucketName: '%env(AWS_S3_BUCKET_NAME)%'
             $markdownLogger: '@monolog.logger.markdown'
             $isDebug: '%kernel.debug%'
             # Let's take it for a test drive! Go back, refresh the form and it works!
