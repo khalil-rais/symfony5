@@ -436,7 +436,11 @@ reference ""
                 Great! Back in the controller, pass $reference->getFilePath()
                 and then false for the $isPublic argument.
              */
-            $fileStream = $uploaderHelper->readStream($reference->getFilePath(), false);
+            /*
+                Let's see these two methods are called from ArticleReferenceAdminController.
+                Take off that second argument for readStream().
+             */
+            $fileStream = $uploaderHelper->readStream($reference->getFilePath());
             /*
                 Finally, now that we have a "write" stream
                 and a "read" stream, we can use a function called stream_copy_to_stream() to do exactly that!
@@ -633,7 +637,10 @@ reference ""
          */
         $entityManager->remove($reference);
         $entityManager->flush();
-        $uploaderHelper->deleteFile($reference->getFilePath(), false);
+        /*
+            Then, search for "delete", and remove the second argument from deleteFile() as well.
+         */
+        $uploaderHelper->deleteFile($reference->getFilePath());
         /*
             Quick note: in the real world, if there was a problem deleting the file from Flysystem -
             which is definitely possible when you're storing in the cloud -

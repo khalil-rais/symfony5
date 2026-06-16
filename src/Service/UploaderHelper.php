@@ -50,7 +50,12 @@ class UploaderHelper
     private $publicUploadsFilesystem;
     private $logger;
     private $publicAssetBaseUrl;
-    private $privateFilesystem;
+    /*
+        That will break UploaderHelper
+        because we're using that bind on top.
+        But we don't need it anymore!
+        Remove the $privateFilesystem property and the $privateUploadFilesystem argument.
+     */
 
 
     /*
@@ -65,19 +70,11 @@ class UploaderHelper
     /*
         First, rename the argument to be more descriptive, how about $publicUploadFilesystem:
      */
-    /*
-        Tip: If you're using version 4 of oneup/flysystem-bundle (so, flysystem v2),
-        autowire Filesystem instead of FilesystemInterface from League\Flysystem.
-
-        Now, copy that argument name and, in UploaderHelper,
-        add a second argument: FilesystemInterface $privateUploadFilesystem.
-        Create a new property on top called $privateFilesystem and set it below:
-        $this->privateFilesystem = $privateUploadFilesystem
-
-     */
     private FilesystemInterface $filesystem;
-
-    public function __construct(FilesystemInterface $publicUploadsFilesystem, FilesystemInterface $privateUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl, FilesystemInterface $filesystem)
+    /*
+        Change the argument to match the bind: $uploadFilesystem.
+     */
+    public function __construct(FilesystemInterface $publicUploadsFilesystem, RequestStackContext $requestStackContext, LoggerInterface $logger, string $uploadedAssetsBaseUrl, FilesystemInterface $uploadsFilesystem)
     {
         /*
             The last place is in UploaderHelper. The getBasePath() call will give us the directory
@@ -91,8 +88,7 @@ class UploaderHelper
         $this->requestStackContext = $requestStackContext;
         $this->logger = $logger;
         $this->publicAssetBaseUrl = $uploadedAssetsBaseUrl;
-        $this->privateFilesystem = $privateUploadsFilesystem;
-        $this->filesystem = $filesystem;
+        $this->filesystem = $uploadsFilesystem;
     }
     /*
         This class will handle all things related to uploading files.
@@ -444,16 +440,16 @@ class UploaderHelper
     /**
      * @return resource
      */
-    public function readStream(string $path, bool $isPublic)
+    public function readStream(string $path)
     {
-        $filesystem = $isPublic ? $this->publicUploadsFilesystem : $this->privateFilesystem;
         /*
-            Then, $resource = $filesystem->readStream($path).
-            Tip: If you're using version 4 of oneup/flysystem-bundle (so, flysystem v2),
-            you don't need to code defensively anymore!
-            All methods will throw an exception automatically if the operation fails.
+            But, we're still using that property in two places:
+            the first is down in readStream.
+            Now that everything is stored in one filesystem, delete that old code,
+            remove the unused argument and always use $this->filesystem.
+            Reading a stream is the same for public and private files.
          */
-        $resource = $filesystem->readStream($path);
+        $resource = $this->publicUploadsFilesystem->readStream($path);
         /*
             That's pretty much it!
             But hold Cmd or Ctrl and click to see the readStream() method.
@@ -484,16 +480,14 @@ class UploaderHelper
         Copy the readStream() function declaration, paste, rename it to deleteFile()
         and remove the return type.
      */
-    public function deleteFile(string $path, bool $isPublic)
+    public function deleteFile(string $path)
     {
         /*
-            We'll start the same way: by grabbing whichever filesystem we need.
+            Repeat that in deleteFile():
+            delete the extra logic & argument,
+            and use $this->filesystem always.
          */
-        $filesystem = $isPublic ? $this->publicUploadsFilesystem : $this->privateFilesystem;
-        /*
-            Next say $result = $filesystem->delete() and pass that $path.
-         */
-        $result = $filesystem->delete($path);
+        $result = $this->publicUploadsFilesystem->delete($path);
         /*
             Finally, code defensively: if $result === false,
             throw a new exception with Error deleting "%s" and $path.

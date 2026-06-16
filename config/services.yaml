@@ -98,7 +98,24 @@ services:
             # you can see it in the error.
             # It suggests two services that implement the FilesystemInterface type-hint -
             # we want the second one. Type @ then paste.
-            $publicUploadsFilesystem: '@oneup_flysystem.public_uploads_filesystem_filesystem'
+            # And in services.yaml, update the "bind" in the same way.
+            # Hmm, and I think I'll change the argument name it's binding to: just $uploadFilesystem.
+
+            # That will break UploaderHelper:
+            # we need to rename the argument there.
+            # But, let's just see what happens if we "forget" to do that.
+            # Refresh the page:“Unused binding $uploadFilesystem in S3Client.”
+            #
+            # This is that generic and somewhat "inaccurate" error that says
+            # that we've configured a bind that's never used!
+            # The error is even better if we temporarily delete the bind entirely.
+            # Ah, here it is:
+            # “Cannot autowire UploaderHelper:
+            # argument $publicUploadFilesystem references an interface,
+            # but that interface cannot be autowired.”
+            # This is saying: Hey! I don't know what you want me to send for this argument!
+            # Put the bind back, then, in UploaderHelper here it is.
+            $uploadsFilesystem: '@oneup_flysystem.uploads_filesystem_filesystem'
             # One more time for the fixtures!
             # php bin/console doctrine:fixtures:load
             # > yes
@@ -117,13 +134,8 @@ services:
             # We know how to fix that: back in services.yaml, add a bind: $uploadedAssetsBaseUrl
             # set to %uploads_base_url%. Now... it works!
             $uploadedAssetsBaseUrl: '%uploads_base_url%'
-            # Cool! Next, in UploaderHelper, we're already passing the $publicUploadFilesystem as an argument.
-            # We will also need the private one.
-            # Before we add it here, go into services.yaml.
-            # Remember, under _defaults, we're binding the $publicUploadFilesystem argument to the public fileystem service.
-            # Let's do the same for the private one.
-            # Call it $privateUploadFilesystem and change the service id to point to the "private" one.
-            $privateUploadsFilesystem: '@oneup_flysystem.private_uploads_filesystem_filesystem'
+            # Next, in services.yaml, because there's no private_upload_filesystem anymore,
+            # remove that bind.
 
     # custom aliases for autowiring
     Nexy\Slack\Client: '@nexy_slack.client'

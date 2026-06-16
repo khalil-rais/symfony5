@@ -33,7 +33,10 @@
 # the directory config is now called location.
 oneup_flysystem:
     adapters:
-        public_uploads_adapter:
+        # That felt great! There's one more piece of cleanup we can do, it's optional, but nice.
+        # Using the word "public" in the adapter and filesystem isn't accurate anymore!
+        # Let's use uploads_adapter and uploads_filesystem.
+        uploads_adapter:
             local:
                 # Next, in oneup_flysystem.yaml, we need the directory name. Copy the other parameter:
                 # %uploads_dir_name%.
@@ -159,22 +162,8 @@ oneup_flysystem:
     # There are two ways to fix this.
     # First, we could re-add the alias option and point it at this FilesystemInterface:
 
-        # But for now, a great solution is to create a private filesystem.
-        # Open the config/packages/oneup_flysystem.yaml file.
-        # Copy the public_uploads_adapter,
-        # paste and call it private_uploads_adapter.
-        # You can store the files anywhere, as long as it's not in public/.
-        # But, the var/ directory is sort of meant for this type of thing.
-        # So let's say: var/uploads.
-        # Oh, and I could re-use my uploads_dir_name parameter here -
-        # but it won't give us any benefit.
-        # That parameter is really meant to keep the upload directory and public path to assets in sync.
-        # But these files won't have a public path anyways, we'll make them downloadable in an entirely different way.
-        private_uploads_adapter:
-            local:
-                directory: '%kernel.project_dir%/var/uploads'
     filesystems:
-        public_uploads_filesystem:
+        uploads_filesystem:
 
             # Once that finishes there.
             # Now we can use this awss3v3 adapter.
@@ -194,14 +183,9 @@ oneup_flysystem:
                 # open oneup_flysystem.yaml,
                 # and set bucket to %env(AWS_S3_ACCESS_BUCKET)%.
                 bucket: '%env(AWS_S3_BUCKET_NAME)%'
-        # Next, for filesystems, do the same thing:
-        # make a private_uploads_filesystem that will use the private_uploads_adapter.
-        private_uploads_filesystem:
-            # That's it! What about the private_uploads_adapter?
-            # Well, temporarily, copy the config from the public adapter
-            # and paste it exactly down there.
-            # We're actually not going to need two filesystems anymore
-            # but we'll talk about that soon.
-            awss3v3:
-                client: Aws\S3\S3Client
-                bucket: '%env(AWS_S3_BUCKET_NAME)%'
+        # Hey! This is awesome!
+        # Thanks to the object-by-object permissions super-power of S3,
+        # we don't need an extra "private" filesystem at all!
+        # We can do some serious cleanup!
+        # Start in config/packages/oneup_flysystem.yaml:
+        # remove the private_uploads_adapter and filesystem.

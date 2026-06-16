@@ -42,11 +42,15 @@ yarn-error.log
 .phpunit
 ###< symfony/phpunit-bridge ###
 
-# Next, open up the real .gitignore file - the one at the root of your app -
-# and ignore the entire /public/uploads directory.
-# It's a bit weird, but thanks to this,
-# we will ignore all files in public/uploads except for the .gitignore file we already added.
-/public/uploads/
+# Oh, and there's one more thing we can get rid of!
+# Do we need the public/uploads directory anymore?
+# No! Delete it!
+# And inside .gitignore, we can remove the custom public/uploads/ line we added.
+# So by putting things in S3, it simplifies things!
+# Next: now that I've been complimenting our S3 setup and saying how awesome it,
+# I have a confession to make!
+# We've just introduced a hidden performance bug.
+# Let's crush it!
 # Why did we do this?
 # Well, unfortunately, you can't add a directory to git.
 # So by adding this .gitignore file,

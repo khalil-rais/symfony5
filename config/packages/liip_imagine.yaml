@@ -55,7 +55,9 @@ liip_imagine:
             # For that, go back to config/services.yaml and copy the long service id from the bind section.
             # Back in liip_imagine.yaml, paste!
             flysystem:
-                filesystem_service: oneup_flysystem.public_uploads_filesystem_filesystem
+                # We reference this in a few spots.
+                # In liip_imagine.yaml, take out the public_ in these two spots.
+                filesystem_service: oneup_flysystem.uploads_filesystem_filesystem
     # We now have a "loader" called flysystem_loader,
     # and a "loader's" job is to "load" the source file.
     # You can technically have multiple loaders, though I've never had to do that.
@@ -90,7 +92,7 @@ liip_imagine:
     resolvers:
         flysystem_resolver:
             flysystem:
-                filesystem_service: oneup_flysystem.public_uploads_filesystem_filesystem
+                filesystem_service: oneup_flysystem.uploads_filesystem_filesystem
                 # cache_prefix is the subdirectory within the filesystem
                 # where the files should be stored and root_url is the URL
                 # that all the paths will be prefixed with when the image paths are rendered.
