@@ -241,11 +241,52 @@ class UploaderHelper
     public function getPublicPath(string $path): string
     {
         /*
-            Back in getPublicPath(), use this: getBasePath() then
-            $this->publicAssetsBaseUrl, which will contain the / at the beginning.
+            There's one other path we need to fix:
+            the absolute path to uploaded assets that are not thumbnailed.
+            Open up src/Service/UploaderHelper.php
+            and find the getPublicPath() method there it is.
+            This is a super-handy method:
+            it allows us to get the full, public path to any uploaded file.
+            This $publicAssetBaseUrl property if you look on top,
+            it comes from an argument called $uploadedAssetsBaseUrl.
+            And in services.yaml, that is bound to the uploads_base_url parameter that we just set!
+            There are a few layers,
+            but it means that, in UploaderHelper the $publicAssetBaseUrl property is now the long S3 URL, which is perfect!
+            Head back to down getPublicPath().
+            Even before we changed uploads_base_url to point to S3,
+            we were already setting it to the absolute URL to our domain
+            which means that this method already had a subtle bug!
+            Check it out: the original purpose of this code was to use $this->requestStackContext->getBasePath()
+            to "correct" our paths in case our site was deployed under a sub-directory of a domain - like https://space.org/thespacebar.
+            In that case, getBasePath() would equal thespacebar and would automatically prefix all of our URLs.
+            But ever since we started including the full domain in $publicAssetBaseUrl,
+            this would create a broken URL!
+            We could remove this.
+            Or, to make it still work if $publicAssetsBaseUrl happens to not include the domain,
+            above this, set $fullPath = ,
+            copy the path part, replace that with $fullPath, and paste.
          */
+        $fullPath = $this->publicAssetBaseUrl.'/'.$path;
+        /*
+            Then, if strpos($fullPath, '://') !== false,
+            we know that $fullpath is already absolute.
+            In that case, return it!
+            That's what our code is doing.
+            But if it's not absolute, we can keep prefixing the sub-directory.
+         */
+        // if it's already absolute, just return
+        if (strpos($fullPath, '://') !== false) {
+            return $fullPath;
+        }
+        // needed if you deploy under a subdirectory
         return $this->requestStackContext
-                ->getBasePath().$this->publicAssetBaseUrl.$path;
+                ->getBasePath().$fullPath;
+        /*
+            Hey! The files are uploading to S3
+            and our public paths are pointing to the new URLs perfectly.
+            Next, we can simplify! Remember how we have one public filesystem and one private filesystem?
+            With S3, we only need one.
+         */
     }
     /*
         If our app lives at the root of the domain - like it does right now -
