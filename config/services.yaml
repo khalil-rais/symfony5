@@ -18,10 +18,32 @@ parameters:
     # Call the second one uploads_base_url and set this to almost the same thing:
     # / and then %uploads_dir_name%. This represents the base URL to the uploaded assets.
     uploads_dir_name: 'uploads'
-    # Next, go back to services.yaml.
-    # And for the uploads_base_url, use %env()% and inside,
-    # SITE_BASE_URL: that's the syntax for referencing an environment variable.
-    uploads_base_url: '%env(SITE_BASE_URL)%/%uploads_dir_name%'
+    # So if our system is working so awesomely,
+    # why don't the images show up?
+    # It's because of the hostname in front of the images:
+    # it's pointing at our local server,
+    # but it should be pointing at S3.
+    # Click any of the images on S3.
+    # Here it is: every object in S3 has its own, public URL.
+    # Well actually, every object has a URL,
+    # but whether or not anyone can access that URL is another story.
+    # More on that later.
+    # I'm going to copy the very beginning of that,
+    # and then go open services.yaml.
+    # Earlier, we created a parameter called uploads_base_url.
+    # LiipImagineBundle uses this to prefix every URL that it renders.
+    # The current value includes 127.0.0.1:8000
+    # because that's our SITE_BASE_URL environment variable value.
+    # That worked fine when things were stored locally but not anymore!
+    # Change this to https://s3.amazonaws.com/
+    # and then our bucket name, which is already available as an environment variable: %env()%,
+    # then go copy AWS_S3_ACCESS_BUCKET, and paste.
+    uploads_base_url: '%https://s3.amazonaws.com/%env(AWS_S3_BUCKET_NAME)%'
+    # This is our new base URL.
+    # What about the uploads_dir_name parameter?
+    # We're not using that at all anymore! Trash it.
+    # Ok, let's try it! Refresh and it actually works!
+    # I mean of course, it works!
     # And just like that - every single path to every single uploaded asset will now be absolute.
     # Seriously! Test it out! Boom! Both the link href and the image src contain the https://localhost:8000 part.
     # And, sure, you could add some config so
