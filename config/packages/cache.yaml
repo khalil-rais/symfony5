@@ -17,3 +17,54 @@ framework:
         # Namespaced pools use the above "app" backend by default
         #pools:
             #my.dedicated.cache: ~
+        # Start by going to config/packages/cache.yaml.
+        # This is where you can configure anything related to Symfony's cache system,
+        # and we talked a bit about it in our Symfony Fundamentals course.
+        # The app key determines how the cache.app service caches things,
+        # which is a general-purpose cache service you can use for anything, including this!
+        # Or, to be fancier - I like being fancy - you can create a cache "pool" based on this.
+        # Check it out.
+        # Uncomment pools and create a new cache pool below this called cache.flysystem.psr6.
+        # The name can be anything. Below, set adapter to cache.app.
+        pools:
+            cache.flysystem.psr6:
+                adapter: cache.app
+        # That's it! This creates a new cache service called cache.flysystem.psr6
+        # that, really just uses cache.app behind the scenes to cache everything.
+        # The advantage is that this new service will automatically use a cache "namespace"
+        # so that its keys won't collide with other keys from other parts of your app that also use cache.app.
+        # In your terminal, run:
+        # php bin/console debug:container psr6
+        #    Select one of the following services to display its information:
+        #      [0] cache.adapter.psr6
+        #          [1] cache.flysystem.psr6
+        #          [2] oneup_flysystem.cache_factory.psr6
+        #          [3] oneup_flysystem.cache.psr6
+        #          [4] cache.flysystem.psr6.recorder_inner
+        #          [5] Symfony\Contracts\Cache\TagAwareCacheInterface $cacheFlysystemPsr6
+        #          [6] Symfony\Contracts\Cache\CacheInterface $cacheFlysystemPsr6
+        #          [7] Psr\Cache\CacheItemPoolInterface $cacheFlysystemPsr6
+        #    > 1
+        #
+        #
+        #    Information for Service "cache.flysystem.psr6"
+        #    ==============================================
+        #
+        #    An adapter that collects data about all cache calls.
+        #
+        #    ---------------- --------------------------------------------------
+        #    Option           Value
+        #    ---------------- --------------------------------------------------
+        #    Service ID       cache.flysystem.psr6
+        #    Class            Symfony\Component\Cache\Adapter\TraceableAdapter
+        #    Tags             cache.pool
+        #kernel.reset (method: reset)
+        #    Public           no
+        #    Synthetic        no
+        #    Lazy             no
+        #    Shared           yes
+        #    Abstract         no
+        #    Autowired        no
+        #    Autoconfigured   no
+        #    ---------------- --------------------------------------------------
+        #   There it is! A new fancy cache.flysystem.psr6 service.

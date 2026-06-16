@@ -32,6 +32,21 @@
 # Tip: If you're using version 4 of oneup/flysystem-bundle,
 # the directory config is now called location.
 oneup_flysystem:
+    # Back in oneup_flysystem.yaml, let's use this!
+    # On top though it doesn't matter where,
+    # add cache: and put one new cached adapter below it: psr6_app_cache.
+    # The name here also doesn't matter -
+    # but we'll reference it in a minute.
+    cache:
+        psr6_app_cache:
+            # And below that add psr6:.
+            # That exact key is the important part:
+            # it tells the bundle that we're going to pass it a PSR6-style caching object
+            # that the adapter should use internally.
+            # Finally, set service to what we created in cache.yaml: cache.flysystem.psr6.
+            psr6:
+                service: cache.flysystem.psr6
+
     adapters:
         # That felt great! There's one more piece of cleanup we can do, it's optional, but nice.
         # Using the word "public" in the adapter and filesystem isn't accurate anymore!
@@ -189,3 +204,39 @@ oneup_flysystem:
         # Start in config/packages/oneup_flysystem.yaml:
         # remove the private_uploads_adapter and filesystem.
             adapter: uploads_adapter
+        # At this point, we have a new Flysystem cache adapter
+        # but nobody is using it.
+        # To fix that, duplicate uploads_filesystem
+        # and create a second one called cached_uploads_filesystem.
+        # Make it use the same adapter as before,
+        # but with an extra key: cache: set to the adapter name we used above: psr6_app_cache.
+        cached_uploads_filesystem:
+            adapter: uploads_adapter
+            cache: psr6_app_cache
+            # Thanks to this, all Filesystem calls will first go through the cached adapter.
+            # If something is cached, it will return it immediately.
+            # Everything else will get forwarded to the S3 adapter and work like normal.
+            # This is classic object decoration.
+            # After all of this work,
+            # we should have one new service in the container.
+            # Run:
+            # php bin/console debug:container cached_uploads
+            #     Information for Service "oneup_flysystem.cached_uploads_filesystem_filesystem"
+            #     ==============================================================================
+            #
+            #     ---------------- -------------------------------------------------------------
+            #     Option           Value
+            #     ---------------- -------------------------------------------------------------
+            #     Service ID       oneup_flysystem.cached_uploads_filesystem_filesystem
+            #     Class            League\Flysystem\Filesystem
+            # Tags             oneup_flysystem.filesystem (key: cached_uploads_filesystem)
+            #     Public           yes
+            #     Synthetic        no
+            #     Lazy             no
+            #     Shared           yes
+            #     Abstract         no
+            #     Autowired        no
+            #     Autoconfigured   no
+            #     ---------------- -------------------------------------------------------------
+
+            # There it is: oneup_flysystem.cached_uploads_filesystem_filesystem.

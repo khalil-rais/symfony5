@@ -50,6 +50,11 @@ liip_imagine:
     # The critical part is the key flysystem:
     # that says to use the "Flysystem" loader that comes with the bundle.
     # The only thing it needs to know, is the service id of the filesystem that we want to use.
+    # Finally, go back to liip_imagine.yaml.
+    # For the loader, we don't really need caching:
+    # this downloads the source file,
+    # which should only happen one time anyways.
+    # Let's leave it.
     loaders:
         flysystem_loader:
             # For that, go back to config/services.yaml and copy the long service id from the bind section.
@@ -89,10 +94,29 @@ liip_imagine:
     # which is a concept we'll talk about soon.
     # True is the default value anyways,
     # which basically means these files will be publicly accessible.
+
     resolvers:
         flysystem_resolver:
             flysystem:
-                filesystem_service: oneup_flysystem.uploads_filesystem_filesystem
+                # But for the resolver, we do want to cache this.
+                # Add the cached_ to the service id.
+                # The resolver is responsible for checking if the thumbnail file exists -
+                # something we do want to cache -
+                # and for saving the cached file.
+                # But, "save" operations are never cached -
+                # so it won't affect that.
+                filesystem_service: oneup_flysystem.cached_uploads_filesystem_filesystem
+                # Let's try this! Refresh the page.
+                # Ok, everything seems to work fine.
+                # Now, check your tweets, like some Instagram photos,
+                # then turn off your Wifi again.
+                # Moment of truth:
+                # do a force refresh to fully make sure we're reloading.
+                # Awesome! Yea, the page looks terrible - a bunch of things fail.
+                # But our server did not fail:
+                # we are no longer talking to S3 on every request.
+                # Big win. Next, let's use a super cool feature of S3 - signed URLs -
+                # to see an alternate way of allowing users to download private files, which, for large stuff, is more performant.
                 # cache_prefix is the subdirectory within the filesystem
                 # where the files should be stored and root_url is the URL
                 # that all the paths will be prefixed with when the image paths are rendered.
