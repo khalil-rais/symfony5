@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Serializer\SerializerInterface;
 use Aws\S3\S3Client;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Api\ArticleReferenceUploadApiModel;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -93,16 +94,63 @@ class ArticleReferenceAdminController extends BaseController
      * @Route("/admin/article/{id}/references",name="admin_article_add_reference", methods={"POST"})
      */
     public function uploadArticleReference (Article $article, Request $request, UploaderHelper $uploaderHelper, EntityManagerInterface
-    $entityManager, ValidatorInterface $validator)
+    $entityManager, ValidatorInterface $validator, SerializerInterface $serializer)
     {
         /*
-            Back in the controller, let's finish this whole darn thing.
-            Set the file to an $uploadedFile object
-            and I'll add the same inline documentation
-            that says that this is an UploadedFile object - the one from HttpFoundation.
+            1- Love it! Let's get to work.
+            Back in our controller, to see what it looks like,
+            let's make this endpoint capable of handling both ways of uploading files: form-data and JSON.
+            We can figure out which situation we're in by looking at the Content-Type header.
+            So, if $request->headers->get('Content-Type') === 'application/json',
+            we'll do our new thing, else, run the normal code.
+            And... this is pretty cool... the only part that'll really be different is the $uploadedFile part.
+            Move that into the else.
          */
-        /** @var UploadedFile $uploadedFile */
-        $uploadedFile = $request->files->get('reference');
+        if ($request->headers->get('Content-Type') === 'application/json')
+        {
+            /*
+                4- We're ready! Back in the controller add a new argument at the end: SerializerInterface $serializer.
+                Then, it's beautiful, really $uploadApiModel = $serializer->deserialize().
+                This takes three arguments: the raw JSON - $request->getContent() - the type of object it should be turned into -
+                ArticleReferenceUploadApiModel::class - and the input format, json.
+             */
+            $uploadApiModel = $serializer->deserialize(
+                $request->getContent(),
+                ArticleReferenceUploadApiModel::class,
+                'json'
+            );
+            /*
+                We don't need a context this time, because we're not deserializing into an existing object
+                and we don't need to use groups.
+                And because this object has some constraints,
+                we'll need to check validation up here:
+                $violations = $validator->validate($uploadApiModel).
+                And if $violations->count() > 0, return the normal, $this->json($violations, 400).
+             */
+            $violations = $validator->validate($uploadApiModel);
+            if ($violations->count() > 0) {
+                return $this->json($violations, 400);
+            }
+            /*
+                At the bottom, let's dd($uploadApiModel) so we can see if this crazy idea is working.
+             */
+            dd($uploadApiModel);
+            /*
+                You ready to try this?
+                Spin back over to Postman, high-five someone near you and... send! Hey!
+                Check out that beautiful dump!
+                The text is still encoded, but that's a killer first step.
+                Leave the filename blank to check validation. Looks great.
+                Let's finish this next:
+                we still need to base64 decode that data and push it into our normal file upload system.
+                Let's do that in a clean way that we can love.
+             */
+        }
+        else
+        {
+            /** @var UploadedFile $uploadedFile */
+            $uploadedFile = $request->files->get('reference');
+        }
         /*
             When you select a file with Dropzone,
             it's smart enough to upload to the action URL on our form.
