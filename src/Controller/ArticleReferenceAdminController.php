@@ -178,19 +178,29 @@ class ArticleReferenceAdminController extends BaseController
                 Let's dd() that.
              */
             $uploadedFile = new FileObject($tmpPath);
-            dd($uploadedFile);
             /*
-                5- Phew! Back on Postman, hit send.
-                Hey! That looks great!
-                Copy that filename, then, wait!
-                That was just the directory - copy the actual filename - called pathname,
-                find your terminal and I'll open that in vim.
+                1- Yes! The contents are perfect!
+                So... are we done?
+                Let's find out!
+                Take off the dd(), move over and... this is our moment of glory... send!
+                Oh, boo! No glory, just errors.
+                Life of a programmer.
+                “Undefined method getClientOriginalName() on File.”
+                This comes from down here on line 84.
+                Ah yes, the UploadedFile object has a few methods that its parent File does not.
+                Notably getClientOriginalName().
+                No problem, back up, create an $originalName variable on both sides of the if.
+                For the API style, set it to $uploadApiModel->filename:
+                the API client will send this manually.
+                For the else, set $originalName to $uploadedFile->getClientOriginalName().
              */
+            $originalFilename = $uploadApiModel->filename;
         }
         else
         {
             /** @var UploadedFile $uploadedFile */
             $uploadedFile = $request->files->get('reference');
+            $originalFilename = $uploadedFile->getClientOriginalName();
         }
         /*
             When you select a file with Dropzone,
@@ -375,6 +385,32 @@ reference ""
          */
         $articleReference = new ArticleReference($article);
         $articleReference->setFilename($filename);
+        /*
+            Now, copy $originalName, head back down to setOriginalFilename() and paste!
+            And if for some reason it's not set,
+            we can still use $filename as a backup.
+            But that's definitely impossible for our API-style thanks to the validation rules.
+         */
+        $articleReference->setOriginalFilename($originalFilename ?? $filename);
+        /*
+            2- Deep breath. Let's try it again.
+            Woh! Did that just work? It looks right.
+            Go refresh the browser.
+            Ha! We have a space.txt file!
+            And we can even download it!
+            Go check out S3 - the article_reference directory.
+            Oh, interesting!
+            The files are prefixed with sf-uploads -
+            that's the temporary filename we created on the server.
+            That's because UploaderHelper uses that to create the unique filename.
+            And really, that's fine!
+            These filenames are 100% internal.
+            But if it bothers you,
+            you could use the original filename to help make the temporary file.
+            Anyways... we did it!
+            A fully JSON-driven API upload endpoint.
+            Fun, right?
+         */
         /*
             But remember! There are a couple of new pieces of info
             that we can set on ArticleReference- like the original filename.
