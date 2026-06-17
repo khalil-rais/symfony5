@@ -66,33 +66,14 @@ class ArticleReferenceAdminController extends BaseController
         This is the service that the form system uses internally for validation.
      */
     /*
-        Let me show you what I mean.
-        I'm going to use Postman to interact with our endpoint
-        as if it were truly meant to be an API endpoint used by API clients.
-        For the URL, copy the URL in the browser,
-        paste, and change /edit to /references.
-        Yep, that'll hit our controller.
-        Make this a POST request.
-        What about the body of the request?
-        What should that look like?
-        Well, because we wrote our endpoint to basically handle a traditional form-submit,
-        the format will be form-data.
-        For the key, remember that we're expecting the file data on a field called reference.
-        Change the field type to "file" and select earth.jpeg.
-        That's it! Before trying this, our site is being served over https thanks to the Symfony local web server
-        and some certificate magic it does behind the scenes.
-        But Postman doesn't know to use that magic,
-        so the certificate won't work.
-        In the Postman preferences - I've already done it - turn SSL verification off.
-        Or you can run the Symfony web server with the --allow-http flag if you want to avoid this.
-        Ok, send the request! Oh... what's this?
-        Check out the preview.
-        The login page, of course!
-        Uploading requires a valid user.
-        Just to play around, let's remove the @IsGranted() temporarily.
+        4- Oh, and don't forget to put security back: @IsGranted("MANAGE", subject="article").
+        In a real project, wherever I test my API endpoints -
+        like Postman or via functional tests, I would actually authenticate myself properly so they worked, instead of temporarily hacking out security.
+        Generally speaking, removing security is, uh, not a great idea.
      */
     /**
      * @Route("/admin/article/{id}/references",name="admin_article_add_reference", methods={"POST"})
+     * @IsGranted("MANAGE", subject="article")
      */
     public function uploadArticleReference (Article $article, Request $request, UploaderHelper $uploaderHelper, EntityManagerInterface
     $entityManager, ValidatorInterface $validator, SerializerInterface $serializer)
@@ -431,6 +412,28 @@ reference ""
             "I have no idea what this file is".
          */
         $articleReference->setMimeType($uploadedFile->getMimeType() ?? 'application/octet-stream');
+        /*
+            1- Before we finish... and ride off into the sunset, as champions of uploading in Symfony,
+            let's make sure we delete that temporary file after we finish.
+            All the way down here, before persist, but after we've tried to read the mime type from the file,
+            add, if is_file($uploadedFile->getPathname()),
+            then delete it: unlink($uploadedFile->getPathname()).
+         */
+        if (is_file($uploadedFile->getPathname())) {
+            unlink($uploadedFile->getPathname());
+            /*
+                2- The if is sorta unnecessary, but I like it.
+                To double-check that this works,
+                let's dd($uploadedFile->getPathname()),
+                go find Postman and send.
+                Copy the path, find your terminal,
+                and try to open that file. It's gone!
+                dd($uploadedFile->getPathname());
+             */
+            /*
+                3- Celebrate by removing that dd() and sending one last time. I'm so happy.
+             */
+        }
         /*
             With that done, save this: add the EntityManagerInterface $entityManager argument,
             then $entityManager->persist($articleReference) and $entityManager->flush().
@@ -987,3 +990,12 @@ reference ""
     }
 
 }
+/*
+    5- Hey! That's it! We did it! Woh!
+    I had a ton of a fun making this tutorial -
+    we got to play with uploads, a bunch of cool libraries and... the cloud.
+    Uploading is fairly simple, but there can be a lot of layers to keep track of, like Flysystem and LiipImagineBundle.
+    As always, let us know what you're building and if you have questions,
+    ask them in the comments.
+    Alright friends, seeya next time!
+ */
