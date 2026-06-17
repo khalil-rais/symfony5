@@ -40,9 +40,37 @@ class ArticleReferenceUploadApiModel
      */
     public $filename;
 
+    /*
+        1- Decoding is easy enough. But let's make our new model class a bit smarter to help with this. First,
+        change the data property to be private. If we only did this, the serializer would no longer be able
+        to set that onto our object.
+     */
     /**
      * @Assert\NotBlank()
      */
-    public $data;
+    private $data;
 
+    /*
+        2- Hit "Send" to see this. Yep! the data key is ignored: it's not a field the client can send, because
+        there's no setter for it and it's not public. Then, validation fails because that field is still empty.
+        So, because I've mysteriously said that we should set the property to private, add a
+        public function setData() with a nullable string argument... because the user could
+        forget to send that field. Inside, $this->data = $data.
+     */
+    public function setData(?string $data)
+    {
+        $this->data = $data;
+        /*
+            3- Now, create another property: private $decodedData. And inside the setter,
+            $this->decodedData = base64_decode($data). And because this is private and does not
+            have a setter method, if a smart user tried to send a decodedData key on the JSON, it would be
+            ignored. The only valid fields are filename - because it's public - and data - because it has a
+            setter.
+         */
+        $this->decodedData = base64_decode($data);
+        /*
+            4- Try it again. It's working and the decoded data is ready! It's a simple string in our case, but this
+            would work equally well if you base64 encoded a PDF, for example.
+         */
+    }
 }
