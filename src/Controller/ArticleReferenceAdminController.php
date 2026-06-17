@@ -23,6 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Aws\S3\S3Client;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use App\Api\ArticleReferenceUploadApiModel;
+use Symfony\Component\HttpFoundation\File\File as FileObject;
 
 class ArticleReferenceAdminController extends BaseController
 {
@@ -132,18 +133,58 @@ class ArticleReferenceAdminController extends BaseController
                 return $this->json($violations, 400);
             }
             /*
+                1- Let's look at the controller.
+                We know the "else" part, that's the "traditional" upload part, is working by simply setting an $uploadedFile object and letting the rest of the controller do its magic.
+                So, if we can create an UploadedFile object up here, we're in business!
+                It should go through validation and process.
+                If you remember from our fixtures, we can't actually create UploadedFile objects -
+                it's tied to the PHP upload process.
+                But we can create File objects.
+                Open up ArticleFixtures.
+                At the bottom, yep!
+                We create a new File() - that's the parent class of UploadedFile
+                and pass it $targetPath,
+                which is the path to a file on the filesystem.
+                UploaderHelper can already handle this.
+                In the controller, we can do the same thing.
+                Start by setting $tmpPath to sys_get_temp_dir() plus '/sf_upload'.uniqueid() to guarantee a unique, temporary file path.
+                Yep, we're literally going to save the file to disk so our upload system can process it.
+                We could also enhance UploaderHelper to be able to handle the content as a string,
+                but this way will re-use more logic.
+             */
+            $tmpPath = sys_get_temp_dir().'/sf_upload'.uniqid();
+            /*
+                3- Now we can say: file_put_contents($tmpPath, $uploadedApiModel->getDecodedData()).
+                Oh, I'm not getting any auto-completion on that
+                because PhpStorm doesn't know what the $uploadedApiModel object is.
+                Add some inline doc to help it.
+                Now, $this->, got it - getDecodedData().
+             */
+            file_put_contents($tmpPath, $uploadApiModel->getDecodedData());
+            /*
                 At the bottom, let's dd($uploadApiModel) so we can see if this crazy idea is working.
              */
-            dd($uploadApiModel);
             /*
-                You ready to try this?
-                Spin back over to Postman, high-five someone near you and... send! Hey!
-                Check out that beautiful dump!
-                The text is still encoded, but that's a killer first step.
-                Leave the filename blank to check validation. Looks great.
-                Let's finish this next:
-                we still need to base64 decode that data and push it into our normal file upload system.
-                Let's do that in a clean way that we can love.
+                4- Finally, set $uploadedFile to a new File() - the one from HttpFoundation.
+                Woh! That was weird -
+                it put the full, long class name here.
+                Technically, that's fine... but why?
+                Undo that, then go check out the use statements.
+                Ah: this is one of those rare cases where we already have another class imported with the same name: File.
+                Let's add our use statement manually,
+                then alias is to, how about, FileObject.
+                I know, a bit ugly, but necessary.
+                Below, new FileObject() and pass it the temporary path.
+                Let's dd() that.
+             */
+            $uploadedFile = new FileObject($tmpPath);
+            dd($uploadedFile);
+            /*
+                5- Phew! Back on Postman, hit send.
+                Hey! That looks great!
+                Copy that filename, then, wait!
+                That was just the directory - copy the actual filename - called pathname,
+                find your terminal and I'll open that in vim.
              */
         }
         else

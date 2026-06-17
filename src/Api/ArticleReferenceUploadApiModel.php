@@ -73,4 +73,14 @@ class ArticleReferenceUploadApiModel
             would work equally well if you base64 encoded a PDF, for example.
          */
     }
+
+    /*
+        2- To get the raw content, go back to the model class. We need a getter.
+        Add public function getDecodedData() with a nullable string return type.
+        Then, return $this->decodedData.
+     */
+    public function getDecodedData(): ?string
+    {
+        return $this->decodedData;
+    }
 }
