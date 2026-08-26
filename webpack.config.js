@@ -1,4 +1,10 @@
-var Encore = require('@symfony/webpack-encore');
+const Encore = require('@symfony/webpack-encore');
+
+// Manually configure the runtime environment if not already configured yet by the "encore" command.
+// It's useful when you use tools that rely on webpack.config.js file.
+if (!Encore.isRuntimeEnvironmentConfigured()) {
+    Encore.configureRuntimeEnvironment(process.env.NODE_ENV || 'dev');
+}
 
 Encore
     // directory where compiled assets will be stored
@@ -11,37 +17,14 @@ Encore
     /*
      * ENTRY CONFIG
      *
-     * Add 1 entry for each "page" of your app
-     * (including one that's included on every page - e.g. "app")
-     *
      * Each entry will result in one JavaScript file (e.g. app.js)
-     * and one CSS file (e.g. app.css) if you JavaScript imports CSS.
+     * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
-    .addEntry('app', './assets/js/app.js')
-    .addEntry('article_show', './assets/js/article_show.js')
-    .addEntry('admin_article_form', './assets/js/admin_article_form.js')
-    .addStyleEntry('account', './assets/css/account.scss')
-    .addStyleEntry('login', './assets/css/login.scss')
-    /*
-        The problem is that this is now a Sass file
-        and inline_css only works with CSS files:
-        we can't point it at a Sass file and expect it transform the Sass into CSS.
-        And even if it were a CSS file,
-        the @import won't work unless we process this through Encore.
-        So here's the plan:
-        we're going to pretend that email.scss is just an ordinary CSS file
-        that we want to include on some page on our site.
-        Open up webpack.config.js.
-        Whenever we have some page-specific CSS or JS,
-        we add a new entry for it.
-        In this case, because we don't need any JavaScript,
-        we can add a "style" entry.
-        Say .addStyleEntry() - call the entry,
-        how about, email, and point it at the file: ./assets/css/email.scss.
-    */
-    .addStyleEntry('email', './assets/css/email.scss')
-    //.addEntry('page1', './assets/js/page1.js')
-    //.addEntry('page2', './assets/js/page2.js')
+    .addEntry('app', './assets/app.js')
+    .addStyleEntry('admin', './assets/styles/admin.css')
+
+    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
+    .enableStimulusBridge('./assets/controllers.json')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
@@ -49,7 +32,6 @@ Encore
     // will require an extra script tag for runtime.js
     // but, you probably want this, unless you're building a single-page app
     .enableSingleRuntimeChunk()
-    //.disableSingleRuntimeChunk()
 
     /*
      * FEATURE CONFIG
@@ -64,34 +46,32 @@ Encore
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
 
-    // enables @babel/preset-env polyfills
-    .configureBabel(() => {}, {
-        useBuiltIns: 'usage',
-        corejs: 3
+    // configure Babel
+    // .configureBabel((config) => {
+    //     config.plugins.push('@babel/a-babel-plugin');
+    // })
+
+    // enables and configure @babel/preset-env polyfills
+    .configureBabelPresetEnv((config) => {
+        config.useBuiltIns = 'usage';
+        config.corejs = '3.23';
     })
 
     // enables Sass/SCSS support
-    .enableSassLoader()
-    .enablePostCssLoader()
-
-    .copyFiles({
-        from: './assets/images',
-        to: 'images/[path][name].[hash:8].[ext]'
-    })
+    //.enableSassLoader()
 
     // uncomment if you use TypeScript
     //.enableTypeScriptLoader()
 
+    // uncomment if you use React
+    //.enableReactPreset()
+
     // uncomment to get integrity="..." attributes on your script & link tags
     // requires WebpackEncoreBundle 1.4 or higher
-    //.enableIntegrityHashes()
+    //.enableIntegrityHashes(Encore.isProduction())
 
     // uncomment if you're having problems with a jQuery plugin
-    .autoProvidejQuery()
-
-    // uncomment if you use API Platform Admin (composer req api-admin)
-    //.enableReactPreset()
-    //.addEntry('admin', './assets/js/admin.js')
+    //.autoProvidejQuery()
 ;
 
 module.exports = Encore.getWebpackConfig();

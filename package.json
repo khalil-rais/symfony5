@@ -1,33 +1,26 @@
 {
     "devDependencies": {
-        "@symfony/webpack-encore": "^0.28.0",
-        "autocomplete.js": "^0.36.0",
-        "autoprefixer": "^9.5.1",
-        "bootstrap": "^4.3.1",
-        "core-js": "^3.0.0",
-        "dropzone": "^5.5.1",
-        "font-awesome": "^4.7.0",
-        "jquery": "^3.4.0",
-        "popper.js": "^1.15.0",
-        "postcss-loader": "^3.0.0",
-        "regenerator-runtime": "^0.13.2",
-        "sass": "^1.29.0",
-        "sass-loader": "^7.0.1",
-        "sortablejs": "^1.8.4",
-        "webpack-notifier": "^1.6.0"
+        "@babel/core": "^7.17.0",
+        "@babel/preset-env": "^7.16.0",
+        "@fontsource/lobster": "^4.5.11",
+        "@fortawesome/fontawesome-free": "^6.2.0",
+        "@hotwired/stimulus": "^3.0.0",
+        "@symfony/stimulus-bridge": "^3.2.0",
+        "@symfony/ux-live-component": "file:vendor/symfony/ux-live-component/assets",
+        "@symfony/webpack-encore": "^4.0.0",
+        "bootstrap": "^4",
+        "core-js": "^3.23.0",
+        "regenerator-runtime": "^0.13.9",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0",
+        "webpack-notifier": "^1.15.0"
     },
     "license": "UNLICENSED",
     "private": true,
     "scripts": {
-        "dev-server": "NODE_OPTIONS=--openssl-legacy-provider encore dev-server",
-        "dev": "NODE_OPTIONS=--openssl-legacy-provider encore dev",
-        "watch": "NODE_OPTIONS=--openssl-legacy-provider encore dev --watch",
-        "build": "NODE_OPTIONS=--openssl-legacy-provider encore production --progress"
-    },
-    "browserslist": [
-        "> .05%"
-    ],
-    "dependencies": {
-        "foundation-emails": "^2.5.1"
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
     }
 }

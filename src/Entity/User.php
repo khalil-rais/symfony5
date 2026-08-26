@@ -2,85 +2,31 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @UniqueEntity(
- *     fields={"email"},
- *     message="I think you're already registered!"
- * )
- */
-class User implements UserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: '`user`')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
+
+    #[ORM\Column]
+    private array $roles = [];
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups("main")
-     * @Assert\NotBlank(message="Please enter an email")
-     * @Assert\Email()
+     * @var string The hashed password
      */
-    private $email;
-
-    /**
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("main")
-     */
-    private $firstName;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $password;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("main")
-     */
-    private $twitterUsername;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ApiToken", mappedBy="user", orphanRemoval=true)
-     */
-    private $apiTokens;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Article", mappedBy="author", fetch="EXTRA_LAZY")
-     */
-    private $articles;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $agreedTermsAt;
-
-    /**
-     * @ORM\Column(name="subscribe_to_newsletter", type="boolean", options={"default": false})
-     */
-    private $subscribeToNewsletter = false;
-
-    public function __construct()
-    {
-        $this->apiTokens = new ArrayCollection();
-        $this->articles = new ArrayCollection();
-    }
+    #[ORM\Column]
+    private ?string $password = null;
 
     public function getId(): ?int
     {
@@ -103,6 +49,14 @@ class User implements UserInterface
      * A visual identifier that represents this user.
      *
      * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier instead
      */
     public function getUsername(): string
     {
@@ -129,40 +83,11 @@ class User implements UserInterface
     }
 
     /**
-     * @see UserInterface
+     * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function getSalt()
-    {
-        // not needed when using bcrypt or argon
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials()
-    {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
-    }
-
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): self
-    {
-        $this->firstName = $firstName;
-
-        return $this;
     }
 
     public function setPassword(string $password): self
@@ -172,115 +97,23 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getTwitterUsername(): ?string
+    /**
+     * Returning a salt is only needed, if you are not using a modern
+     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     *
+     * @see UserInterface
+     */
+    public function getSalt(): ?string
     {
-        return $this->twitterUsername;
-    }
-
-    public function setTwitterUsername(?string $twitterUsername): self
-    {
-        $this->twitterUsername = $twitterUsername;
-
-        return $this;
-    }
-
-    public function getAvatarUrl(int $size = null): string
-    {
-        $url = 'https://robohash.org/'.$this->getEmail();
-
-        if ($size) {
-            $url .= sprintf('?size=%dx%d', $size, $size);
-        }
-
-        return $url;
+        return null;
     }
 
     /**
-     * @return Collection|ApiToken[]
+     * @see UserInterface
      */
-    public function getApiTokens(): Collection
+    public function eraseCredentials()
     {
-        return $this->apiTokens;
-    }
-
-    public function addApiToken(ApiToken $apiToken): self
-    {
-        if (!$this->apiTokens->contains($apiToken)) {
-            $this->apiTokens[] = $apiToken;
-            $apiToken->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeApiToken(ApiToken $apiToken): self
-    {
-        if ($this->apiTokens->contains($apiToken)) {
-            $this->apiTokens->removeElement($apiToken);
-            // set the owning side to null (unless already changed)
-            if ($apiToken->getUser() === $this) {
-                $apiToken->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Article[]
-     */
-    public function getArticles(): Collection
-    {
-        return $this->articles;
-    }
-
-    public function addArticle(Article $article): self
-    {
-        if (!$this->articles->contains($article)) {
-            $this->articles[] = $article;
-            $article->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function removeArticle(Article $article): self
-    {
-        if ($this->articles->contains($article)) {
-            $this->articles->removeElement($article);
-            // set the owning side to null (unless already changed)
-            if ($article->getAuthor() === $this) {
-                $article->setAuthor(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function __toString()
-    {
-        return $this->getFirstName();
-    }
-
-    public function getAgreedTermsAt(): ?\DateTimeInterface
-    {
-        return $this->agreedTermsAt;
-    }
-
-    public function agreeToTerms()
-    {
-        $this->agreedTermsAt = new \DateTime();
-    }
-
-    public function getSubscribeToNewsletter(): bool
-    {
-        return $this->subscribeToNewsletter;
-    }
-
-    public function setSubscribeToNewsletter(bool $subscribeToNewsletter): self
-    {
-        $this->subscribeToNewsletter = $subscribeToNewsletter;
-
-        return $this;
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 }

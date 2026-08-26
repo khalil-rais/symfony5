@@ -1,7 +1,7 @@
-# File Uploads in Symfony
+# Netgen Layouts Tutorial!
 
-Well hi there! This repository holds the code and script
-for the [File Uploads in Symfony](https://symfonycasts.com/screencast/symfony-uploads) course on SymfonyCasts.
+Well howdy! This repository holds the code and script
+for the [Netgen Layouts Tutorial](https://symfonycasts.com/screencast/layouts) on SymfonyCasts.
 
 ## Setup
 
@@ -9,7 +9,7 @@ If you've just downloaded the code, congratulations!!
 
 To get it working, follow these steps:
 
-**Download Composer dependencies**
+### Download Composer dependencies
 
 Make sure you have [Composer installed](https://getcomposer.org/download/)
 and then run:
@@ -21,29 +21,57 @@ composer install
 You may alternatively need to run `php composer.phar install`, depending
 on how you installed Composer.
 
-**Configure the .env (or .env.local) File**
+### Database Setup
 
-Open the `.env` file and make any adjustments you need - specifically
-`DATABASE_URL`. Or, if you want, you can create a `.env.local` file
-and *override* any configuration you need there (instead of changing
-`.env` directly).
+The code comes with a `docker-compose.yaml` file and we recommend using
+Docker to boot a database container. You will still have PHP installed
+locally, but you'll connect to a database inside Docker. This is optional,
+but I think you'll love it!
 
-**Setup the Database**
-
-Again, make sure `.env` is setup for your computer. Then, create
-the database & tables!
+First, make sure you have [Docker installed](https://docs.docker.com/get-docker/)
+and running. To start the container, run:
 
 ```
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:migrate
-php bin/console doctrine:fixtures:load
+docker-compose up -d
 ```
 
-If you get an error that the database exists, that should
-be ok. But if you have problems, completely drop the
-database (`doctrine:database:drop --force`) and try again.
+Next, build the database and the schema with:
 
-**Start the built-in web server**
+```
+# "symfony console" is equivalent to "bin/console"
+# but its aware of your database container
+symfony console doctrine:database:create --if-not-exists
+symfony console doctrine:migrations:migrate
+symfony console doctrine:fixtures:load
+```
+
+(If you get an error about "MySQL server has gone away", just wait
+a few seconds and try again - the container is probably still booting).
+
+If you do *not* want to use Docker, just make sure to start your own
+database server and update the `DATABASE_URL` environment variable in
+`.env` or `.env.local` before running the commands above.
+
+### Webpack Encore Assets
+
+This app uses Webpack Encore for the CSS, JS and image files.
+But, the built files are already included... so you don't need
+to download or build anything if you don't want to!
+
+But if you *do* want to play with the CSS/JS and build the
+final files, no problem. Make sure you have [yarn](https://yarnpkg.com/lang/en/)
+or `npm` installed (`npm` comes with Node) and then run:
+
+```
+yarn install
+yarn watch
+
+# or
+npm install
+npm run watch
+```
+
+### Start the Symfony web server
 
 You can use Nginx or Apache, but Symfony's local web server
 works even better.
@@ -66,26 +94,6 @@ error that you need to run `symfony server:ca:install` first).
 Now check out the site at `https://localhost:8000`
 
 Have fun!
-
-## Somebody Has To
-
-Somebody has to go polish the stars,
-They're looking a little bit dull.
-Somebody has to go polish the stars,
-For the eagles and starlings and gulls
-Have all been complaining they're tarnished and worn,
-They say they want new ones we cannot afford.
-So please get your rags
-And your polishing jars,
-Somebody has to go polish the stars.
-
-Shel Silverstein
-
-## A Space Riddle!
-
-> I'm not white and fluffy, but pieces of me *do* orbit the sun. What am I?
-
-**Answer**: The Oort Cloud!
 
 ## Have Ideas, Feedback or an Issue?
 
