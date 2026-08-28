@@ -24,7 +24,7 @@ class LatestRecipeQueryTypeHandler implements QueryTypeHandlerInterface
 
     public function getValues(Query $query, int $offset = 0, ?int $limit = null): iterable
     {
-        return $this->recipeRepository->createQueryBuilderOrderedByNewest()
+        return $this->recipeRepository->createQueryBuilderOrderedByNewest($query->getParameter('term')->getValue())
             ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()
@@ -33,7 +33,7 @@ class LatestRecipeQueryTypeHandler implements QueryTypeHandlerInterface
 
     public function getCount(Query $query): int
     {
-        return $this->recipeRepository->createQueryBuilderOrderedByNewest()
+        return $this->recipeRepository->createQueryBuilderOrderedByNewest($query->getParameter('term')->getValue())
             ->select('COUNT(recipe.id)')
             ->getQuery()
             ->getSingleScalarResult();
