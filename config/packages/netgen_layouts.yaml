@@ -9,3 +9,12 @@ netgen_layouts:
   query_types:
     latest_recipes:
       name: 'Latest Recipes'
+
+  view:
+    item_view:
+      # app = admin
+      app:
+        # this key is not important
+        recipes_app:
+          template: 'nglayouts/admin/recipe_item.html.twig'
+          
