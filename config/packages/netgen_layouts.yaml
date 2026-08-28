@@ -19,3 +19,10 @@ netgen_layouts:
           template: 'nglayouts/admin/recipe_item.html.twig'
           match:
             item\value_type: 'doctrine_recipe'
+      # default = frontend
+      default:
+        # this key is not important
+        recipes_default:
+          template: 'nglayouts/frontend/recipe_item.html.twig'
+          match:
+            item\value_type: 'doctrine_recipe'
