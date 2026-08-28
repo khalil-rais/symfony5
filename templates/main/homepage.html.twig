@@ -1,6 +1,8 @@
 {% extends nglayouts.layoutTemplate %}
 
 {% block body %}
+
+    {% block hero %}
     <div class="hero-wrapper">
         <h1 class="header">Bark & Bake</h1>
         <p class="text-center">Doggone Good Treat & Meal Recipes</p>
@@ -8,7 +10,9 @@
             <img src="{{ asset('images/dog-bone.png') }}" width="auto" height="50" alt="dog bone icon">
         </div>
     </div>
+    {% endblock %}
 
+    {% block latest_recipes %}
     <div class="container">
         <h2 class="text-center my-5">Latest Recipes</h2>
         <div class="row">
@@ -26,14 +30,18 @@
         </div>
         <div class="text-center mt-5 text-underline"><u><a href="#">Show More</a></u></div>
     </div>
+    {% endblock %}
 
+    {% block subscribe_newsletter %}
     <div class="text-center pt-4 pb-5 my-4" style="background-color: #fdedf0;">
         <h2>Subscribe</h2>
         <p class="mb-4">Dog Food Cooking Made Easy</p>
 
         {{ component('subscribe_newsletter') }}
     </div>
+    {% endblock %}
 
+    {% block featured_skills %}
     <div class="container py-4 my-5">
         <h2 class="text-center mb-4">Featured Skills</h2>
         <div class="row my-5">
@@ -56,4 +64,5 @@
         </div>
         <div class="text-center mt-3 text-underline"><u><a href="#">Show More</a></u></div>
     </div>
+    {% endblock %}
 {% endblock %}
