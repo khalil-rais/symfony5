@@ -1,2 +1,7 @@
 netgen_layouts:
   pagelayout: 'base.html.twig'
+
+  value_types:
+    doctrine_recipe:
+      name: Recipe
+      manual_items: false
