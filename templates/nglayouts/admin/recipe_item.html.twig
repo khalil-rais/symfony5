@@ -1,13 +1,1 @@
-Does it work?
-{{ dump() }}
-{#
-array:7 [▼
-"item" => Netgen\Layouts\Item\CmsItem {#1801 ▶}
-"view_type" => "standard"
-"view_context" => "app"
-"ea" => EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider {#313 ▶}
-"app" => Symfony\Bridge\Twig\AppVariable {#1288 ▶}
-"nglayouts_admin" => Netgen\Bundle\LayoutsAdminBundle\Templating\Twig\GlobalVariable {#1394 ▶}
-"nglayouts" => Netgen\Bundle\LayoutsBundle\Templating\Twig\GlobalVariable {#1396 ▶}
-]
-#}
+{{ item.object.name }} | <time>{{ item.object.createdAt|date('Y-m-d') }}</time>
