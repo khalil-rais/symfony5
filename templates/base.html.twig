@@ -15,6 +15,8 @@
     </head>
 
     <body>
+    {% block layout %}
+        {% block navigation %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="{{ path('app_homepage')}}">
                 <img src="{{ asset('images/B-B-logo.png') }}" width="30" height="30" alt="bark and bake logo">
@@ -43,11 +45,10 @@
                 </form>
             </div>
         </nav>
-
-        {% block layout %}
-            {% block body %}{% endblock %}
         {% endblock %}
 
+        {% block body %}{% endblock %}
+        {% block footer %}
         <div class="container mt-5">
             <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
                 <div class="col-md-6 d-flex align-items-center">
@@ -60,5 +61,7 @@
                 </div>
             </footer>
         </div>
+        {% endblock %}
+    {% endblock %}
     </body>
 </html>
