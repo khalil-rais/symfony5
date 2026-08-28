@@ -5,3 +5,7 @@ netgen_layouts:
     doctrine_recipe:
       name: Recipe
       manual_items: false
+
+  query_types:
+    latest_recipes:
+      name: 'Latest Recipes'
