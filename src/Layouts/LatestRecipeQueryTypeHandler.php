@@ -7,6 +7,7 @@ use Netgen\Layouts\Collection\QueryType\QueryTypeHandlerInterface;
 use Netgen\Layouts\Parameters\ParameterBuilderInterface;
 use App\Repository\RecipeRepository;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Netgen\Layouts\Parameters\ParameterType\TextType;
 
 #[AutoconfigureTag('netgen_layouts.query_type_handler', ['type' => 'latest_recipes'])]
 class LatestRecipeQueryTypeHandler implements QueryTypeHandlerInterface
@@ -18,7 +19,7 @@ class LatestRecipeQueryTypeHandler implements QueryTypeHandlerInterface
 
     public function buildParameters(ParameterBuilderInterface $builder): void
     {
-        // TODO: Implement buildParameters() method.
+        $builder->add('term', TextType::class);
     }
 
     public function getValues(Query $query, int $offset = 0, ?int $limit = null): iterable
